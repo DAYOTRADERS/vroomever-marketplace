@@ -19,6 +19,8 @@
  */
 
 @theme inline {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -59,24 +61,32 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-vip: var(--vip);
+  --color-vip-foreground: var(--vip-foreground);
+  --color-surface-strong: var(--surface-strong);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-surface-muted: var(--surface-muted);
+  --radius-card: 0.75rem;
+  --shadow-card: 0 12px 36px -20px oklch(0.18 0.04 160 / 0.25);
+  --shadow-elevated: 0 24px 60px -24px oklch(0.18 0.07 160 / 0.4);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --background: oklch(0.982 0.006 95);
+  --foreground: oklch(0.19 0.025 166);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.49 0.13 160);
+  --primary-foreground: oklch(0.985 0.004 95);
+  --secondary: oklch(0.93 0.028 155);
+  --secondary-foreground: oklch(0.28 0.06 160);
+  --muted: oklch(0.955 0.009 100);
+  --muted-foreground: oklch(0.48 0.025 160);
+  --accent: oklch(0.93 0.045 85);
+  --accent-foreground: oklch(0.3 0.05 85);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
@@ -95,17 +105,22 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --vip: oklch(0.78 0.16 78);
+  --vip-foreground: oklch(0.22 0.04 70);
+  --surface-strong: oklch(0.19 0.025 166);
+  --surface-foreground: oklch(0.97 0.006 150);
+  --surface-muted: oklch(0.76 0.025 155);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
+  --background: oklch(0.145 0.025 166);
   --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
+  --card: oklch(0.19 0.025 166);
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.72 0.16 157);
+  --primary-foreground: oklch(0.16 0.03 166);
   --secondary: oklch(0.279 0.041 260.031);
   --secondary-foreground: oklch(0.984 0.003 247.858);
   --muted: oklch(0.279 0.041 260.031);
@@ -130,6 +145,11 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --vip: oklch(0.82 0.16 80);
+  --vip-foreground: oklch(0.2 0.035 75);
+  --surface-strong: oklch(0.105 0.018 166);
+  --surface-foreground: oklch(0.97 0.006 150);
+  --surface-muted: oklch(0.72 0.025 155);
 }
 
 @layer base {
@@ -140,5 +160,22 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+    min-width: 320px;
   }
+  button, a { transition-duration: 200ms; }
+  ::selection { background: color-mix(in oklab, var(--primary) 28%, transparent); }
+}
+
+@utility glass-panel {
+  background: color-mix(in oklab, var(--card) 82%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px);
+}
+
+@utility dot-grid {
+  background-image: radial-gradient(color-mix(in oklab, var(--primary) 18%, transparent) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
