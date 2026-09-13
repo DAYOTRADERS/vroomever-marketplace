@@ -10,33 +10,428 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SellRouteImport } from './routes/sell'
+import { Route as SellerTermsRouteImport } from './routes/seller-terms'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VipRouteImport } from './routes/vip'
+import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
+import { Route as MasteradminIndexRouteImport } from './routes/masteradmin.index'
+import { Route as MasteradminAnalyticsRouteImport } from './routes/masteradmin.analytics'
+import { Route as MasteradminAuditRouteImport } from './routes/masteradmin.audit'
+import { Route as MasteradminCategoriesRouteImport } from './routes/masteradmin.categories'
+import { Route as MasteradminLoginRouteImport } from './routes/masteradmin.login'
+import { Route as MasteradminPaymentsRouteImport } from './routes/masteradmin.payments'
+import { Route as MasteradminProductsRouteImport } from './routes/masteradmin.products'
+import { Route as MasteradminReportsRouteImport } from './routes/masteradmin.reports'
+import { Route as MasteradminSettingsRouteImport } from './routes/masteradmin.settings'
+import { Route as MasteradminSubscriptionsRouteImport } from './routes/masteradmin.subscriptions'
+import { Route as MasteradminUsersRouteImport } from './routes/masteradmin.users'
+import { Route as MasteradminVipRouteImport } from './routes/masteradmin.vip'
+import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as SellerIdRouteImport } from './routes/seller.$id'
+import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
+import { Route as SellerListingsRouteImport } from './routes/seller.listings'
+import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
+import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BuyerTermsRoute = BuyerTermsRouteImport.update({
+  id: '/buyer-terms',
+  path: '/buyer-terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerTermsRoute = SellerTermsRouteImport.update({
+  id: '/seller-terms',
+  path: '/seller-terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VipRoute = VipRouteImport.update({
+  id: '/vip',
+  path: '/vip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
+  id: '/category/$category',
+  path: '/category/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminIndexRoute = MasteradminIndexRouteImport.update({
+  id: '/masteradmin/',
+  path: '/masteradmin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminAnalyticsRoute = MasteradminAnalyticsRouteImport.update({
+  id: '/masteradmin/analytics',
+  path: '/masteradmin/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminAuditRoute = MasteradminAuditRouteImport.update({
+  id: '/masteradmin/audit',
+  path: '/masteradmin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminCategoriesRoute = MasteradminCategoriesRouteImport.update({
+  id: '/masteradmin/categories',
+  path: '/masteradmin/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminLoginRoute = MasteradminLoginRouteImport.update({
+  id: '/masteradmin/login',
+  path: '/masteradmin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminPaymentsRoute = MasteradminPaymentsRouteImport.update({
+  id: '/masteradmin/payments',
+  path: '/masteradmin/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminProductsRoute = MasteradminProductsRouteImport.update({
+  id: '/masteradmin/products',
+  path: '/masteradmin/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminReportsRoute = MasteradminReportsRouteImport.update({
+  id: '/masteradmin/reports',
+  path: '/masteradmin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminSettingsRoute = MasteradminSettingsRouteImport.update({
+  id: '/masteradmin/settings',
+  path: '/masteradmin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminSubscriptionsRoute =
+  MasteradminSubscriptionsRouteImport.update({
+    id: '/masteradmin/subscriptions',
+    path: '/masteradmin/subscriptions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MasteradminUsersRoute = MasteradminUsersRouteImport.update({
+  id: '/masteradmin/users',
+  path: '/masteradmin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminVipRoute = MasteradminVipRouteImport.update({
+  id: '/masteradmin/vip',
+  path: '/masteradmin/vip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductIdRoute = ProductIdRouteImport.update({
+  id: '/product/$id',
+  path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerIdRoute = SellerIdRouteImport.update({
+  id: '/seller/$id',
+  path: '/seller/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerDashboardRoute = SellerDashboardRouteImport.update({
+  id: '/seller/dashboard',
+  path: '/seller/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SellerListingsRoute = SellerListingsRouteImport.update({
+  id: '/seller/listings',
+  path: '/seller/listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsIndexRoute = SubscriptionsIndexRouteImport.update({
+  id: '/subscriptions/',
+  path: '/subscriptions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
+  id: '/subscriptions/payment',
+  path: '/subscriptions/payment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/buyer-terms': typeof BuyerTermsRoute
+  '/dashboard': typeof DashboardRoute
+  '/favorites': typeof FavoritesRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/sell': typeof SellRoute
+  '/seller-terms': typeof SellerTermsRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
+  '/category/$category': typeof CategoryCategoryRoute
+  '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
+  '/masteradmin/audit': typeof MasteradminAuditRoute
+  '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/payments': typeof MasteradminPaymentsRoute
+  '/masteradmin/products': typeof MasteradminProductsRoute
+  '/masteradmin/reports': typeof MasteradminReportsRoute
+  '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
+  '/masteradmin/users': typeof MasteradminUsersRoute
+  '/masteradmin/vip': typeof MasteradminVipRoute
+  '/product/$id': typeof ProductIdRoute
+  '/seller/$id': typeof SellerIdRoute
+  '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/listings': typeof SellerListingsRoute
+  '/subscriptions/payment': typeof SubscriptionsPaymentRoute
+  '/masteradmin/': typeof MasteradminIndexRoute
+  '/subscriptions/': typeof SubscriptionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/buyer-terms': typeof BuyerTermsRoute
+  '/dashboard': typeof DashboardRoute
+  '/favorites': typeof FavoritesRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/sell': typeof SellRoute
+  '/seller-terms': typeof SellerTermsRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
+  '/category/$category': typeof CategoryCategoryRoute
+  '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
+  '/masteradmin/audit': typeof MasteradminAuditRoute
+  '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/payments': typeof MasteradminPaymentsRoute
+  '/masteradmin/products': typeof MasteradminProductsRoute
+  '/masteradmin/reports': typeof MasteradminReportsRoute
+  '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
+  '/masteradmin/users': typeof MasteradminUsersRoute
+  '/masteradmin/vip': typeof MasteradminVipRoute
+  '/product/$id': typeof ProductIdRoute
+  '/seller/$id': typeof SellerIdRoute
+  '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/listings': typeof SellerListingsRoute
+  '/subscriptions/payment': typeof SubscriptionsPaymentRoute
+  '/masteradmin': typeof MasteradminIndexRoute
+  '/subscriptions': typeof SubscriptionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/buyer-terms': typeof BuyerTermsRoute
+  '/dashboard': typeof DashboardRoute
+  '/favorites': typeof FavoritesRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/profile': typeof ProfileRoute
+  '/sell': typeof SellRoute
+  '/seller-terms': typeof SellerTermsRoute
+  '/signup': typeof SignupRoute
+  '/terms': typeof TermsRoute
+  '/vip': typeof VipRoute
+  '/category/$category': typeof CategoryCategoryRoute
+  '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
+  '/masteradmin/audit': typeof MasteradminAuditRoute
+  '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/payments': typeof MasteradminPaymentsRoute
+  '/masteradmin/products': typeof MasteradminProductsRoute
+  '/masteradmin/reports': typeof MasteradminReportsRoute
+  '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
+  '/masteradmin/users': typeof MasteradminUsersRoute
+  '/masteradmin/vip': typeof MasteradminVipRoute
+  '/product/$id': typeof ProductIdRoute
+  '/seller/$id': typeof SellerIdRoute
+  '/seller/dashboard': typeof SellerDashboardRoute
+  '/seller/listings': typeof SellerListingsRoute
+  '/subscriptions/payment': typeof SubscriptionsPaymentRoute
+  '/masteradmin/': typeof MasteradminIndexRoute
+  '/subscriptions/': typeof SubscriptionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/buyer-terms'
+    | '/dashboard'
+    | '/favorites'
+    | '/login'
+    | '/privacy'
+    | '/profile'
+    | '/sell'
+    | '/seller-terms'
+    | '/signup'
+    | '/terms'
+    | '/vip'
+    | '/category/$category'
+    | '/masteradmin/analytics'
+    | '/masteradmin/audit'
+    | '/masteradmin/categories'
+    | '/masteradmin/login'
+    | '/masteradmin/payments'
+    | '/masteradmin/products'
+    | '/masteradmin/reports'
+    | '/masteradmin/settings'
+    | '/masteradmin/subscriptions'
+    | '/masteradmin/users'
+    | '/masteradmin/vip'
+    | '/product/$id'
+    | '/seller/$id'
+    | '/seller/dashboard'
+    | '/seller/listings'
+    | '/subscriptions/payment'
+    | '/masteradmin/'
+    | '/subscriptions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/buyer-terms'
+    | '/dashboard'
+    | '/favorites'
+    | '/login'
+    | '/privacy'
+    | '/profile'
+    | '/sell'
+    | '/seller-terms'
+    | '/signup'
+    | '/terms'
+    | '/vip'
+    | '/category/$category'
+    | '/masteradmin/analytics'
+    | '/masteradmin/audit'
+    | '/masteradmin/categories'
+    | '/masteradmin/login'
+    | '/masteradmin/payments'
+    | '/masteradmin/products'
+    | '/masteradmin/reports'
+    | '/masteradmin/settings'
+    | '/masteradmin/subscriptions'
+    | '/masteradmin/users'
+    | '/masteradmin/vip'
+    | '/product/$id'
+    | '/seller/$id'
+    | '/seller/dashboard'
+    | '/seller/listings'
+    | '/subscriptions/payment'
+    | '/masteradmin'
+    | '/subscriptions'
+  id:
+    | '__root__'
+    | '/'
+    | '/buyer-terms'
+    | '/dashboard'
+    | '/favorites'
+    | '/login'
+    | '/privacy'
+    | '/profile'
+    | '/sell'
+    | '/seller-terms'
+    | '/signup'
+    | '/terms'
+    | '/vip'
+    | '/category/$category'
+    | '/masteradmin/analytics'
+    | '/masteradmin/audit'
+    | '/masteradmin/categories'
+    | '/masteradmin/login'
+    | '/masteradmin/payments'
+    | '/masteradmin/products'
+    | '/masteradmin/reports'
+    | '/masteradmin/settings'
+    | '/masteradmin/subscriptions'
+    | '/masteradmin/users'
+    | '/masteradmin/vip'
+    | '/product/$id'
+    | '/seller/$id'
+    | '/seller/dashboard'
+    | '/seller/listings'
+    | '/subscriptions/payment'
+    | '/masteradmin/'
+    | '/subscriptions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BuyerTermsRoute: typeof BuyerTermsRoute
+  DashboardRoute: typeof DashboardRoute
+  FavoritesRoute: typeof FavoritesRoute
+  LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProfileRoute: typeof ProfileRoute
+  SellRoute: typeof SellRoute
+  SellerTermsRoute: typeof SellerTermsRoute
+  SignupRoute: typeof SignupRoute
+  TermsRoute: typeof TermsRoute
+  VipRoute: typeof VipRoute
+  CategoryCategoryRoute: typeof CategoryCategoryRoute
+  MasteradminAnalyticsRoute: typeof MasteradminAnalyticsRoute
+  MasteradminAuditRoute: typeof MasteradminAuditRoute
+  MasteradminCategoriesRoute: typeof MasteradminCategoriesRoute
+  MasteradminLoginRoute: typeof MasteradminLoginRoute
+  MasteradminPaymentsRoute: typeof MasteradminPaymentsRoute
+  MasteradminProductsRoute: typeof MasteradminProductsRoute
+  MasteradminReportsRoute: typeof MasteradminReportsRoute
+  MasteradminSettingsRoute: typeof MasteradminSettingsRoute
+  MasteradminSubscriptionsRoute: typeof MasteradminSubscriptionsRoute
+  MasteradminUsersRoute: typeof MasteradminUsersRoute
+  MasteradminVipRoute: typeof MasteradminVipRoute
+  ProductIdRoute: typeof ProductIdRoute
+  SellerIdRoute: typeof SellerIdRoute
+  SellerDashboardRoute: typeof SellerDashboardRoute
+  SellerListingsRoute: typeof SellerListingsRoute
+  SubscriptionsPaymentRoute: typeof SubscriptionsPaymentRoute
+  MasteradminIndexRoute: typeof MasteradminIndexRoute
+  SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +443,251 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buyer-terms': {
+      id: '/buyer-terms'
+      path: '/buyer-terms'
+      fullPath: '/buyer-terms'
+      preLoaderRoute: typeof BuyerTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller-terms': {
+      id: '/seller-terms'
+      path: '/seller-terms'
+      fullPath: '/seller-terms'
+      preLoaderRoute: typeof SellerTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vip': {
+      id: '/vip'
+      path: '/vip'
+      fullPath: '/vip'
+      preLoaderRoute: typeof VipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/$category': {
+      id: '/category/$category'
+      path: '/category/$category'
+      fullPath: '/category/$category'
+      preLoaderRoute: typeof CategoryCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/': {
+      id: '/masteradmin/'
+      path: '/masteradmin'
+      fullPath: '/masteradmin/'
+      preLoaderRoute: typeof MasteradminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/analytics': {
+      id: '/masteradmin/analytics'
+      path: '/masteradmin/analytics'
+      fullPath: '/masteradmin/analytics'
+      preLoaderRoute: typeof MasteradminAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/audit': {
+      id: '/masteradmin/audit'
+      path: '/masteradmin/audit'
+      fullPath: '/masteradmin/audit'
+      preLoaderRoute: typeof MasteradminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/categories': {
+      id: '/masteradmin/categories'
+      path: '/masteradmin/categories'
+      fullPath: '/masteradmin/categories'
+      preLoaderRoute: typeof MasteradminCategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/login': {
+      id: '/masteradmin/login'
+      path: '/masteradmin/login'
+      fullPath: '/masteradmin/login'
+      preLoaderRoute: typeof MasteradminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/payments': {
+      id: '/masteradmin/payments'
+      path: '/masteradmin/payments'
+      fullPath: '/masteradmin/payments'
+      preLoaderRoute: typeof MasteradminPaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/products': {
+      id: '/masteradmin/products'
+      path: '/masteradmin/products'
+      fullPath: '/masteradmin/products'
+      preLoaderRoute: typeof MasteradminProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/reports': {
+      id: '/masteradmin/reports'
+      path: '/masteradmin/reports'
+      fullPath: '/masteradmin/reports'
+      preLoaderRoute: typeof MasteradminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/settings': {
+      id: '/masteradmin/settings'
+      path: '/masteradmin/settings'
+      fullPath: '/masteradmin/settings'
+      preLoaderRoute: typeof MasteradminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/subscriptions': {
+      id: '/masteradmin/subscriptions'
+      path: '/masteradmin/subscriptions'
+      fullPath: '/masteradmin/subscriptions'
+      preLoaderRoute: typeof MasteradminSubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/users': {
+      id: '/masteradmin/users'
+      path: '/masteradmin/users'
+      fullPath: '/masteradmin/users'
+      preLoaderRoute: typeof MasteradminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/vip': {
+      id: '/masteradmin/vip'
+      path: '/masteradmin/vip'
+      fullPath: '/masteradmin/vip'
+      preLoaderRoute: typeof MasteradminVipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product/$id': {
+      id: '/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/$id': {
+      id: '/seller/$id'
+      path: '/seller/$id'
+      fullPath: '/seller/$id'
+      preLoaderRoute: typeof SellerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/dashboard': {
+      id: '/seller/dashboard'
+      path: '/seller/dashboard'
+      fullPath: '/seller/dashboard'
+      preLoaderRoute: typeof SellerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seller/listings': {
+      id: '/seller/listings'
+      path: '/seller/listings'
+      fullPath: '/seller/listings'
+      preLoaderRoute: typeof SellerListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/': {
+      id: '/subscriptions/'
+      path: '/subscriptions'
+      fullPath: '/subscriptions/'
+      preLoaderRoute: typeof SubscriptionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/payment': {
+      id: '/subscriptions/payment'
+      path: '/subscriptions/payment'
+      fullPath: '/subscriptions/payment'
+      preLoaderRoute: typeof SubscriptionsPaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BuyerTermsRoute: BuyerTermsRoute,
+  DashboardRoute: DashboardRoute,
+  FavoritesRoute: FavoritesRoute,
+  LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProfileRoute: ProfileRoute,
+  SellRoute: SellRoute,
+  SellerTermsRoute: SellerTermsRoute,
+  SignupRoute: SignupRoute,
+  TermsRoute: TermsRoute,
+  VipRoute: VipRoute,
+  CategoryCategoryRoute: CategoryCategoryRoute,
+  MasteradminAnalyticsRoute: MasteradminAnalyticsRoute,
+  MasteradminAuditRoute: MasteradminAuditRoute,
+  MasteradminCategoriesRoute: MasteradminCategoriesRoute,
+  MasteradminLoginRoute: MasteradminLoginRoute,
+  MasteradminPaymentsRoute: MasteradminPaymentsRoute,
+  MasteradminProductsRoute: MasteradminProductsRoute,
+  MasteradminReportsRoute: MasteradminReportsRoute,
+  MasteradminSettingsRoute: MasteradminSettingsRoute,
+  MasteradminSubscriptionsRoute: MasteradminSubscriptionsRoute,
+  MasteradminUsersRoute: MasteradminUsersRoute,
+  MasteradminVipRoute: MasteradminVipRoute,
+  ProductIdRoute: ProductIdRoute,
+  SellerIdRoute: SellerIdRoute,
+  SellerDashboardRoute: SellerDashboardRoute,
+  SellerListingsRoute: SellerListingsRoute,
+  SubscriptionsPaymentRoute: SubscriptionsPaymentRoute,
+  MasteradminIndexRoute: MasteradminIndexRoute,
+  SubscriptionsIndexRoute: SubscriptionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
