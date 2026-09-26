@@ -412,3 +412,60 @@ export function AdminDatabasePage() {
     </div>
   );
 }
+
+
+export function AdminBootstrapPage() {
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [setupKey, setSetupKey] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const createAdmin = async (event: FormEvent) => {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    setError("");
+
+    const { data, error: invokeError } = await supabase.functions.invoke("admin-bootstrap", {
+      body: { email, password, full_name: fullName },
+      headers: { "x-admin-bootstrap-key": setupKey },
+    });
+
+    if (invokeError) {
+      setError(invokeError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data?.error) {
+      setError(data.error);
+      setLoading(false);
+      return;
+    }
+
+    setMessage("Admin account created successfully. You can now use /admin to sign in.");
+    setPassword("");
+    setSetupKey("");
+    setLoading(false);
+  };
+
+  return (
+    <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
+      <form onSubmit={createAdmin} className="w-full max-w-md rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+        <Brand inverted />
+        <h1 className="mt-8 font-display text-3xl font-bold">Admin account setup</h1>
+        <p className="mt-2 text-sm text-surface-muted">Restricted administrator creation.</p>
+        {message && <p className="mt-4 rounded-lg bg-primary/10 p-3 text-sm text-primary">{message}</p>}
+        {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+        <label className="mt-6 block text-sm">Full name<Input required value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+        <label className="mt-4 block text-sm">Admin email<Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+        <label className="mt-4 block text-sm">Password<Input required minLength={8} type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+        <label className="mt-4 block text-sm">Setup key<Input required type="password" value={setupKey} onChange={(e) => setSetupKey(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+        <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>{loading ? "Creating admin…" : "Create admin account"}</Button>
+      </form>
+    </div>
+  );
+}
