@@ -275,7 +275,7 @@ export function AdminDatabasePage() {
 
     const [{ data: profileRows, error: usersError }, { data: productsData, error: productsError }] =
       await Promise.all([
-        supabase.from("profiles").select("id,full_name,role,created_at").order("created_at", { ascending: false }),
+        supabase.rpc("admin_users"),
         supabase.from("products").select("id,title,seller_id,price,status,created_at").order("created_at", { ascending: false }),
       ]);
 
@@ -293,9 +293,9 @@ export function AdminDatabasePage() {
     setUsers(
       (profileRows ?? []).map((row) => ({
         id: row.id,
-        full_name: row.full_name,
-        email: row.id === session.user.id ? session.user.email ?? "" : "Protected",
-        role: row.role,
+        full_name: row.full_name ?? "",
+        email: row.email ?? "",
+        role: row.role ?? "buyer",
         created_at: row.created_at,
       })),
     );
