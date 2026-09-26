@@ -189,3 +189,40 @@ using (
     where p.id = product_id and p.seller_id = (select auth.uid())
   )
 );
+
+
+-- Secure admin read access. Admin passwords belong to Supabase Auth;
+-- never store admin passwords in this public application database.
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check
+  check (role in ('buyer','seller','admin'));
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated;
+
+drop policy if exists profiles_select_admin on public.profiles;
+create policy profiles_select_admin on public.profiles for select
+to authenticated using (public.is_admin());
+
+drop policy if exists products_select_admin on public.products;
+create policy products_select_admin on public.products for select
+to authenticated using (public.is_admin());
+
+drop policy if exists product_media_select_admin on public.product_media;
+create policy product_media_select_admin on public.product_media for select
+to authenticated using (public.is_admin());
