@@ -4,7 +4,7 @@ import { Seo } from "@/components/vroomever/marketplace-pages";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
-  head: () => Seo("Vroomever — Sign in", "Sign in or create your Vroomever marketplace account."),
+  head: () => Seo("Vrumever — Sign in", "Sign in or create your Vrumever marketplace account."),
   component: EntryGate,
 });
 
