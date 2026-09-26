@@ -226,3 +226,26 @@ to authenticated using (public.is_admin());
 drop policy if exists product_media_select_admin on public.product_media;
 create policy product_media_select_admin on public.product_media for select
 to authenticated using (public.is_admin());
+
+
+create or replace function public.admin_users()
+returns table (
+  id uuid,
+  email text,
+  full_name text,
+  role text,
+  created_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select u.id, u.email, coalesce(p.full_name, ''), coalesce(p.role, 'buyer'), u.created_at
+  from auth.users u
+  left join public.profiles p on p.id = u.id
+  where public.is_admin();
+$$;
+
+revoke all on function public.admin_users() from public;
+grant execute on function public.admin_users() to authenticated;
