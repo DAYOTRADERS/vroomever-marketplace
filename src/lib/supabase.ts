@@ -9,7 +9,7 @@ const env = import.meta.env as Record<string, string | undefined>;
 const supabaseUrl =
   env.NEXT_PUBLIC_SUPABASE_URL ??
   env.VITE_SUPABASE_URL ??
-  "https://hooxnftxqfwhxnapobfx.supabase.co";
+  "https://hoonftxfqfwhxnapobfx.supabase.co";
 
 const supabasePublishableKey =
   env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
