@@ -3,7 +3,8 @@ import {
   BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Settings, ShieldCheck, Sparkles, Tags, UsersRound, type LucideIcon,
 } from "lucide-react";
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -224,4 +225,190 @@ export function AdminSettings() {
       <div className="md:col-span-2"><Button>Save settings</Button></div>
     </div>
   </AdminShell>;
+}
+
+
+export function AdminDatabasePage() {
+  const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [sessionReady, setSessionReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [signingIn, setSigningIn] = useState(false);
+  const [error, setError] = useState("");
+  const [users, setUsers] = useState<Array<{ id: string; full_name: string; email: string; role: string; created_at: string }>>([]);
+  const [productRows, setProductRows] = useState<Array<{ id: string; title: string; seller_id: string; price: number; status: string; created_at: string }>>([]);
+
+  const loadAdminData = async () => {
+    setLoading(true);
+    setError("");
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData.session;
+    if (!session) {
+      setSessionReady(false);
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+    setSessionReady(true);
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", session.user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      setError(profileError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (profile?.role !== "admin") {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+
+    setIsAdmin(true);
+
+    const [{ data: profileRows, error: usersError }, { data: productsData, error: productsError }] =
+      await Promise.all([
+        supabase.from("profiles").select("id,full_name,role,created_at").order("created_at", { ascending: false }),
+        supabase.from("products").select("id,title,seller_id,price,status,created_at").order("created_at", { ascending: false }),
+      ]);
+
+    if (usersError) {
+      setError(usersError.message);
+      setLoading(false);
+      return;
+    }
+    if (productsError) {
+      setError(productsError.message);
+      setLoading(false);
+      return;
+    }
+
+    setUsers(
+      (profileRows ?? []).map((row) => ({
+        id: row.id,
+        full_name: row.full_name,
+        email: row.id === session.user.id ? session.user.email ?? "" : "Protected",
+        role: row.role,
+        created_at: row.created_at,
+      })),
+    );
+    setProductRows(
+      (productsData ?? []).map((row) => ({
+        id: row.id,
+        title: row.title,
+        seller_id: row.seller_id,
+        price: Number(row.price),
+        status: row.status,
+        created_at: row.created_at,
+      })),
+    );
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void loadAdminData();
+  }, []);
+
+  const signIn = async (event: FormEvent) => {
+    event.preventDefault();
+    setSigningIn(true);
+    setError("");
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setError(signInError.message);
+      setSigningIn(false);
+      return;
+    }
+    setPassword("");
+    await loadAdminData();
+    setSigningIn(false);
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setSessionReady(false);
+    setIsAdmin(false);
+    setUsers([]);
+    setProductRows([]);
+    nav({ to: "/admin" });
+  };
+
+  if (loading) {
+    return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Loading admin access…</p></div>;
+  }
+
+  if (!sessionReady) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
+        <form onSubmit={signIn} className="w-full max-w-md rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+          <Brand inverted />
+          <h1 className="mt-8 font-display text-3xl font-bold">Admin database</h1>
+          <p className="mt-2 text-sm text-surface-muted">Sign in with the Supabase Auth admin account.</p>
+          {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+          <label className="mt-6 block text-sm">Admin email<Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+          <label className="mt-4 block text-sm">Password<Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" /></label>
+          <Button className="mt-6 w-full" size="lg" type="submit" disabled={signingIn}>{signingIn ? "Signing in…" : "Open admin database"}</Button>
+        </form>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
+        <div className="w-full max-w-md rounded-card border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
+          <Brand inverted />
+          <h1 className="mt-8 font-display text-2xl font-bold">Admin access required</h1>
+          <p className="mt-2 text-sm text-surface-muted">This account does not have the admin role.</p>
+          {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
+          <Button className="mt-6" onClick={signOut}>Sign out</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-muted/40">
+      <header className="border-b border-border bg-surface-strong text-surface-foreground">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
+          <div><Brand inverted /><p className="mt-1 text-xs text-surface-muted">Live Supabase database</p></div>
+          <Button variant="outline" onClick={signOut}><LogOut className="size-4" /> Sign out</Button>
+        </div>
+      </header>
+      <main className="mx-auto max-w-7xl space-y-8 p-5 lg:p-8">
+        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VroomEver Supabase database." />
+        {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Stat label="Users" value={String(users.length)} />
+          <Stat label="Products" value={String(productRows.length)} />
+        </div>
+        <section>
+          <h2 className="mb-3 font-display text-xl font-bold">All users and roles</h2>
+          <Table head={["Name", "Email", "Role", "Created"]} rows={users.map((user) => [
+            <div><strong className="block">{user.full_name || "Unnamed user"}</strong><small className="text-muted-foreground">{user.id}</small></div>,
+            user.email,
+            <Badge variant="outline">{user.role}</Badge>,
+            new Date(user.created_at).toLocaleString(),
+          ])} />
+        </section>
+        <section>
+          <h2 className="mb-3 font-display text-xl font-bold">All products posted</h2>
+          <Table head={["Product", "Seller ID", "Price", "Status", "Created"]} rows={productRows.map((product) => [
+            <strong>{product.title}</strong>,
+            <span className="font-mono text-xs">{product.seller_id}</span>,
+            formatKsh(product.price),
+            <Badge variant="outline">{product.status}</Badge>,
+            new Date(product.created_at).toLocaleString(),
+          ])} />
+        </section>
+      </main>
+    </div>
+  );
 }
