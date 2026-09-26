@@ -1,22 +1,7 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { Seo } from "@/components/vroomever/marketplace-pages";
-import { supabase } from "@/lib/supabase";
+import { createFileRoute } from "@tanstack/react-router";
+import { HomePage, Seo } from "@/components/vroomever/marketplace-pages";
 
 export const Route = createFileRoute("/")({
-  head: () => Seo("Vrumever — Sign in", "Sign in or create your Vrumever marketplace account."),
-  component: EntryGate,
+  head: () => Seo("Vrumever — Discover, Connect, Trade", "Kenya’s modern marketplace for trusted sellers and remarkable finds."),
+  component: HomePage,
 });
-
-function EntryGate() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    let mounted = true;
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      navigate({ to: data.session ? "/dashboard" : "/login", replace: true });
-    });
-    return () => { mounted = false; };
-  }, [navigate]);
-  return null;
-}
