@@ -98,8 +98,8 @@ export function SellPage() {
     const {data:category}=await supabase.from("categories").select("id").eq("slug",categorySlug).maybeSingle();
     if(!category){setError("Category is not available in the database. Apply the latest schema first.");setSaving(false);return;}
     const {error:insertError}=await supabase.from("products").insert({
-      seller_id:sellerId,category_id:category.id,title:title.trim(),description:description.trim(),
-      price:Number(price),location:location.trim(),condition,status:"pending"
+      seller_id:sellerId,category_slug:category.slug,title:title.trim(),description:description.trim(),
+      price_ksh:Number(price),location:location.trim(),condition,status:"pending"
     });
     if(insertError){setError(insertError.message);setSaving(false);return;}
     setStep(7);setSaving(false);
