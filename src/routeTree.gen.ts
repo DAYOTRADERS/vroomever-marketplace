@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -41,6 +43,12 @@ import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
 import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth', path: '/auth', getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm', path: '/auth/confirm', getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -199,6 +207,8 @@ const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/auth': typeof AuthRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/': typeof IndexRoute
   '/buyer-terms': typeof BuyerTermsRoute
   '/dashboard': typeof DashboardRoute
@@ -232,6 +242,8 @@ export interface FileRoutesByFullPath {
   '/subscriptions/': typeof SubscriptionsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/': typeof IndexRoute
   '/buyer-terms': typeof BuyerTermsRoute
   '/dashboard': typeof DashboardRoute
@@ -265,6 +277,8 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsIndexRoute
 }
 export interface FileRoutesById {
+  '/auth': typeof AuthRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/buyer-terms': typeof BuyerTermsRoute
@@ -301,6 +315,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/auth'
+    | '/auth/confirm'
     | '/'
     | '/buyer-terms'
     | '/dashboard'
@@ -334,6 +350,8 @@ export interface FileRouteTypes {
     | '/subscriptions/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/auth'
+    | '/auth/confirm'
     | '/'
     | '/buyer-terms'
     | '/dashboard'
@@ -366,6 +384,8 @@ export interface FileRouteTypes {
     | '/masteradmin'
     | '/subscriptions'
   id:
+    | '/auth'
+    | '/auth/confirm'
     | '__root__'
     | '/'
     | '/buyer-terms'
@@ -401,6 +421,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthRoute: typeof AuthRoute
+  AuthConfirmRoute: typeof AuthConfirmRoute
   IndexRoute: typeof IndexRoute
   BuyerTermsRoute: typeof BuyerTermsRoute
   DashboardRoute: typeof DashboardRoute
@@ -436,6 +458,8 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': { id: '/auth', path: '/auth', fullPath: '/auth', preLoaderRoute: typeof AuthRouteImport, parentRoute: typeof rootRouteImport }
+    '/auth/confirm': { id: '/auth/confirm', path: '/auth/confirm', fullPath: '/auth/confirm', preLoaderRoute: typeof AuthConfirmRouteImport, parentRoute: typeof rootRouteImport }
     '/': {
       id: '/'
       path: '/'
@@ -657,6 +681,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  AuthRoute: AuthRoute,
+  AuthConfirmRoute: AuthConfirmRoute,
   IndexRoute: IndexRoute,
   BuyerTermsRoute: BuyerTermsRoute,
   DashboardRoute: DashboardRoute,

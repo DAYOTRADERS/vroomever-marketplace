@@ -6,7 +6,7 @@ export const Route = createFileRoute("/auth")({
     role: search.role === "seller" ? "seller" : "buyer",
     mode: search.mode === "signup" ? "signup" : "login",
   }),
-  head: () => Seo("Vrumever — Account", "Sign in or create a Vrumever buyer or seller account."),
+  head: () => Seo("Vroomever — Account", "Sign in or create a Vroomever buyer or seller account."),
   component: AuthRoute,
 });
 

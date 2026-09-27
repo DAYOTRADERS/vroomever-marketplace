@@ -319,3 +319,85 @@ $$;
 
 revoke all on function public.admin_set_user_role(uuid, text) from public;
 grant execute on function public.admin_set_user_role(uuid, text) to authenticated;
+
+create table if not exists public.reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid references auth.users(id) on delete set null,
+  product_id uuid references public.products(id) on delete cascade,
+  reason text not null,
+  details text,
+  status text not null default 'open' check (status in ('open','investigating','resolved','dismissed')),
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz
+);
+alter table public.reports enable row level security;
+grant select, insert, update on public.reports to authenticated;
+drop policy if exists reports_admin_all on public.reports;
+create policy reports_admin_all on public.reports for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+create table if not exists public.audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid references auth.users(id) on delete set null,
+  action text not null,
+  target_type text,
+  target_id uuid,
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+alter table public.audit_logs enable row level security;
+grant select on public.audit_logs to authenticated;
+drop policy if exists audit_admin_read on public.audit_logs;
+create policy audit_admin_read on public.audit_logs for select to authenticated using (public.is_admin());
+
+create or replace function public.admin_log(
+  p_action text,
+  p_target_type text default null,
+  p_target_id uuid default null,
+  p_details jsonb default '{}'::jsonb
+) returns uuid language plpgsql security definer set search_path = public as $$
+declare new_id uuid;
+begin
+  if not public.is_admin() then raise exception 'Administrator access required'; end if;
+  insert into public.audit_logs(actor_id,action,target_type,target_id,details)
+  values(auth.uid(),p_action,p_target_type,p_target_id,coalesce(p_details,'{}'::jsonb))
+  returning id into new_id;
+  return new_id;
+end;
+$$;
+revoke all on function public.admin_log(text,text,uuid,jsonb) from public;
+grant execute on function public.admin_log(text,text,uuid,jsonb) to authenticated;
+
+create table if not exists public.vip_promotions (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references public.products(id) on delete cascade,
+  seller_id uuid not null references auth.users(id) on delete cascade,
+  duration_days integer not null check (duration_days > 0),
+  amount_ksh integer not null default 0,
+  status text not null default 'pending' check (status in ('pending','active','expired','cancelled')),
+  starts_at timestamptz not null default now(),
+  expires_at timestamptz,
+  created_at timestamptz not null default now()
+);
+alter table public.vip_promotions enable row level security;
+grant select, insert, update on public.vip_promotions to authenticated;
+drop policy if exists vip_owner_read on public.vip_promotions;
+create policy vip_owner_read on public.vip_promotions for select to authenticated using (seller_id=auth.uid() or public.is_admin());
+drop policy if exists vip_owner_insert on public.vip_promotions;
+create policy vip_owner_insert on public.vip_promotions for insert to authenticated with check (seller_id=auth.uid());
+drop policy if exists vip_admin_manage on public.vip_promotions;
+create policy vip_admin_manage on public.vip_promotions for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+create table if not exists public.platform_settings (
+  key text primary key,
+  value jsonb not null default '{}'::jsonb,
+  updated_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+alter table public.platform_settings enable row level security;
+grant select, insert, update on public.platform_settings to authenticated;
+drop policy if exists settings_admin_all on public.platform_settings;
+create policy settings_admin_all on public.platform_settings for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+create index if not exists audit_logs_created_idx on public.audit_logs(created_at desc);
+create index if not exists reports_created_idx on public.reports(created_at desc);
+create index if not exists vip_promotions_created_idx on public.vip_promotions(created_at desc);
