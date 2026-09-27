@@ -28,13 +28,13 @@ const nav: { to: string; label: string; icon: LucideIcon }[] = [
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const nav = useNavigate();
+  const navigate = useNavigate();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) {
-        nav({ to: "/masteradmin/login", replace: true });
+        navigate({ to: "/masteradmin/login", replace: true });
         return;
       }
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.session.user.id).maybeSingle();
@@ -45,7 +45,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       }
       setReady(true);
     });
-  }, [nav]);
+  }, [navigate]);
 
   if (!ready) return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking admin access…</p></div>;
 
@@ -55,7 +55,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="flex items-center justify-between p-5"><Brand inverted /><Badge className="bg-primary/20 text-primary">Admin</Badge></div>
         <nav className="grid gap-1 p-3">
           {nav.map((item) => <Link key={item.to} to={item.to} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}><item.icon className="size-4" /> {item.label}</Link>)}
-          <button type="button" onClick={async()=>{await supabase.auth.signOut(); nav({to:"/masteradmin/login"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
+          <button type="button" onClick={async()=>{await supabase.auth.signOut(); navigate({to:"/masteradmin/login"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
         </nav>
       </aside>
       <main className="p-5 lg:p-8">{children}</main>
