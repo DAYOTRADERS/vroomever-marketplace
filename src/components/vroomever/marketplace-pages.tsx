@@ -33,7 +33,7 @@ export const Seo = (title: string, description: string) => ({ meta: [{ title }, 
 
 export function HomePage() { return <SiteShell>
  <section className="relative isolate min-h-[660px] overflow-hidden bg-surface-strong text-surface-foreground">
-  <img src={hero} alt="Shop and sell across Kenya with Vrumever" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-center" />
+  <img src={hero} alt="Shop and sell across Kenya with Vroomever" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-center" />
   <div className="absolute inset-0 bg-gradient-to-r from-surface-strong via-surface-strong/82 to-transparent" />
   <div className="dot-grid absolute inset-0 opacity-20" />
   <div className="relative mx-auto flex min-h-[660px] max-w-7xl items-center px-5 py-24"><div className="max-w-2xl">
@@ -118,7 +118,7 @@ function SellStep({step,categorySlug,setCategorySlug,title,setTitle,price,setPri
  if(step===4)return <><h2 className="font-display text-2xl font-bold">Review your listing</h2><div className="mt-6 grid gap-5 rounded-card bg-muted p-5 md:grid-cols-[180px_1fr]"><div className="grid aspect-[4/3] place-items-center rounded-card bg-secondary"><Camera/></div><div><Badge>Pending review</Badge><h3 className="mt-3 font-display text-xl font-bold">{title||"Your listing title"}</h3><p className="mt-2 text-muted-foreground">{cat.name} · {location||"Kenya"} · Photos {photos.length}/5 · Video {video?1:0}/1</p><p className="mt-4 font-display text-2xl font-bold text-primary">KSh {Number(price||0).toLocaleString("en-KE")}</p></div></div></>;
  if(step===5)return <><h2 className="font-display text-2xl font-bold">Choose a seller package</h2><div className="mt-6 grid gap-4 md:grid-cols-3">{packages.map(p=><PackageCard key={p.name} p={p}/>)}</div></>;
  if(step===6)return <PaymentPanel/>;
- return <div className="py-12 text-center"><span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><CheckCircle2 className="size-10"/></span><h2 className="mt-6 font-display text-3xl font-bold">Saved to VroomEver</h2><p className="mx-auto mt-3 max-w-md text-muted-foreground">Your listing is now stored in the marketplace database with pending moderation status.</p></div>;
+ return <div className="py-12 text-center"><span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><CheckCircle2 className="size-10"/></span><h2 className="mt-6 font-display text-3xl font-bold">Saved to Vroomever</h2><p className="mx-auto mt-3 max-w-md text-muted-foreground">Your listing is now stored in the marketplace database with pending moderation status.</p></div>;
 }
 
 function PackageCard({p}:{p:(typeof packages)[number]}) { return <div className={`relative rounded-card border p-5 ${p.popular?"border-primary bg-secondary":"border-border"}`}>{p.popular&&<Badge className="absolute -top-3 left-4">Most popular</Badge>}<h3 className="font-display text-xl font-bold">{p.name}</h3><p className="mt-2 text-sm text-muted-foreground">{p.description}</p><p className="mt-5 font-display text-2xl font-bold">{formatKsh(p.price)}<small className="text-xs font-normal text-muted-foreground"> / {p.cadence}</small></p><p className="mt-3 text-xs">Up to {p.limit} active listings</p></div> }
@@ -132,45 +132,45 @@ export function SellerListingsPage() {
  const [rows,setRows]=useState<Array<{id:string;title:string;price:number;status:string;created_at:string}>>([]);
  const [loading,setLoading]=useState(true);
  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const sellerId=data.session?.user.id;if(!sellerId){window.location.href="/auth?role=seller";return;}const {data:items}=await supabase.from("products").select("id,title,price,status,created_at").eq("seller_id",sellerId).order("created_at",{ascending:false});setRows((items??[]).map(x=>({...x,price:Number(x.price)})));setLoading(false);});},[]);
- return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><PageTitle eyebrow="Seller workspace" title="Your listings" copy="Live listings stored in the VroomEver database." action={<Button asChild><Link to="/sell"><Plus/>Add listing</Link></Button>}/>{loading?<p className="text-sm text-muted-foreground">Loading your listings…</p>:<div className="overflow-hidden rounded-card border border-border bg-card"><div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-bold uppercase text-muted-foreground"><span>Listing</span><span>Status</span><span>Price</span></div>{rows.length?rows.map(p=><div key={p.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-4 last:border-0"><div className="min-w-0"><strong className="block truncate">{p.title}</strong><small className="text-muted-foreground">{new Date(p.created_at).toLocaleString()}</small></div><Badge variant="outline">{p.status}</Badge><span className="font-semibold">{formatKsh(p.price)}</span></div>):<div className="p-8 text-center text-sm text-muted-foreground">No database listings yet. Create your first listing.</div>}</div>}</div></SiteShell>
+ return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><PageTitle eyebrow="Seller workspace" title="Your listings" copy="Live listings stored in the Vroomever database." action={<Button asChild><Link to="/sell"><Plus/>Add listing</Link></Button>}/>{loading?<p className="text-sm text-muted-foreground">Loading your listings…</p>:<div className="overflow-hidden rounded-card border border-border bg-card"><div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-bold uppercase text-muted-foreground"><span>Listing</span><span>Status</span><span>Price</span></div>{rows.length?rows.map(p=><div key={p.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-4 last:border-0"><div className="min-w-0"><strong className="block truncate">{p.title}</strong><small className="text-muted-foreground">{new Date(p.created_at).toLocaleString()}</small></div><Badge variant="outline">{p.status}</Badge><span className="font-semibold">{formatKsh(p.price)}</span></div>):<div className="p-8 text-center text-sm text-muted-foreground">No database listings yet. Create your first listing.</div>}</div>}</div></SiteShell>
 }
 
 export function LegalPage({type}:{type:"terms"|"privacy"|"seller"|"buyer"}) {
  const content={
   terms:{title:"Terms & Conditions",sections:[
-   ["Using VroomEver","VroomEver is a Kenyan marketplace that helps buyers and sellers discover listings and communicate directly. By creating or using an account, you agree to these terms and to applicable Kenyan law."],
+   ["Using Vroomever","Vroomever is a Kenyan marketplace that helps buyers and sellers discover listings and communicate directly. By creating or using an account, you agree to these terms and to applicable Kenyan law."],
    ["Accounts and security","Provide accurate registration details, keep your password private, and do not create accounts for deceptive or unlawful purposes. You are responsible for activity performed through your account."],
    ["Listings and seller duties","Sellers must own or have authority to sell what they list, use accurate descriptions and prices, disclose material defects, and keep contact details reasonably reachable. Counterfeit, stolen, unsafe or unlawful goods are not permitted."],
-   ["Buyer responsibilities","Buyers should review listing details, verify the seller and item, inspect goods where practical, and agree delivery and payment arrangements carefully. VroomEver does not take possession of listed goods unless a specific VroomEver service says otherwise."],
+   ["Buyer responsibilities","Buyers should review listing details, verify the seller and item, inspect goods where practical, and agree delivery and payment arrangements carefully. Vroomever does not take possession of listed goods unless a specific Vroomever service says otherwise."],
    ["Communication and transactions","Users are responsible for their agreements, payments, delivery, inspection and collection arrangements. Never share passwords, one-time codes or unnecessary financial information with another user."],
-   ["Safety, reports and enforcement","Report suspicious listings, impersonation, fraud or unsafe conduct through the available reporting channels. VroomEver may restrict or remove accounts or listings that breach these terms or applicable law."],
+   ["Safety, reports and enforcement","Report suspicious listings, impersonation, fraud or unsafe conduct through the available reporting channels. Vroomever may restrict or remove accounts or listings that breach these terms or applicable law."],
    ["Fees and promotions","Any seller package, promotional placement or other paid feature will show its applicable price and conditions before activation. A marketplace listing does not itself guarantee a sale."],
-   ["Intellectual property and user content","You retain rights in content you lawfully upload, while granting VroomEver the limited permission needed to host, display and operate the marketplace. Do not upload material that infringes another person's rights."],
-   ["Privacy and legal compliance","Personal information is handled according to VroomEver's privacy notice. Users must comply with applicable Kenyan consumer, advertising, data-protection and other relevant laws."],
-   ["Changes and contact","VroomEver may update these terms as the service develops. Continued use after an update means the revised terms apply from their effective date. Contact VroomEver through the support channel shown on the platform for questions."]
+   ["Intellectual property and user content","You retain rights in content you lawfully upload, while granting Vroomever the limited permission needed to host, display and operate the marketplace. Do not upload material that infringes another person's rights."],
+   ["Privacy and legal compliance","Personal information is handled according to Vroomever's privacy notice. Users must comply with applicable Kenyan consumer, advertising, data-protection and other relevant laws."],
+   ["Changes and contact","Vroomever may update these terms as the service develops. Continued use after an update means the revised terms apply from their effective date. Contact Vroomever through the support channel shown on the platform for questions."]
   ]},
   privacy:{title:"Privacy Policy",sections:[
-   ["Information collected","VroomEver may process account details, listing information, contact details, device information and activity needed to operate and secure the marketplace."],
+   ["Information collected","Vroomever may process account details, listing information, contact details, device information and activity needed to operate and secure the marketplace."],
    ["How information is used","Information is used to authenticate users, publish listings, facilitate communication, improve the service, prevent abuse and provide support."],
-   ["Sharing","Information may be shared with service providers needed to operate VroomEver or where required by law. VroomEver does not make another user's private account credentials publicly available."],
+   ["Sharing","Information may be shared with service providers needed to operate Vroomever or where required by law. Vroomever does not make another user's private account credentials publicly available."],
    ["Your choices","Users may request correction of inaccurate account information and should avoid publishing sensitive personal information in public listings."],
-   ["Security and retention","VroomEver applies reasonable technical and organizational safeguards. Information is retained only as needed for legitimate operational, security, legal and support purposes."]
+   ["Security and retention","Vroomever applies reasonable technical and organizational safeguards. Information is retained only as needed for legitimate operational, security, legal and support purposes."]
   ]},
   seller:{title:"Seller Terms",sections:[
    ["Accurate listings","Describe each product or service truthfully, including condition, location, price and important limitations."],
    ["Proof and lawful ownership","Only list items or services you are legally entitled to offer. Keep relevant ownership, authorization or compliance records where applicable."],
    ["Buyer communication","Respond respectfully, avoid deceptive claims, and never request passwords, OTPs or unrelated sensitive credentials."],
    ["Fulfilment and disputes","Agree payment, collection, delivery, inspection and refund terms clearly with buyers. Keep evidence of material transaction communications."],
-   ["Moderation","VroomEver may pause, reject or remove listings that violate platform rules, applicable law or safety requirements."]
+   ["Moderation","Vroomever may pause, reject or remove listings that violate platform rules, applicable law or safety requirements."]
   ]},
   buyer:{title:"Buyer Terms",sections:[
    ["Review before buying","Check the listing, seller information, condition, price and location before committing."],
    ["Safe communication","Use sensible precautions when meeting sellers and do not disclose passwords, OTPs or unnecessary financial credentials."],
    ["Payments and delivery","Confirm the agreed payment recipient, amount and delivery or collection arrangement before sending funds."],
-   ["Reports","Report suspicious, misleading, counterfeit, stolen or unsafe listings so VroomEver can review them."],
-   ["Your agreement with the seller","The purchase agreement is between the buyer and seller unless VroomEver expressly provides a separate transaction service."]
+   ["Reports","Report suspicious, misleading, counterfeit, stolen or unsafe listings so Vroomever can review them."],
+   ["Your agreement with the seller","The purchase agreement is between the buyer and seller unless Vroomever expressly provides a separate transaction service."]
 
   ]}
  }[type];
- return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VroomEver legal" title={content.title} copy="Effective September 2026 · VroomEver marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
+ return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="Vroomever legal" title={content.title} copy="Effective September 2026 · Vroomever marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
 }
