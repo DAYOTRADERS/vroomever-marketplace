@@ -118,7 +118,7 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
 
 export function AdminOverview() {
  const [users,setUsers]=useState(0); const [listings,setListings]=useState(0); const [pending,setPending]=useState<Array<{id:string;title:string;status:string}>>([]);
- useEffect(()=>{Promise.all([supabase.rpc("admin_users"),supabase.from("products").select("id,title,status").order("created_at",{ascending:false})]).then(([u,p])=>{setUsers((u.data??[]).length);setListings((p.data??[]).length);setPending((p.data??[]).filter(x=>x.status==="pending").slice(0,10));});},[]);
+ useEffect(()=>{Promise.all([supabase.rpc("admin_users"),supabase.from("products").select("id,title,status").order("created_at",{ascending:false}),supabase.from("categories").select("slug")]).then(([u,p,c])=>{setUsers((u.data??[]).length);setListings((p.data??[]).length);setPending((p.data??[]).filter(x=>x.status==="pending").slice(0,10));});},[]);
  return <AdminShell><PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live VroomEver platform data from Supabase."/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Total users" value={String(users)}/><Stat label="Database listings" value={String(listings)}/><Stat label="Pending moderation" value={String(pending.length)}/><Stat label="Categories" value="21"/></div><div className="mt-8 rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Pending moderation</h2><div className="mt-4 grid gap-3">{pending.length?pending.map(p=><div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>):<p className="text-sm text-muted-foreground">No pending listings.</p>}</div></div></AdminShell>;
 }
 
@@ -249,7 +249,7 @@ export function AdminDatabasePage() {
     const [{ data: profileRows, error: usersError }, { data: productsData, error: productsError }] =
       await Promise.all([
         supabase.rpc("admin_users"),
-        supabase.from("products").select("id,title,seller_id,price,status,created_at").order("created_at", { ascending: false }),
+        supabase.from("products").select("id,title,seller_id,price_ksh,status,created_at").order("created_at", { ascending: false }),
       ]);
 
     if (usersError) {
@@ -277,7 +277,7 @@ export function AdminDatabasePage() {
         id: row.id,
         title: row.title,
         seller_id: row.seller_id,
-        price: Number(row.price),
+        price: Number(row.price_ksh),
         status: row.status,
         created_at: row.created_at,
       })),
