@@ -91,7 +91,7 @@ export function AdminLoginPage() {
     <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
         <Brand inverted /><h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
-        <p className="mt-2 text-sm text-surface-muted">Secure VroomEver control center access.</p>
+        <p className="mt-2 text-sm text-surface-muted">Secure Vroomever control center access.</p>
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <label className="mt-6 block text-sm">Admin email<Input name="email" required type="email" className="mt-2 h-11 bg-background text-foreground" /></label>
         <label className="mt-4 block text-sm">Password<Input name="password" required type="password" className="mt-2 h-11 bg-background text-foreground" /></label>
@@ -119,7 +119,7 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
 export function AdminOverview() {
  const [users,setUsers]=useState(0); const [listings,setListings]=useState(0); const [pending,setPending]=useState<Array<{id:string;title:string;status:string}>>([]);
  useEffect(()=>{Promise.all([supabase.rpc("admin_users"),supabase.from("products").select("id,title,status").order("created_at",{ascending:false}),supabase.from("categories").select("slug")]).then(([u,p,c])=>{setUsers((u.data??[]).length);setListings((p.data??[]).length);setPending((p.data??[]).filter(x=>x.status==="pending").slice(0,10));});},[]);
- return <AdminShell><PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live VroomEver platform data from Supabase."/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Total users" value={String(users)}/><Stat label="Database listings" value={String(listings)}/><Stat label="Pending moderation" value={String(pending.length)}/><Stat label="Categories" value="21"/></div><div className="mt-8 rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Pending moderation</h2><div className="mt-4 grid gap-3">{pending.length?pending.map(p=><div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>):<p className="text-sm text-muted-foreground">No pending listings.</p>}</div></div></AdminShell>;
+ return <AdminShell><PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live Vroomever platform data from Supabase."/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Total users" value={String(users)}/><Stat label="Database listings" value={String(listings)}/><Stat label="Pending moderation" value={String(pending.length)}/><Stat label="Categories" value="21"/></div><div className="mt-8 rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Pending moderation</h2><div className="mt-4 grid gap-3">{pending.length?pending.map(p=><div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>):<p className="text-sm text-muted-foreground">No pending listings.</p>}</div></div></AdminShell>;
 }
 
 
@@ -356,7 +356,7 @@ export function AdminDatabasePage() {
         </div>
       </header>
       <main className="mx-auto max-w-7xl space-y-8 p-5 lg:p-8">
-        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VroomEver Supabase database." />
+        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the Vroomever Supabase database." />
         {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Stat label="Users" value={String(users.length)} />
