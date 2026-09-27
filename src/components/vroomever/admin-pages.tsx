@@ -117,51 +117,26 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
 }
 
 export function AdminOverview() {
-  return <AdminShell>
-    <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Simulated platform health for Stage 1." />
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Stat label="Total users" value="18,402" /><Stat label="Live listings" value="24,118" />
-      <Stat label="Active subscriptions" value="1,247" /><Stat label="Revenue (30d)" value={formatKsh(3820000)} />
-    </div>
-    <div className="mt-8 grid gap-6 lg:grid-cols-2">
-      <div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Listings per week</h2><div className="mt-8 flex h-48 items-end gap-3">{[40, 65, 58, 92, 74, 110, 96, 128].map((h, i) => <div key={i} className="flex-1 rounded-t bg-primary/70" style={{ height: h }} />)}</div></div>
-      <div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Pending moderation</h2><div className="mt-4 grid gap-3">{products.map((p) => <div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3 last:border-0"><span className="truncate text-sm">{p.title}</span><span className="flex gap-2"><Button size="sm">Approve</Button><Button size="sm" variant="outline">Reject</Button></span></div>)}</div></div>
-    </div>
-  </AdminShell>;
+ const [users,setUsers]=useState(0); const [listings,setListings]=useState(0); const [pending,setPending]=useState<Array<{id:string;title:string;status:string}>>([]);
+ useEffect(()=>{Promise.all([supabase.rpc("admin_users"),supabase.from("products").select("id,title,status").order("created_at",{ascending:false})]).then(([u,p])=>{setUsers((u.data??[]).length);setListings((p.data??[]).length);setPending((p.data??[]).filter(x=>x.status==="pending").slice(0,10));});},[]);
+ return <AdminShell><PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live VroomEver platform data from Supabase."/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Stat label="Total users" value={String(users)}/><Stat label="Database listings" value={String(listings)}/><Stat label="Pending moderation" value={String(pending.length)}/><Stat label="Categories" value="21"/></div><div className="mt-8 rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Pending moderation</h2><div className="mt-4 grid gap-3">{pending.length?pending.map(p=><div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>):<p className="text-sm text-muted-foreground">No pending listings.</p>}</div></div></AdminShell>;
 }
+
 
 export function AdminUsers() {
-  const [users, setUsers] = useState([
-    { name: "Amina Wanjiku", email: "amina@example.co.ke", role: "Buyer", status: "Active" },
-    { name: "Prestige Motors KE", email: "sales@prestige.co.ke", role: "Seller", status: "Verified" },
-    { name: "Gadget Grid", email: "hello@gadgetgrid.co.ke", role: "Seller", status: "Active" },
-    { name: "Brian Otieno", email: "brian@example.co.ke", role: "Buyer", status: "Suspended" },
-  ]);
-  const toggle = (i: number) => setUsers(users.map((u, x) => x === i ? { ...u, status: u.status === "Suspended" ? "Active" : "Suspended" } : u));
-  return <AdminShell>
-    <PageTitle eyebrow="People" title="Users & roles" copy="Manage buyers, sellers and administrators." />
-    <Table head={["User", "Role", "Status", "Actions"]} rows={users.map((u, i) => [
-      <div><strong className="block">{u.name}</strong><small className="text-muted-foreground">{u.email}</small></div>,
-      <Badge variant="outline">{u.role}</Badge>,
-      <Badge className={u.status === "Suspended" ? "bg-destructive text-destructive-foreground" : ""}>{u.status}</Badge>,
-      <Button size="sm" variant="outline" onClick={() => toggle(i)}>{u.status === "Suspended" ? "Reinstate" : "Suspend"}</Button>,
-    ])} />
-  </AdminShell>;
+ const [rows,setRows]=useState<Array<{id:string;name:string;email:string;role:string;created_at:string}>>([]);
+ useEffect(()=>{supabase.rpc("admin_users").then(({data})=>setRows((data??[]).map(u=>({id:u.id,name:u.full_name||"Unnamed user",email:u.email||"",role:u.role||"buyer",created_at:u.created_at}))));},[]);
+ return <AdminShell><PageTitle eyebrow="People" title="Users & roles" copy="Live buyer, seller and administrator accounts."/><Table head={["User","Role","Created"]} rows={rows.map(u=>[<div><strong className="block">{u.name}</strong><small className="text-muted-foreground">{u.email}</small></div>,<Badge variant="outline">{u.role}</Badge>,new Date(u.created_at).toLocaleString()])}/></AdminShell>;
 }
 
+
 export function AdminProducts() {
-  const [rows, setRows] = useState(products.map((p, i) => ({ ...p, status: i === 1 ? "Pending" : "Approved" })));
-  const set = (i: number, status: string) => setRows(rows.map((r, x) => x === i ? { ...r, status } : r));
-  return <AdminShell>
-    <PageTitle eyebrow="Catalogue" title="Product moderation" copy="Approve, reject, hide or remove listings." />
-    <Table head={["Listing", "Price", "Status", "Actions"]} rows={rows.map((p, i) => [
-      <div className="flex items-center gap-3"><img src={p.image} alt="" width={64} height={48} loading="lazy" className="size-12 rounded-md object-cover" /><span><strong className="block">{p.title}</strong><small className="text-muted-foreground">{p.seller}</small></span></div>,
-      formatKsh(p.price),
-      <Badge variant="outline">{p.status}</Badge>,
-      <span className="flex flex-wrap gap-2"><Button size="sm" onClick={() => set(i, "Approved")}>Approve</Button><Button size="sm" variant="outline" onClick={() => set(i, "Rejected")}>Reject</Button><Button size="sm" variant="ghost" onClick={() => set(i, "Hidden")}>Hide</Button></span>,
-    ])} />
-  </AdminShell>;
+ const [rows,setRows]=useState<Array<{id:string;title:string;price:number;status:string;seller_id:string}>>([]);
+ useEffect(()=>{supabase.from("products").select("id,title,price,status,seller_id").order("created_at",{ascending:false}).then(({data})=>setRows((data??[]).map(p=>({...p,price:Number(p.price)}))));},[]);
+ const setStatus=async(id:string,status:string)=>{const {error}=await supabase.from("products").update({status}).eq("id",id);if(!error)setRows(rows.map(r=>r.id===id?{...r,status}:r));};
+ return <AdminShell><PageTitle eyebrow="Catalogue" title="Product moderation" copy="Live listings stored in Supabase."/><Table head={["Listing","Price","Status","Actions"]} rows={rows.map(p=>[<div><strong className="block">{p.title}</strong><small className="text-muted-foreground">{p.seller_id}</small></div>,formatKsh(p.price),<Badge variant="outline">{p.status}</Badge>,<span className="flex flex-wrap gap-2"><Button size="sm" onClick={()=>void setStatus(p.id,"active")}>Approve</Button><Button size="sm" variant="outline" onClick={()=>void setStatus(p.id,"rejected")}>Reject</Button><Button size="sm" variant="ghost" onClick={()=>void setStatus(p.id,"hidden")}>Hide</Button></span>])}/></AdminShell>;
 }
+
 
 export function AdminCategories() {
   return <AdminShell>
