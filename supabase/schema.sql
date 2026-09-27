@@ -320,6 +320,21 @@ $$;
 revoke all on function public.admin_set_user_role(uuid, text) from public;
 grant execute on function public.admin_set_user_role(uuid, text) to authenticated;
 
+create table if not exists public.reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid references auth.users(id) on delete set null,
+  product_id uuid references public.products(id) on delete cascade,
+  reason text not null,
+  details text,
+  status text not null default 'open' check (status in ('open','investigating','resolved','dismissed')),
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz
+);
+alter table public.reports enable row level security;
+grant select, insert, update on public.reports to authenticated;
+drop policy if exists reports_admin_all on public.reports;
+create policy reports_admin_all on public.reports for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
 create table if not exists public.audit_logs (
   id uuid primary key default gen_random_uuid(),
   actor_id uuid references auth.users(id) on delete set null,
