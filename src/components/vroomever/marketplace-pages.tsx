@@ -161,7 +161,7 @@ export function LegalPage({type}:{type:"terms"|"privacy"|"seller"|"buyer"}) {
   ]}
  }[type];
  return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VroomEver legal" title={content.title} copy="Effective September 2026 · VroomEver marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
-}mport { Link, useNavigate } from "@tanstack/react-router";
+}
 import {
  ArrowLeft, ArrowRight, BadgeCheck, BarChart3, Bell, Camera, Check, CheckCircle2, ChevronRight,
  CircleDollarSign, Clock3, Eye, FileVideo, Filter, Heart, ImagePlus, ListChecks, MapPin, MessageCircle,
