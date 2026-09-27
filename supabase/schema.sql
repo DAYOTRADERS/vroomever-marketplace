@@ -249,3 +249,46 @@ $$;
 
 revoke all on function public.admin_users() from public;
 grant execute on function public.admin_users() to authenticated;
+
+
+-- Marketplace taxonomy: exactly 21 top-level categories used by the application.
+insert into public.categories (name, slug)
+values
+  ('Cars & Vehicles','cars'),
+  ('Property','property'),
+  ('Phones & Tablets','phones-tablets'),
+  ('Electronics','electronics'),
+  ('Fashion','fashion'),
+  ('Furniture','furniture'),
+  ('Home Appliances','home-appliances'),
+  ('Food Stuff','food-stuff'),
+  ('Agriculture & Farming','agriculture'),
+  ('Gemstones & Jewellery','gem-stones'),
+  ('Beauty & Personal Care','beauty'),
+  ('Repair & Construction','repair-construction'),
+  ('Commercial Equipment','commercial-equipment'),
+  ('Business & Industry','business-industry'),
+  ('Babies & Kids','babies-kids'),
+  ('Animals & Pets','animals-pets'),
+  ('Leisure & Sports','leisure-sports'),
+  ('Jobs','jobs'),
+  ('Services','services'),
+  ('Health & Medical','health-medical'),
+  ('Office & School','office-school')
+on conflict (slug) do update set name = excluded.name;
+
+-- Administrators can manage the marketplace taxonomy and listings; buyers/sellers
+-- remain restricted by the owner policies above.
+grant select, insert, update, delete on table public.categories to authenticated;
+
+drop policy if exists categories_admin_manage on public.categories;
+create policy categories_admin_manage on public.categories for all
+to authenticated using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists products_admin_manage on public.products;
+create policy products_admin_manage on public.products for all
+to authenticated using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists product_media_admin_manage on public.product_media;
+create policy product_media_admin_manage on public.product_media for all
+to authenticated using (public.is_admin()) with check (public.is_admin());
