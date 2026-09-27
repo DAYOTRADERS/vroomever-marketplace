@@ -28,26 +28,34 @@ const nav: { to: string; label: string; icon: LucideIcon }[] = [
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const nav = useNavigate();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) {
+        nav({ to: "/masteradmin/login", replace: true });
+        return;
+      }
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.session.user.id).maybeSingle();
+      if (profile?.role !== "admin") {
+        await supabase.auth.signOut();
+        nav({ to: "/masteradmin/login", replace: true });
+        return;
+      }
+      setReady(true);
+    });
+  }, [nav]);
+
+  if (!ready) return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking admin access…</p></div>;
+
   return (
     <div className="min-h-screen bg-muted/40 lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="border-r border-border bg-surface-strong text-surface-foreground lg:min-h-screen">
-        <div className="flex items-center justify-between p-5">
-          <Brand inverted />
-          <Badge className="bg-primary/20 text-primary">Admin</Badge>
-        </div>
+        <div className="flex items-center justify-between p-5"><Brand inverted /><Badge className="bg-primary/20 text-primary">Admin</Badge></div>
         <nav className="grid gap-1 p-3">
-          {nav.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}
-            >
-              <item.icon className="size-4" /> {item.label}
-            </Link>
-          ))}
-          <Link to="/masteradmin/login" className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5">
-            <LogOut className="size-4" /> Sign out
-          </Link>
+          {nav.map((item) => <Link key={item.to} to={item.to} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}><item.icon className="size-4" /> {item.label}</Link>)}
+          <button type="button" onClick={async()=>{await supabase.auth.signOut(); nav({to:"/masteradmin/login"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
         </nav>
       </aside>
       <main className="p-5 lg:p-8">{children}</main>
@@ -57,16 +65,37 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 export function AdminLoginPage() {
   const nav = useNavigate();
-  const submit = (e: FormEvent) => { e.preventDefault(); nav({ to: "/masteradmin" }); };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const submit = async (e: FormEvent) => {
+    e.preventDefault(); setLoading(true); setError("");
+    const form = new FormData(e.currentTarget as HTMLFormElement);
+    const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) { setError(signInError.message); setLoading(false); return; }
+    const { data: sessionData } = await supabase.auth.getSession();
+    const { data: profile } = sessionData.session
+      ? await supabase.from("profiles").select("role").eq("id", sessionData.session.user.id).maybeSingle()
+      : { data: null };
+    if (profile?.role !== "admin") {
+      await supabase.auth.signOut();
+      setError("This account does not have administrator access.");
+      setLoading(false);
+      return;
+    }
+    nav({ to: "/masteradmin", replace: true });
+    setLoading(false);
+  };
   return (
     <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-        <Brand inverted />
-        <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
-        <p className="mt-2 text-sm text-surface-muted">Restricted control center access.</p>
-        <label className="mt-6 block text-sm">Admin email<Input required type="email" className="mt-2 h-11 bg-background text-foreground" /></label>
-        <label className="mt-4 block text-sm">Password<Input required type="password" className="mt-2 h-11 bg-background text-foreground" /></label>
-        <Button className="mt-6 w-full" size="lg" type="submit"><ShieldCheck /> Enter control center</Button>
+        <Brand inverted /><h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
+        <p className="mt-2 text-sm text-surface-muted">Secure VroomEver control center access.</p>
+        {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
+        <label className="mt-6 block text-sm">Admin email<Input name="email" required type="email" className="mt-2 h-11 bg-background text-foreground" /></label>
+        <label className="mt-4 block text-sm">Password<Input name="password" required type="password" className="mt-2 h-11 bg-background text-foreground" /></label>
+        <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>{loading ? "Signing in…" : "Enter control center"}<ShieldCheck /></Button>
       </form>
     </div>
   );
