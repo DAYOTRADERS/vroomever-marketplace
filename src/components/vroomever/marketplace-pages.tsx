@@ -95,7 +95,7 @@ export function SellPage() {
     if(!sellerId){nav({to:"/auth",search:{role:"seller"}});return;}
     if(!title.trim()||!price||Number(price)<0){setError("Add a valid title and price before publishing.");return;}
     setSaving(true);setError("");
-    const {data:category}=await supabase.from("categories").select("id").eq("slug",categorySlug).maybeSingle();
+    const {data:category}=await supabase.from("categories").select("slug").eq("slug",categorySlug).maybeSingle();
     if(!category){setError("Category is not available in the database. Apply the latest schema first.");setSaving(false);return;}
     const {error:insertError}=await supabase.from("products").insert({
       seller_id:sellerId,category_slug:category.slug,title:title.trim(),description:description.trim(),
