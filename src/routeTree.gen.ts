@@ -41,6 +41,9 @@ import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
 import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
 
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm', path: '/auth/confirm', getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -198,6 +201,7 @@ const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+  '/auth/confirm': typeof AuthConfirmRoute
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/buyer-terms': typeof BuyerTermsRoute
@@ -300,6 +304,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
+    | '/auth/confirm'
   fullPaths:
     | '/'
     | '/buyer-terms'
@@ -400,6 +405,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
   fileRoutesById: FileRoutesById
 }
+  AuthConfirmRoute: typeof AuthConfirmRoute
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BuyerTermsRoute: typeof BuyerTermsRoute
@@ -656,6 +662,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
+  AuthConfirmRoute: AuthConfirmRoute,
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuyerTermsRoute: BuyerTermsRoute,

@@ -1,1 +1,4 @@
 project_id = "msqegezpceppoiryujvu"
+[auth.email.template.confirmation]
+subject = "Verify your Vroomever account"
+content_path = "./supabase/templates/confirmation.html"
