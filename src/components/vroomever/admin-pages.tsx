@@ -125,8 +125,11 @@ export function AdminOverview() {
 
 export function AdminUsers() {
  const [rows,setRows]=useState<Array<{id:string;name:string;email:string;role:string;created_at:string}>>([]);
- useEffect(()=>{supabase.rpc("admin_users").then(({data})=>setRows((data??[]).map(u=>({id:u.id,name:u.full_name||"Unnamed user",email:u.email||"",role:u.role||"buyer",created_at:u.created_at}))));},[]);
- return <AdminShell><PageTitle eyebrow="People" title="Users & roles" copy="Live buyer, seller and administrator accounts."/><Table head={["User","Role","Created"]} rows={rows.map(u=>[<div><strong className="block">{u.name}</strong><small className="text-muted-foreground">{u.email}</small></div>,<Badge variant="outline">{u.role}</Badge>,new Date(u.created_at).toLocaleString()])}/></AdminShell>;
+ const [busy,setBusy]=useState("");
+ const load=async()=>{const {data}=await supabase.rpc("admin_users");setRows((data??[]).map(u=>({id:u.id,name:u.full_name||"Unnamed user",email:u.email||"",role:u.role||"buyer",created_at:u.created_at})));};
+ useEffect(()=>{void load();},[]);
+ const setRole=async(id:string,role:"buyer"|"seller"|"admin")=>{setBusy(id);const {error}=await supabase.rpc("admin_set_user_role",{target_user_id:id,target_role:role});if(!error)await load();setBusy("");};
+ return <AdminShell><PageTitle eyebrow="People" title="Users & roles" copy="Live buyer, seller and administrator accounts. Correct legacy role mismatches here."/><Table head={["User","Role","Created","Role actions"]} rows={rows.map(u=>[<div><strong className="block">{u.name}</strong><small className="text-muted-foreground">{u.email}</small></div>,<Badge variant="outline">{u.role}</Badge>,new Date(u.created_at).toLocaleString(),<div className="flex flex-wrap gap-2">{(["buyer","seller","admin"] as const).map(role=><Button key={role} size="sm" variant={u.role===role?"default":"outline"} disabled={busy===u.id||u.role===role} onClick={()=>void setRole(u.id,role)}>{busy===u.id?"Saving…":role}</Button>)}</div>])}/></AdminShell>;
 }
 
 
