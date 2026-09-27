@@ -158,3 +158,8 @@ export function LegalPage({type}:{type:"terms"|"privacy"|"seller"|"buyer"}) {
    ["Payments and delivery","Confirm the agreed payment recipient, amount and delivery or collection arrangement before sending funds."],
    ["Reports","Report suspicious, misleading, counterfeit, stolen or unsafe listings so VroomEver can review them."],
    ["Your agreement with the seller","The purchase agreement is between the buyer and seller unless VroomEver expressly provides a separate transaction service."]
+
+  ]}
+ }[type];
+ return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VroomEver legal" title={content.title} copy="Effective September 2026 · VroomEver marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
+}
