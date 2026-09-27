@@ -201,6 +201,7 @@ const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+  '/auth/confirm': typeof AuthConfirmRoute
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/buyer-terms': typeof BuyerTermsRoute
@@ -303,6 +304,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
+    | '/auth/confirm'
   fullPaths:
     | '/'
     | '/buyer-terms'
@@ -403,6 +405,7 @@ export interface FileRouteTypes {
     | '/subscriptions/'
   fileRoutesById: FileRoutesById
 }
+  AuthConfirmRoute: typeof AuthConfirmRoute
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BuyerTermsRoute: typeof BuyerTermsRoute
@@ -659,6 +662,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
+  AuthConfirmRoute: AuthConfirmRoute,
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BuyerTermsRoute: BuyerTermsRoute,
