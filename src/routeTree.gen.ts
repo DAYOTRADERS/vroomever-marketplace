@@ -41,6 +41,9 @@ import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
 import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
 
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/auth/confirm', path: '/auth/confirm', getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
