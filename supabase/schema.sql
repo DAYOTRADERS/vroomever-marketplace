@@ -292,3 +292,30 @@ to authenticated using (public.is_admin()) with check (public.is_admin());
 drop policy if exists product_media_admin_manage on public.product_media;
 create policy product_media_admin_manage on public.product_media for all
 to authenticated using (public.is_admin()) with check (public.is_admin());
+
+
+-- Admin-only role management. Seller/buyer roles are controlled from the
+-- authenticated profile record; administrators can correct an account when
+-- a legacy profile was created with the wrong role.
+create or replace function public.admin_set_user_role(target_user_id uuid, target_role text)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Administrator access required';
+  end if;
+  if target_role not in ('buyer','seller','admin') then
+    raise exception 'Invalid role';
+  end if;
+  update public.profiles
+  set role = target_role, updated_at = now()
+  where id = target_user_id;
+  return found;
+end;
+$$;
+
+revoke all on function public.admin_set_user_role(uuid, text) from public;
+grant execute on function public.admin_set_user_role(uuid, text) to authenticated;
