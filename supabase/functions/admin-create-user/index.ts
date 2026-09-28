@@ -40,21 +40,37 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
+  // Bootstrap rule:
+  // - If there are NO admin profiles, this request is allowed to create the FIRST admin.
+  // - Once an admin exists, only an authenticated admin may create another admin.
+  const { count: adminCount, error: adminCountError } = await admin
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "admin");
+
+  if (adminCountError) {
+    return json({ error: "Unable to check administrator status." }, 500);
+  }
+
+  const hasExistingAdmin = (adminCount ?? 0) > 0;
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace(/^Bearer\s+/i, "").trim();
-  if (!token) return json({ error: "Authentication required." }, 401);
 
-  const { data: userData, error: userError } = await admin.auth.getUser(token);
-  if (userError || !userData.user) return json({ error: "Invalid authentication session." }, 401);
+  if (hasExistingAdmin) {
+    if (!token) return json({ error: "Administrator authentication is required before another admin account can be created." }, 401);
 
-  const { data: callerProfile, error: callerProfileError } = await admin
-    .from("profiles")
-    .select("role")
-    .eq("id", userData.user.id)
-    .maybeSingle();
+    const { data: userData, error: userError } = await admin.auth.getUser(token);
+    if (userError || !userData.user) return json({ error: "Invalid authentication session." }, 401);
 
-  if (callerProfileError || callerProfile?.role !== "admin") {
-    return json({ error: "Administrator access required." }, 403);
+    const { data: callerProfile, error: callerProfileError } = await admin
+      .from("profiles")
+      .select("role")
+      .eq("id", userData.user.id)
+      .maybeSingle();
+
+    if (callerProfileError || callerProfile?.role !== "admin") {
+      return json({ error: "Administrator access required." }, 403);
+    }
   }
 
   let body: { email?: string; fullName?: string; password?: string };
