@@ -23,24 +23,56 @@ function AdminSetupPage() {
     setError("");
     setMessage("");
 
-    const { data, error: functionError } = await supabase.functions.invoke("admin-create-user", {
-      body: { email, fullName, password },
+    // First-admin creation is handled directly by Supabase Auth + a locked
+    // database RPC, so the first administrator does not depend on an Edge Function.
+    const { data: currentSession } = await supabase.auth.getSession();
+
+    if (!currentSession.session) {
+      const { data: signupData, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+
+      if (signupError) {
+        // If the Auth user already exists, try signing in so the same recovery
+        // page can promote that account when there are still zero admins.
+        if (/already registered|already exists/i.test(signupError.message)) {
+          const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+          if (loginError) {
+            setError("That email already has an account. Sign in with its current password, then use this setup page.");
+            return;
+          }
+        } else {
+          setError(signupError.message);
+          return;
+        }
+      } else if (!signupData.session) {
+        // Supabase may require email confirmation. Try the password login once;
+        // if confirmation is required, return a clear message instead of an
+        // Edge Function/network error.
+        const { error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+        if (loginError) {
+          setError("Supabase requires email confirmation before this first administrator can be activated. Confirm the email, then return here and sign in with the same credentials.");
+          return;
+        }
+      }
+    }
+
+    const { error: bootstrapError } = await supabase.rpc("bootstrap_first_admin", {
+      target_full_name: fullName,
     });
 
-    if (functionError) {
-      setError(functionError.message || "Administrator creation service is unavailable.");
+    if (bootstrapError) {
+      setError(bootstrapError.message);
       return;
     }
 
-    if (data?.error) {
-      setError(String(data.error));
-      return;
-    }
-
-    setMessage("Administrator account created successfully. You can now sign in at /masteradmin.");
+    setMessage("First administrator created successfully. You can now sign in at /masteradmin.");
     setEmail("");
     setFullName("");
     setPassword("");
+    await supabase.auth.signOut();
   };
 
   return (
