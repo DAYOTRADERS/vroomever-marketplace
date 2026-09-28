@@ -5,7 +5,7 @@ create table if not exists public.profiles (
   full_name text not null default '',
   phone text,
   avatar_url text,
-  role text not null default 'buyer' check (role in ('buyer','seller')),
+  role text not null default 'buyer' check (role in ('buyer','seller','admin')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -58,18 +58,25 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $
 begin
+  -- Public signup may choose buyer or seller. Admin is never accepted from
+  -- browser-controlled metadata; admin access is granted separately.
   insert into public.profiles (id, full_name, role)
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    case when new.raw_user_meta_data ->> 'role' = 'seller' then 'seller' else 'buyer' end
+    case
+      when new.raw_user_meta_data ->> 'role' = 'seller' then 'seller'
+      else 'buyer'
+    end
   )
-  on conflict (id) do nothing;
+  on conflict (id) do update
+    set full_name = excluded.full_name,
+        updated_at = now();
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
