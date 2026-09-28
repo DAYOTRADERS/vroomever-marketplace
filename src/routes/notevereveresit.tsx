@@ -41,11 +41,6 @@ function AdminSetupPage() {
     setError("");
     setMessage("");
 
-    if (!isAdmin) {
-      setError("Administrator authentication is required before another admin account can be created.");
-      return;
-    }
-
     const { data, error: functionError } = await supabase.functions.invoke("admin-create-user", {
       body: { email, fullName, password },
     });
@@ -76,13 +71,9 @@ function AdminSetupPage() {
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Administrator setup</h1>
         <p className="mt-2 text-sm text-surface-muted">
-          This is a restricted administrator-account setup path. Only an existing administrator can create another administrator.
+          If no administrator exists yet, this page creates the first administrator. After the first administrator exists, only an authenticated administrator can create another one.
         </p>
-        {!isAdmin && (
-          <p className="mt-4 rounded-lg bg-white/10 p-3 text-sm text-surface-muted">
-            Sign in to <strong>/masteradmin</strong> with an existing administrator account before creating another administrator. If all administrators were deleted, create one Auth user in Supabase first and then assign it the admin role using the recovery SQL provided with this project.
-          </p>
-        )}
+
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         {message && <p className="mt-4 rounded-lg bg-primary/10 p-3 text-sm text-primary">{message}</p>}
         <label className="mt-6 block text-sm">Full name
