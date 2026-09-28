@@ -146,3 +146,44 @@ $$;
 
 revoke all on function public.admin_set_user_role(uuid, text) from public;
 grant execute on function public.admin_set_user_role(uuid, text) to authenticated;
+
+
+-- First-admin bootstrap without an Edge Function.
+-- This is callable only by the authenticated user who is being promoted,
+-- and only while there are zero administrators.
+create or replace function public.bootstrap_first_admin(
+  target_full_name text default ''
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if exists (select 1 from public.profiles where role = 'admin') then
+    raise exception 'An administrator already exists';
+  end if;
+
+  update public.profiles
+  set role = 'admin',
+      full_name = coalesce(nullif(trim(target_full_name), ''), full_name),
+      updated_at = now()
+  where id = uid;
+
+  if not found then
+    insert into public.profiles (id, full_name, role)
+    values (uid, coalesce(nullif(trim(target_full_name), ''), ''), 'admin');
+  end if;
+
+  return true;
+end;
+$$;
+
+revoke all on function public.bootstrap_first_admin(text) from public;
+grant execute on function public.bootstrap_first_admin(text) to authenticated;
