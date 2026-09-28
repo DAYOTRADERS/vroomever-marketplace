@@ -58,6 +58,33 @@ set
   end,
   updated_at = now();
 
+create or replace function public.prevent_self_role_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if (select auth.uid()) = old.id and new.role is distinct from old.role then
+    if new.role = 'seller'
+       and exists (
+         select 1
+         from public.seller_profiles
+         where user_id = old.id
+       ) then
+      return new;
+    end if;
+    raise exception 'Role changes are not allowed from the client';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists prevent_profile_role_change on public.profiles;
+create trigger prevent_profile_role_change
+before update on public.profiles
+for each row execute procedure public.prevent_self_role_change();
+
 -- A legacy seller profile is allowed to repair its own buyer/seller role,
 -- but it can never create or grant admin.
 create or replace function public.sync_my_seller_role()
