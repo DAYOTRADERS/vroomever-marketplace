@@ -46,9 +46,24 @@ function AdminSetupPage() {
       return;
     }
 
-    // Account creation must be completed by a server-side privileged function.
-    // This page intentionally does not write profiles.role = 'admin' from the browser.
-    setError("The secure administrator creation service is not deployed yet. Sign in as an existing administrator, then deploy the server-side admin creation function.");
+    const { data, error: functionError } = await supabase.functions.invoke("admin-create-user", {
+      body: { email, fullName, password },
+    });
+
+    if (functionError) {
+      setError(functionError.message || "Administrator creation service is unavailable.");
+      return;
+    }
+
+    if (data?.error) {
+      setError(String(data.error));
+      return;
+    }
+
+    setMessage("Administrator account created successfully. You can now sign in at /masteradmin.");
+    setEmail("");
+    setFullName("");
+    setPassword("");
   };
 
   if (checking) {
@@ -61,11 +76,11 @@ function AdminSetupPage() {
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Administrator setup</h1>
         <p className="mt-2 text-sm text-surface-muted">
-          This is a restricted administrator-account setup path. It does not expose a client-side role escalation.
+          This is a restricted administrator-account setup path. Only an existing administrator can create another administrator.
         </p>
         {!isAdmin && (
           <p className="mt-4 rounded-lg bg-white/10 p-3 text-sm text-surface-muted">
-            Sign in to <strong>/masteradmin</strong> with an existing administrator account before creating another administrator.
+            Sign in to <strong>/masteradmin</strong> with an existing administrator account before creating another administrator. If all administrators were deleted, create one Auth user in Supabase first and then assign it the admin role using the recovery SQL provided with this project.
           </p>
         )}
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
