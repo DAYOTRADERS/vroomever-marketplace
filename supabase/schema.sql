@@ -86,15 +86,26 @@ for each row execute procedure public.handle_new_user();
 create or replace function public.prevent_self_role_change()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
-as $$
+as $
 begin
   if (select auth.uid()) = old.id and new.role is distinct from old.role then
+    -- A legacy seller account may repair buyer -> seller when it already has
+    -- a seller_profiles record. Admin can never be granted by the client.
+    if new.role = 'seller'
+       and exists (
+         select 1
+         from public.seller_profiles
+         where user_id = old.id
+       ) then
+      return new;
+    end if;
     raise exception 'Role changes are not allowed from the client';
   end if;
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists prevent_profile_role_change on public.profiles;
 create trigger prevent_profile_role_change
