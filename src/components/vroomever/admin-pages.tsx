@@ -360,7 +360,7 @@ export function AdminDatabasePage() {
     setIsAdmin(false);
     setUsers([]);
     setProductRows([]);
-    nav({ to: "/admin" });
+    nav({ to: "/masteradmin", replace: true });
   };
 
   if (loading) {
