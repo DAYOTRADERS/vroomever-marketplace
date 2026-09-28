@@ -34,13 +34,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) {
-        navigate({ to: "/masteradmin/login", replace: true });
+        navigate({ to: "/masteradmin", replace: true });
         return;
       }
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.session.user.id).maybeSingle();
       if (profile?.role !== "admin") {
         await supabase.auth.signOut();
-        nav({ to: "/masteradmin/login", replace: true });
+        nav({ to: "/masteradmin", replace: true });
         return;
       }
       setReady(true);
@@ -55,7 +55,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="flex items-center justify-between p-5"><Brand inverted /><Badge className="bg-primary/20 text-primary">Admin</Badge></div>
         <nav className="grid gap-1 p-3">
           {adminNav.map((item) => <Link key={item.to} to={item.to} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}><item.icon className="size-4" /> {item.label}</Link>)}
-          <button type="button" onClick={async()=>{await supabase.auth.signOut(); navigate({to:"/masteradmin/login"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
+          <button type="button" onClick={async()=>{await supabase.auth.signOut(); navigate({to:"/masteradmin"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
         </nav>
       </aside>
       <main className="p-5 lg:p-8">{children}</main>
@@ -114,6 +114,22 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
       </table>
     </div>
   );
+}
+
+export function AdminEntryPage() {
+  const [checking, setChecking] = useState(true);
+  const [authenticatedAdmin, setAuthenticatedAdmin] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) { setAuthenticatedAdmin(false); setChecking(false); return; }
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.session.user.id).maybeSingle();
+      if (profile?.role === "admin") setAuthenticatedAdmin(true);
+      else { await supabase.auth.signOut(); setAuthenticatedAdmin(false); }
+      setChecking(false);
+    });
+  }, []);
+  if (checking) return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking admin access…</p></div>;
+  return authenticatedAdmin ? <AdminOverview /> : <AdminLoginPage />;
 }
 
 export function AdminOverview() {
