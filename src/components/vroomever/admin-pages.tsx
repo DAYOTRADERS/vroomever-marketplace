@@ -12,7 +12,7 @@ import { Brand } from "./brand";
 import { PageTitle } from "./marketplace-pages";
 import { categories, formatKsh, packages, products, vipOptions } from "@/data/marketplace";
 
-const nav: { to: string; label: string; icon: LucideIcon }[] = [
+const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin", label: "Overview", icon: LayoutDashboard },
   { to: "/masteradmin/users", label: "Users", icon: UsersRound },
   { to: "/masteradmin/products", label: "Products", icon: Boxes },
@@ -54,7 +54,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside className="border-r border-border bg-surface-strong text-surface-foreground lg:min-h-screen">
         <div className="flex items-center justify-between p-5"><Brand inverted /><Badge className="bg-primary/20 text-primary">Admin</Badge></div>
         <nav className="grid gap-1 p-3">
-          {nav.map((item) => <Link key={item.to} to={item.to} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}><item.icon className="size-4" /> {item.label}</Link>)}
+          {adminNav.map((item) => <Link key={item.to} to={item.to} className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}><item.icon className="size-4" /> {item.label}</Link>)}
           <button type="button" onClick={async()=>{await supabase.auth.signOut(); navigate({to:"/masteradmin/login"});}} className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"><LogOut className="size-4" /> Sign out</button>
         </nav>
       </aside>
