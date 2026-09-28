@@ -40,7 +40,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.session.user.id).maybeSingle();
       if (profile?.role !== "admin") {
         await supabase.auth.signOut();
-        nav({ to: "/masteradmin", replace: true });
+        navigate({ to: "/masteradmin", replace: true });
         return;
       }
       setReady(true);
