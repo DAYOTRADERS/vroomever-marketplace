@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brand } from "@/components/vroomever/brand";
@@ -12,29 +12,11 @@ export const Route = createFileRoute("/notevereveresit")({
 });
 
 function AdminSetupPage() {
-  const [checking, setChecking] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) {
-        setChecking(false);
-        return;
-      }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.session.user.id)
-        .maybeSingle();
-      setIsAdmin(profile?.role === "admin");
-      setChecking(false);
-    });
-  }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -60,10 +42,6 @@ function AdminSetupPage() {
     setFullName("");
     setPassword("");
   };
-
-  if (checking) {
-    return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking administrator access…</p></div>;
-  }
 
   return (
     <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
