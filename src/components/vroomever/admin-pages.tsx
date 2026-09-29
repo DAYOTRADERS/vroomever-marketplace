@@ -65,37 +65,135 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
 export function AdminLoginPage() {
   const nav = useNavigate();
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const submit = async (e: FormEvent) => {
-    e.preventDefault(); setLoading(true); setError("");
-    const form = new FormData(e.currentTarget as HTMLFormElement);
+  const [message, setMessage] = useState("");
+
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
+
+    const form = new FormData(e.currentTarget);
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
+    const fullName = String(form.get("fullName") ?? "").trim();
+
+    if (mode === "signup") {
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+
+      if (signupError) {
+        setError(signupError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (!data.session) {
+        setMessage("Account created. Check your email to confirm the account, then return here and sign in.");
+        setLoading(false);
+        return;
+      }
+
+      const { error: adminError } = await supabase.rpc("bootstrap_first_admin", {
+        target_full_name: fullName,
+      });
+
+      if (adminError) {
+        await supabase.auth.signOut();
+        setError(adminError.message);
+        setLoading(false);
+        return;
+      }
+
+      nav({ to: "/masteradmin", replace: true });
+      setLoading(false);
+      return;
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    if (signInError) { setError(signInError.message); setLoading(false); return; }
+    if (signInError) {
+      setError(signInError.message);
+      setLoading(false);
+      return;
+    }
+
     const { data: sessionData } = await supabase.auth.getSession();
-    const { data: profile } = sessionData.session
-      ? await supabase.from("profiles").select("role").eq("id", sessionData.session.user.id).maybeSingle()
-      : { data: null };
+    if (!sessionData.session) {
+      setError("Your login session could not be created.");
+      setLoading(false);
+      return;
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", sessionData.session.user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      setError(profileError.message);
+      setLoading(false);
+      return;
+    }
+
     if (profile?.role !== "admin") {
       await supabase.auth.signOut();
       setError("This account does not have administrator access.");
       setLoading(false);
       return;
     }
+
     nav({ to: "/masteradmin", replace: true });
     setLoading(false);
   };
+
   return (
     <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-        <Brand inverted /><h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
-        <p className="mt-2 text-sm text-surface-muted">Secure VroomEver control center access.</p>
+        <Brand inverted />
+        <h1 className="mt-8 font-display text-3xl font-bold">Admin account</h1>
+        <p className="mt-2 text-sm text-surface-muted">
+          {mode === "login" ? "Sign in to the VroomEver administration area." : "Create the first VroomEver administrator account."}
+        </p>
+
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
-        <label className="mt-6 block text-sm">Admin email<Input name="email" required type="email" className="mt-2 h-11 bg-background text-foreground" /></label>
-        <label className="mt-4 block text-sm">Password<Input name="password" required type="password" className="mt-2 h-11 bg-background text-foreground" /></label>
-        <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>{loading ? "Signing in…" : "Enter control center"}<ShieldCheck /></Button>
+        {message && <p className="mt-4 rounded-lg bg-primary/10 p-3 text-sm text-primary">{message}</p>}
+
+        {mode === "signup" && (
+          <label className="mt-6 block text-sm">
+            Full name
+            <Input name="fullName" required autoComplete="name" className="mt-2 h-11 bg-background text-foreground" />
+          </label>
+        )}
+
+        <label className="mt-4 block text-sm">
+          Email
+          <Input name="email" required type="email" autoComplete="email" className="mt-2 h-11 bg-background text-foreground" />
+        </label>
+
+        <label className="mt-4 block text-sm">
+          Password
+          <Input name="password" required type="password" minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} className="mt-2 h-11 bg-background text-foreground" />
+        </label>
+
+        <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>
+          {loading ? (mode === "login" ? "Signing in…" : "Creating account…") : (mode === "login" ? "Sign in" : "Sign up")}
+          <ShieldCheck />
+        </Button>
+
+        <button
+          type="button"
+          className="mt-4 w-full text-sm text-surface-muted underline-offset-4 hover:underline"
+          onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setMessage(""); }}
+        >
+          {mode === "login" ? "Need to create the admin account? Sign up" : "Already have an admin account? Sign in"}
+        </button>
       </form>
     </div>
   );
