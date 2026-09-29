@@ -58,7 +58,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $v$
 begin
   -- Public signup may choose buyer or seller. Admin is never accepted from
   -- browser-controlled metadata; admin access is granted separately.
@@ -76,7 +76,7 @@ begin
         updated_at = now();
   return new;
 end;
-$;
+$v$;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -88,7 +88,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $v$
 begin
   if (select auth.uid()) = old.id and new.role is distinct from old.role then
     -- A legacy seller account may repair buyer -> seller when it already has
@@ -105,7 +105,7 @@ begin
   end if;
   return new;
 end;
-$;
+$v$;
 
 drop trigger if exists prevent_profile_role_change on public.profiles;
 create trigger prevent_profile_role_change
