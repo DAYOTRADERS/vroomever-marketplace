@@ -17,12 +17,16 @@ function AuthConfirmPage() {
     (async () => {
       const query = new URLSearchParams(window.location.search);
       const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-      const tokenHash = query.get("token_hash");
-      const errorCode = hash.get("error_code") || query.get("error_code");
-      const errorDescription = hash.get("error_description") || query.get("error_description");
+      const tokenHash = query.get("token_hash") ?? hash.get("token_hash");
+      const type = query.get("type") ?? hash.get("type") ?? "email";
+      const errorCode = hash.get("error_code") ?? query.get("error_code");
+      const errorDescription = hash.get("error_description") ?? query.get("error_description");
 
       if (tokenHash) {
-        const { error } = await supabase.auth.verifyOtp({ type: "email", token_hash: tokenHash });
+        const { error } = await supabase.auth.verifyOtp({
+          type: type === "signup" ? "signup" : "email",
+          token_hash: tokenHash,
+        });
         if (error) {
           if (alive) {
             setState("error");
@@ -56,7 +60,12 @@ function AuthConfirmPage() {
         return;
       }
 
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", id).maybeSingle();
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", id)
+        .maybeSingle();
+
       if (!profile?.role) {
         if (alive) {
           setState("error");
@@ -70,7 +79,9 @@ function AuthConfirmPage() {
         setMessage(
           profile.role === "seller"
             ? "Your seller account is verified and ready."
-            : "Your Vroomever account is verified and ready.",
+            : profile.role === "admin"
+              ? "Your administrator account is verified and ready."
+              : "Your Vroomever account is verified and ready.",
         );
         window.history.replaceState({}, "", "/auth/confirm");
       }
