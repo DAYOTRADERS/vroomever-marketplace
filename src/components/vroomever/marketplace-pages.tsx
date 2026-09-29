@@ -115,40 +115,225 @@ export function ProfilePage() {
  return <SiteShell><div className="mx-auto max-w-4xl px-5 py-10"><PageTitle eyebrow="Account" title="Your profile" copy="Manage how buyers and sellers see you."/><div className="glass-panel grid gap-6 rounded-card p-6 md:grid-cols-2"><label className="text-sm font-semibold">Full name<Input className="mt-2" value={fullName} onChange={e=>setFullName(e.target.value)}/></label><label className="text-sm font-semibold">Email<Input className="mt-2" value={email} readOnly/></label><label className="text-sm font-semibold">Phone<Input className="mt-2" value={phone} onChange={e=>setPhone(e.target.value)}/></label><div className="md:col-span-2"><Button onClick={()=>void save()} disabled={saving}>{saving?"Saving…":"Save changes"}</Button></div></div></div></SiteShell>;
 }
 
-export function AuthPage({ signup=false, lockedRole }: { signup?: boolean; lockedRole?: "buyer" | "seller" }) {
- const nav=useNavigate();
- const [role,setRole]=useState<"buyer"|"seller">(lockedRole ?? "buyer");
- const [loading,setLoading]=useState(false);
- const [error,setError]=useState("");
- const signupRole=lockedRole ?? role;
- const routeByRole=async()=>{
-  const {data:sessionData}=await supabase.auth.getSession();
-  if(!sessionData.session){nav({to:"/auth",search:{role:signupRole,mode:"login"}});return;}
-  const userId=sessionData.session.user.id;
-  const {data:profile}=await supabase.from("profiles").select("role").eq("id",userId).maybeSingle();
-  const actualRole=profile?.role==="admin"?"admin":profile?.role==="seller"?"seller":"buyer";
-  nav({to:actualRole==="seller"?"/seller/dashboard":actualRole==="admin"?"/masteradmin":"/dashboard",replace:true});
- };
- const submit=async(e:FormEvent)=>{
-  e.preventDefault();setError("");setLoading(true);
-  const form=new FormData(e.currentTarget as HTMLFormElement);
-  const email=String(form.get("email")??"").trim();
-  const password=String(form.get("password")??"");
-  const fullName=String(form.get("fullName")??"").trim();
-  try{
-   if(signup){
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name:fullName,role:signupRole}}});
-    if(error)throw error;
-    if(!data.session){setError("Account created. Please confirm your email if required, then sign in.");return;}
-   }else{
-    const {error}=await supabase.auth.signInWithPassword({email,password});
-    if(error)throw error;
-   }
-   await routeByRole();
-  }catch(err){setError(err instanceof Error?err.message:"Authentication failed. Please try again.");}
-  finally{setLoading(false);}
- };
- return <div className="grid min-h-screen bg-surface-strong text-surface-foreground lg:grid-cols-2"><div className="relative hidden overflow-hidden lg:block"><img src={hero} alt="Vrumever marketplace" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover"/><div className="absolute inset-0 bg-surface-strong/55"/><div className="relative flex h-full flex-col justify-between p-12"><Brand inverted/><div><p className="max-w-md font-display text-4xl font-bold">Kenya’s marketplace for remarkable finds.</p><p className="mt-4 text-surface-muted">Discover • Connect • Trade</p></div></div></div><div className="flex items-center justify-center px-5 py-12"><form onSubmit={submit} className="w-full max-w-md"><div className="lg:hidden"><Brand inverted/></div><p className="mt-10 text-sm text-primary">{signup?"Join Vrumever":"Welcome back"}</p><h1 className="mt-2 font-display text-4xl font-bold">{signup?"Create your account":"Sign in to continue"}</h1><p className="mt-2 text-sm text-surface-muted">{signup?"Choose your account type below.":"Your saved items and conversations await."}</p>{signup&&<><div className="mt-7 grid grid-cols-2 gap-3"><button type="button" disabled={!!lockedRole} onClick={()=>setRole("buyer")} className={`rounded-card border p-4 text-left transition ${signupRole==="buyer"?"border-primary bg-primary/10":"border-border bg-background/50"} `}><UserRound className="size-5 text-primary"/><strong className="mt-2 block">Buyer</strong><small className="mt-1 block text-surface-muted">Browse, save and connect</small></button><button type="button" disabled={!!lockedRole} onClick={()=>setRole("seller")} className={`rounded-card border p-4 text-left transition ${signupRole==="seller"?"border-primary bg-primary/10":"border-border bg-background/50"} `}><Store className="size-5 text-primary"/><strong className="mt-2 block">Seller</strong><small className="mt-1 block text-surface-muted">Sell and grow your store</small></button></div><label className="mt-5 block text-sm">Full name<Input name="fullName" className="mt-2 h-11 bg-background text-foreground" required/></label></>}<label className="mt-5 block text-sm">Email address<Input name="email" type="email" className="mt-2 h-11 bg-background text-foreground" required/></label><label className="mt-5 block text-sm">Password<Input name="password" type="password" className="mt-2 h-11 bg-background text-foreground" required/></label>{signup&&<label className="mt-5 flex gap-3 text-sm text-surface-muted"><Checkbox required className="mt-0.5"/> I accept the Terms & Conditions and the relevant buyer or seller terms.</label>}{error&&<p className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}<Button size="lg" className="mt-7 w-full" type="submit" disabled={loading}>{loading?"Please wait…":signup?"Create account":"Sign in"}<ArrowRight/></Button><p className="mt-6 text-center text-sm text-surface-muted">{signup?"Already a member? ":"New to Vrumever? "}<Link to="/auth" search={{role:signupRole,mode:signup?"login":"signup"}} className="font-semibold text-primary">{signup?"Sign in":"Create an account"}</Link></p></form></div></div>;
+/* =========================================================================
+   AUTH PAGE — signup, login, buyer, seller. Same component for all four.
+   ========================================================================= */
+
+export function AuthPage({
+  signup = false,
+  lockedRole,
+}: {
+  signup?: boolean;
+  lockedRole?: "buyer" | "seller";
+}) {
+  const nav = useNavigate();
+  const [role, setRole] = useState<"buyer" | "seller">(lockedRole ?? "buyer");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+
+  const signupRole = lockedRole ?? role;
+
+  const routeByRole = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      nav({ to: "/auth", search: { role: signupRole, mode: "login" } });
+      return;
+    }
+    const userId = sessionData.session.user.id;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+    const actualRole =
+      profile?.role === "admin" ? "admin" : profile?.role === "seller" ? "seller" : "buyer";
+    nav({
+      to:
+        actualRole === "seller"
+          ? "/seller/dashboard"
+          : actualRole === "admin"
+            ? "/masteradmin"
+            : "/dashboard",
+      replace: true,
+    });
+  };
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    const form = new FormData(e.currentTarget as HTMLFormElement);
+    const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+    const fullName = String(form.get("fullName") ?? "").trim();
+
+    try {
+      if (signup) {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName, role: signupRole },
+          },
+        });
+        if (signUpError) throw signUpError;
+
+        // Case 1: confirmation is OFF → we get a session and can go straight in.
+        if (data.session) {
+          await routeByRole();
+          return;
+        }
+
+        // Case 2: confirmation is ON → tell the user to check email.
+        setInfo(
+          "Account created. Check your email and click the confirmation link, then sign in here.",
+        );
+        return;
+      }
+
+      // Login path
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+      await routeByRole();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="grid min-h-screen bg-surface-strong text-surface-foreground lg:grid-cols-2">
+      <div className="relative hidden overflow-hidden lg:block">
+        <img
+          src={hero}
+          alt="Vrumever marketplace"
+          width={1600}
+          height={1000}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-surface-strong/55" />
+        <div className="relative flex h-full flex-col justify-between p-12">
+          <Brand inverted />
+          <div>
+            <p className="max-w-md font-display text-4xl font-bold">
+              Kenya’s marketplace for remarkable finds.
+            </p>
+            <p className="mt-4 text-surface-muted">Discover • Connect • Trade</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center px-5 py-12">
+        <form onSubmit={submit} className="w-full max-w-md">
+          <div className="lg:hidden">
+            <Brand inverted />
+          </div>
+          <p className="mt-10 text-sm text-primary">{signup ? "Join Vrumever" : "Welcome back"}</p>
+          <h1 className="mt-2 font-display text-4xl font-bold">
+            {signup ? "Create your account" : "Sign in to continue"}
+          </h1>
+          <p className="mt-2 text-sm text-surface-muted">
+            {signup
+              ? "Choose your account type below."
+              : "Your saved items and conversations await."}
+          </p>
+
+          {signup && (
+            <>
+              <div className="mt-7 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  disabled={!!lockedRole}
+                  onClick={() => setRole("buyer")}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "buyer" ? "border-primary bg-primary/10" : "border-border bg-background/50"}`}
+                >
+                  <UserRound className="size-5 text-primary" />
+                  <strong className="mt-2 block">Buyer</strong>
+                  <small className="mt-1 block text-surface-muted">Browse, save and connect</small>
+                </button>
+                <button
+                  type="button"
+                  disabled={!!lockedRole}
+                  onClick={() => setRole("seller")}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "seller" ? "border-primary bg-primary/10" : "border-border bg-background/50"}`}
+                >
+                  <Store className="size-5 text-primary" />
+                  <strong className="mt-2 block">Seller</strong>
+                  <small className="mt-1 block text-surface-muted">Sell and grow your store</small>
+                </button>
+              </div>
+              <label className="mt-5 block text-sm">
+                Full name
+                <Input
+                  name="fullName"
+                  className="mt-2 h-11 bg-background text-foreground"
+                  required
+                  autoComplete="name"
+                />
+              </label>
+            </>
+          )}
+
+          <label className="mt-5 block text-sm">
+            Email address
+            <Input
+              name="email"
+              type="email"
+              className="mt-2 h-11 bg-background text-foreground"
+              required
+              autoComplete="email"
+            />
+          </label>
+
+          <label className="mt-5 block text-sm">
+            Password
+            <Input
+              name="password"
+              type="password"
+              className="mt-2 h-11 bg-background text-foreground"
+              required
+              minLength={8}
+              autoComplete={signup ? "new-password" : "current-password"}
+            />
+          </label>
+
+          {signup && (
+            <label className="mt-5 flex gap-3 text-sm text-surface-muted">
+              <Checkbox required className="mt-0.5" /> I accept the Terms & Conditions and the
+              relevant buyer or seller terms.
+            </label>
+          )}
+
+          {error && (
+            <p className="mt-4 rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+          )}
+          {info && (
+            <p className="mt-4 rounded-md bg-primary/10 p-3 text-sm text-primary">{info}</p>
+          )}
+
+          <Button size="lg" className="mt-7 w-full" type="submit" disabled={loading}>
+            {loading ? "Please wait…" : signup ? "Create account" : "Sign in"}
+            <ArrowRight />
+          </Button>
+
+          <p className="mt-6 text-center text-sm text-surface-muted">
+            {signup ? "Already a member? " : "New to Vrumever? "}
+            <Link
+              to="/auth"
+              search={{ role: signupRole, mode: signup ? "login" : "signup" }}
+              className="font-semibold text-primary"
+            >
+              {signup ? "Sign in" : "Create an account"}
+            </Link>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
 }
 
 const steps=["Category","Subcategory","Details","Media","Review","Subscription","Payment","Publish"];
