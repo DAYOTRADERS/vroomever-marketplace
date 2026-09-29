@@ -9,6 +9,8 @@ alter table public.profiles
   add constraint profiles_role_check
   check (role in ('buyer','seller','admin'));
 
+create index if not exists profiles_role_idx on public.profiles(role);
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -165,6 +167,10 @@ begin
   if uid is null then
     raise exception 'Authentication required';
   end if;
+
+  -- Serialize first-admin bootstrap so two simultaneous requests cannot both
+  -- observe zero administrators and both promote themselves.
+  perform pg_advisory_xact_lock(hashtextextended('vroomever:first-admin', 0));
 
   if exists (select 1 from public.profiles where role = 'admin') then
     raise exception 'An administrator already exists';
