@@ -422,6 +422,7 @@ begin
     delete from public.admin_profiles where user_id = new.id;
   elsif new.role = 'seller' then
     insert into public.seller_accounts(user_id) values(new.id) on conflict do nothing;
+    insert into public.seller_profiles(user_id) values(new.id) on conflict (user_id) do nothing;
     delete from public.buyer_profiles where user_id = new.id;
     delete from public.admin_profiles where user_id = new.id;
   elsif new.role = 'admin' then
