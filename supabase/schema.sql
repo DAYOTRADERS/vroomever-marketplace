@@ -10,6 +10,8 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 
+create index if not exists profiles_role_idx on public.profiles(role);
+
 create table if not exists public.seller_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.profiles(id) on delete cascade,
