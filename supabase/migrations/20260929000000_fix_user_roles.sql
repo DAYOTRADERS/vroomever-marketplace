@@ -65,7 +65,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $v$
 begin
   if (select auth.uid()) = old.id and new.role is distinct from old.role then
     if new.role = 'seller'
@@ -80,7 +80,7 @@ begin
   end if;
   return new;
 end;
-$;
+$v$;
 
 drop trigger if exists prevent_profile_role_change on public.profiles;
 create trigger prevent_profile_role_change
