@@ -171,23 +171,15 @@ export function AuthPage({
 
     try {
       if (signup) {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName, role: signupRole },
-          },
+        const { data: created, error: createError } = await supabase.functions.invoke("create-account", {
+          body: { email, password, fullName, role: signupRole },
         });
-        if (signUpError) throw signUpError;
+        if (createError) throw new Error(createError.message || "Account creation failed.");
+        if (created?.error) throw new Error(String(created.error));
 
-        // Case 1: confirmation is OFF → we get a session and can go straight in.
-        if (data.session) {
-          await routeByRole(data.session);
-          return;
-        }
-
-        // Case 2: confirmation is ON → tell the user to check email.
-        setInfo("Account created. A confirmation email has been sent to " + email + ". Confirm your email, then sign in here.");
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        await routeByRole(data.session);
         return;
       }
 
