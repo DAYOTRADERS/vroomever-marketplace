@@ -171,15 +171,22 @@ export function AuthPage({
 
     try {
       if (signup) {
-        const { data: created, error: createError } = await supabase.functions.invoke("create-account", {
-          body: { email, password, fullName, role: signupRole },
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName, role: signupRole } },
         });
-        if (createError) throw new Error(createError.message || "Account creation failed.");
-        if (created?.error) throw new Error(String(created.error));
+        if (signUpError) throw signUpError;
 
-        const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        const session = data.session;
+        if (!session) {
+          setInfo("Account created. Please confirm your email, then sign in.");
+          return;
+        }
+
+        const { data: signedIn, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        await routeByRole(data.session);
+        await routeByRole(signedIn.session ?? session);
         return;
       }
 
