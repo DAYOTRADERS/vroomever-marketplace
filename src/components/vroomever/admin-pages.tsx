@@ -198,100 +198,32 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
 
 export function AdminEntryPage() {
   const [checking, setChecking] = useState(true);
-  const [needsBootstrap, setNeedsBootstrap] = useState(false);
   const [authenticatedAdmin, setAuthenticatedAdmin] = useState(false);
-  const [bootstrapError, setBootstrapError] = useState("");
-  const [bootstrapBusy, setBootstrapBusy] = useState(false);
-
-  const evaluate = async () => {
-    setChecking(true);
-    setBootstrapError("");
-    const { data: exists, error: existsError } = await supabase.rpc("admin_exists");
-    if (existsError) {
-      console.error("admin_exists failed:", existsError.message);
-      setNeedsBootstrap(true);
-      setChecking(false);
-      return;
-    }
-    if (!exists) {
-      setNeedsBootstrap(true);
-      setAuthenticatedAdmin(false);
-      setChecking(false);
-      return;
-    }
-    setNeedsBootstrap(false);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setAuthenticatedAdmin(false);
-      setChecking(false);
-      return;
-    }
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
-    if (profile?.role === "admin") setAuthenticatedAdmin(true);
-    else {
-      await supabase.auth.signOut();
-      setAuthenticatedAdmin(false);
-    }
-    setChecking(false);
-  };
 
   useEffect(() => {
-    void evaluate();
+    let active = true;
+    (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!active) return;
+      if (!sessionData.session) {
+        setAuthenticatedAdmin(false);
+        setChecking(false);
+        return;
+      }
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", sessionData.session.user.id).maybeSingle();
+      if (!active) return;
+      if (profile?.role === "admin") setAuthenticatedAdmin(true);
+      else {
+        await supabase.auth.signOut();
+        if (!active) return;
+        setAuthenticatedAdmin(false);
+      }
+      setChecking(false);
+    })();
+    return () => { active = false; };
   }, []);
 
-  const bootstrap = async () => {
-    setBootstrapBusy(true);
-    setBootstrapError("");
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setBootstrapError("Please sign in first, then create the first admin.");
-      setBootstrapBusy(false);
-      return;
-    }
-    const { error } = await supabase.rpc("bootstrap_first_admin", { target_full_name: "" });
-    if (error) {
-      setBootstrapError(error.message);
-      setBootstrapBusy(false);
-      return;
-    }
-    setBootstrapBusy(false);
-    await evaluate();
-  };
-
-  if (checking)
-    return (
-      <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground">
-        <p>Checking admin access…</p>
-      </div>
-    );
-
-  if (needsBootstrap)
-    return (
-      <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
-        <div className="w-full max-w-md rounded-card border border-white/10 bg-white/5 p-8 text-center backdrop-blur-xl">
-          <Brand inverted />
-          <h1 className="mt-8 font-display text-3xl font-bold">First administrator</h1>
-          <p className="mt-2 text-sm text-surface-muted">
-            No administrator exists yet. Sign in with the account you want to promote, then promote it.
-          </p>
-          {bootstrapError && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{bootstrapError}</p>}
-          <div className="mt-6 flex flex-col gap-3">
-            <Button onClick={() => void bootstrap()} disabled={bootstrapBusy}>
-              {bootstrapBusy ? "Promoting…" : "Promote my account to admin"}
-              <ShieldCheck />
-            </Button>
-            <Button asChild variant="outline">
-              <Link to="/auth">Sign in as another account</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-
+  if (checking) return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking admin access…</p></div>;
   return authenticatedAdmin ? <AdminOverview /> : <AdminLoginPage />;
 }
 
