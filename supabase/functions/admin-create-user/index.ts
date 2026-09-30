@@ -36,7 +36,7 @@ Deno.serve(
       );
     }
 
-    let body: { email?: string; fullName?: string };
+    let body: { email?: string; fullName?: string; password?: string };
     try {
       body = await req.json();
     } catch {
@@ -45,6 +45,7 @@ Deno.serve(
 
     const email = String(body.email ?? "").trim().toLowerCase();
     const fullName = String(body.fullName ?? "").trim();
+    const password = String(body.password ?? "");
 
     if (!email || !email.includes("@")) {
       return Response.json({ error: "Enter a valid administrator email." }, { status: 400, headers: corsHeaders });
@@ -52,18 +53,23 @@ Deno.serve(
     if (fullName.length < 2) {
       return Response.json({ error: "Enter the administrator's full name." }, { status: 400, headers: corsHeaders });
     }
+    if (password.length < 8) {
+      return Response.json({ error: "Password must be at least 8 characters." }, { status: 400, headers: corsHeaders });
+    }
 
     try {
       const { data: invited, error: inviteError } =
-        await ctx.supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-          data: { full_name: fullName, role: "admin" },
-          redirectTo: "https://vroomever-marketplace.vercel.app/masteradmin",
+        await ctx.supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { full_name: fullName, role: "admin" },
         });
 
       if (inviteError) {
         console.error("Admin invitation failed:", inviteError);
         return Response.json(
-          { error: inviteError.message, code: inviteError.code ?? "invite_failed" },
+          { error: inviteError.message, code: inviteError.code ?? "admin_creation_failed" },
           { status: inviteError.status && inviteError.status >= 400 ? inviteError.status : 400, headers: corsHeaders },
         );
       }
@@ -96,7 +102,7 @@ Deno.serve(
       return Response.json(
         {
           success: true,
-          message: "Administrator invitation sent.",
+          message: "Administrator account created.",
           user: { id: invited.user.id, email: invited.user.email },
         },
         { status: 200, headers: corsHeaders },
