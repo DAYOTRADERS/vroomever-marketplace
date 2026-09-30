@@ -149,8 +149,10 @@ function BootstrapAdminPage() {
     const email = String(form.get("email") ?? "").trim().toLowerCase();
     const fullName = String(form.get("fullName") ?? "").trim();
 
+    const password = String(form.get("password") ?? "");
+
     const { data, error: invokeError } = await supabase.functions.invoke("admin-create-user", {
-      body: { email, fullName },
+      body: { email, fullName, password },
     });
 
     if (invokeError) {
@@ -182,22 +184,23 @@ function BootstrapAdminPage() {
     const password = String(form.get("password") ?? "");
     const fullName = String(form.get("fullName") ?? "").trim();
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, role: "buyer" },
-      },
+    const { data: created, error: createError } = await supabase.functions.invoke("create-account", {
+      body: { email, password, fullName, role: "buyer" },
     });
-
-    if (signUpError) {
-      setError(signUpError.message);
+    if (createError) {
+      setError(createError.message || "Account creation failed.");
+      setBusy(false);
+      return;
+    }
+    if (created?.error) {
+      setError(String(created.error));
       setBusy(false);
       return;
     }
 
-    if (!data.session) {
-      setInfo("Account created. A confirmation email has been sent to " + email + ". Confirm your email, then return here and sign in to make it the first administrator.");
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    if (signInError) {
+      setError(signInError.message);
       setBusy(false);
       return;
     }
@@ -258,6 +261,10 @@ function BootstrapAdminPage() {
             <label className="text-sm">
               Administrator email
               <Input name="email" required type="email" className="mt-2 h-11 bg-background text-foreground" autoComplete="email" />
+            </label>
+            <label className="text-sm">
+              Password
+              <Input name="password" required minLength={8} type="password" className="mt-2 h-11 bg-background text-foreground" autoComplete="new-password" />
             </label>
             <Button type="submit" className="mt-2 w-full" disabled={busy}>
               {busy ? "Sending invitation…" : "Create & send invitation"}
