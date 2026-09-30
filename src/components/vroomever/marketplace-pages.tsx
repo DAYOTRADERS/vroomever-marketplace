@@ -134,18 +134,17 @@ export function AuthPage({
 
   const signupRole = lockedRole ?? role;
 
-  const routeByRole = async () => {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) {
+  const routeByRole = async (session: { user: { id: string } } | null) => {
+    if (!session) {
       nav({ to: "/auth", search: { role: signupRole, mode: "login" } });
       return;
     }
-    const userId = sessionData.session.user.id;
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", userId)
+      .eq("id", session.user.id)
       .maybeSingle();
+    if (profileError) throw profileError;
     const actualRole =
       profile?.role === "admin" ? "admin" : profile?.role === "seller" ? "seller" : "buyer";
     nav({
@@ -183,21 +182,19 @@ export function AuthPage({
 
         // Case 1: confirmation is OFF → we get a session and can go straight in.
         if (data.session) {
-          await routeByRole();
+          await routeByRole(data.session);
           return;
         }
 
         // Case 2: confirmation is ON → tell the user to check email.
-        setInfo(
-          "Account created. Check your email and click the confirmation link, then sign in here.",
-        );
+        setInfo("Account created. A confirmation email has been sent to " + email + ". Confirm your email, then sign in here.");
         return;
       }
 
       // Login path
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
-      await routeByRole();
+      await routeByRole(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please try again.");
     } finally {
