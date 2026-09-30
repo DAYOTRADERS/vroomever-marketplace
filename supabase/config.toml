@@ -1,7 +1,7 @@
 project_id = "hooxnftxqfwhxnapobfx"
 
 [auth.email]
-enable_confirmations = false
+enable_confirmations = true
 
 [auth.email.template.confirmation]
 subject = "Verify your Vroomever account"
