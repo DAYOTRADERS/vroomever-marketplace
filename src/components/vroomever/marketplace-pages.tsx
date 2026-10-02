@@ -20,6 +20,7 @@ import { SiteShell } from "./site-shell";
 import { categories, formatKsh, packages, vipOptions } from "@/data/marketplace";
 import { categoryImages } from "@/data/category-images";
 import type { CardProduct } from "@/types/marketplace";
+import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
