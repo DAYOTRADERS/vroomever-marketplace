@@ -15,7 +15,15 @@ function runIdFetch() {
 }
 
 /** Streams a Responses call through Lovable AI Gateway and returns the final text. */
-export async function generateGatewayText(messages: ModelMessage[]): Promise<string> {
+export async function generateGatewayText(input: ModelMessage[]): Promise<string> {
+  // The gateway rejects separate system turns here, so fold instructions into the first user turn.
+  const instructions = input.filter((m) => m.role === "system").map((m) => String(m.content)).join("\n\n");
+  const messages: ModelMessage[] = input.filter((m) => m.role !== "system");
+  if (instructions && messages[0]?.role === "user") {
+    const first = messages[0];
+    const rest = typeof first.content === "string" ? [{ type: "text" as const, text: first.content }] : first.content;
+    messages[0] = { role: "user", content: [{ type: "text", text: `Instructions:\n${instructions}` }, ...rest] };
+  }
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured for this app.");
   const provider = createOpenAI({

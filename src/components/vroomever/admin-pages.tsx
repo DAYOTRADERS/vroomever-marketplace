@@ -4,6 +4,8 @@ import {
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeSupportMessage } from "@/lib/support.functions";
 import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
@@ -36,7 +38,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const [openSupport, setOpenSupport] = useState(0);
   useEffect(() => {
     if (!ready) return;
-    const count = () => supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("status", "open").then(({ count: c }) => setOpenSupport(c ?? 0));
+    const count = () => supabase.from("support_messages").select("id", { count: "exact", head: true }).neq("status", "resolved").then(({ count: c }) => setOpenSupport(c ?? 0));
     void count();
     const ch = supabase.channel("support-notify").on("postgres_changes", { event: "*", schema: "public", table: "support_messages" }, () => void count()).subscribe();
     const t = setInterval(count, 30000);
@@ -145,7 +147,7 @@ export function AdminLoginPage() {
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
-        <p className="mt-2 text-sm text-surface-muted">Sign in to the VroomEver administration panel.</p>
+        <p className="mt-2 text-sm text-surface-muted">Sign in to the VRUMEVER administration panel.</p>
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <label className="mt-6 block text-sm">
           Admin email
@@ -280,7 +282,7 @@ export function AdminOverview() {
   }, []);
   return (
     <AdminShell>
-      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the Vroomever database." />
+      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the VRUMEVER database." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Total users" value={String(s.users)} />
         <Stat label="Sellers" value={String(s.sellers)} />
@@ -771,7 +773,7 @@ export function AdminDatabasePage() {
         </div>
       </header>
       <main className="mx-auto max-w-7xl space-y-8 p-5 lg:p-8">
-        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VroomEver Supabase database." />
+        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VRUMEVER Supabase database." />
         {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Stat label="Users" value={String(users.length)} />
@@ -810,25 +812,64 @@ export function AdminDatabasePage() {
   );
 }
 
+type SupportRow = { id: string; user_id: string | null; name: string; email: string; topic: string; message: string; status: string; created_at: string; ai_summary: string | null; ai_topic: string | null; ai_urgency: string | null; ai_suggested_reply: string | null };
+type SupportReplyRow = { id: string; message_id: string; is_admin: boolean; body: string; created_at: string };
+const urgencyTone: Record<string, string> = { urgent: "bg-destructive text-destructive-foreground", high: "bg-vip text-vip-foreground", medium: "bg-secondary text-primary", low: "bg-muted text-muted-foreground" };
+
 function SupportInbox() {
-  const [rows, setRows] = useState<Array<{ id: string; name: string; email: string; topic: string; message: string; status: string; created_at: string }>>([]);
+  const analyze = useServerFn(analyzeSupportMessage);
+  const [rows, setRows] = useState<SupportRow[]>([]);
+  const [replies, setReplies] = useState<SupportReplyRow[]>([]);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState<string | null>(null);
   const n = useNotice();
-  const load = () => supabase.from("support_messages").select("id,name,email,topic,message,status,created_at").order("created_at", { ascending: false }).then(({ data }) => setRows(data ?? []));
+  const load = async () => {
+    const { data } = await supabase.from("support_messages").select("id,user_id,name,email,topic,message,status,created_at,ai_summary,ai_topic,ai_urgency,ai_suggested_reply").order("created_at", { ascending: false });
+    setRows(data ?? []);
+    const { data: r } = await supabase.from("support_replies").select("id,message_id,is_admin,body,created_at").order("created_at");
+    setReplies(r ?? []);
+  };
   useEffect(() => { void load(); }, []);
-  const mark = async (id: string, status: string) => { const { error } = await supabase.from("support_messages").update({ status }).eq("id", id); n.show(error, `Message marked ${status}.`); if (!error) void load(); };
-  const del = async (id: string) => { if (!confirmDo("Delete this support message?")) return; const { error } = await supabase.from("support_messages").delete().eq("id", id); n.show(error, "Message deleted."); if (!error) void load(); };
-  const open = rows.filter((r) => r.status === "open").length;
+  const mark = async (id: string, status: string) => { const { error } = await supabase.from("support_messages").update({ status }).eq("id", id); n.show(error, `Marked ${status.replace("_", " ")}.`); if (!error) void load(); };
+  const del = async (id: string) => { if (!confirmDo("Delete this support message and its conversation?")) return; const { error } = await supabase.from("support_messages").delete().eq("id", id); n.show(error, "Message deleted."); if (!error) void load(); };
+  const runAi = async (id: string) => { setBusy(id); const res = await analyze({ data: { id } }).catch((e: unknown) => ({ ok: false as const, error: e instanceof Error ? e.message : "AI failed" })); setBusy(null); n.show(res.ok ? null : { message: "error" in res ? res.error : "AI failed" }, "AI analysis ready."); void load(); };
+  const sendReply = async (r: SupportRow) => {
+    const body = (drafts[r.id] ?? "").trim();
+    if (!body) return;
+    const { data: u } = await supabase.auth.getUser();
+    if (!u.user) return;
+    const { error } = await supabase.from("support_replies").insert({ message_id: r.id, author_id: u.user.id, is_admin: true, body: body.slice(0, 2000) });
+    n.show(error, r.user_id ? "Reply sent — the user sees it on their Contact support page." : "Reply saved. This sender wasn't signed in, so also email them.");
+    if (!error) { setDrafts((d) => ({ ...d, [r.id]: "" })); void load(); }
+  };
+  const open = rows.filter((r) => r.status !== "resolved").length;
   return (
     <section className="mt-10">
-      <h2 className="flex items-center gap-2 font-display text-xl font-bold">Support messages {open > 0 && <Badge className="bg-destructive text-destructive-foreground">{open} new</Badge>}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Help requests and reports sent from the Contact support page.</p>
+      <h2 className="flex items-center gap-2 font-display text-xl font-bold">Support messages {open > 0 && <Badge className="bg-destructive text-destructive-foreground">{open} open</Badge>}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">AI summarises each message, sets its topic and urgency, and drafts a reply you can edit before sending.</p>
       {n.el}
-      <div className="mt-4">
-        <Table head={["From", "Topic", "Message", "Status", "Actions"]} rows={rows.map((r) => [
-          <span className="grid"><strong>{r.name}</strong><a className="text-xs text-primary" href={`mailto:${r.email}`}>{r.email}</a><small className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}</small></span>,
-          r.topic, <span className="whitespace-pre-line">{r.message}</span>, <Badge variant={r.status === "open" ? "default" : "outline"}>{r.status}</Badge>,
-          <span className="flex flex-wrap gap-2"><Button size="sm" disabled={r.status === "resolved"} onClick={() => void mark(r.id, "resolved")}>Resolve</Button>{r.status !== "open" && <Button size="sm" variant="outline" onClick={() => void mark(r.id, "open")}>Reopen</Button>}<Button size="sm" variant="ghost" onClick={() => void del(r.id)}>Delete</Button></span>,
-        ])} />
+      <div className="mt-4 grid gap-4">
+        {rows.map((r) => (
+          <article key={r.id} className="rounded-card border border-border bg-card p-4 shadow-card sm:p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0"><strong>{r.name}</strong> <a className="break-all text-xs text-primary" href={`mailto:${r.email}`}>{r.email}</a><p className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()} · picked “{r.topic}”{r.user_id ? "" : " · not signed in"}</p></div>
+              <div className="flex flex-wrap gap-2">{r.ai_urgency && <Badge className={`capitalize ${urgencyTone[r.ai_urgency] ?? ""}`}>{r.ai_urgency}</Badge>}{r.ai_topic && <Badge variant="outline" className="capitalize">{r.ai_topic}</Badge>}<Badge variant={r.status === "resolved" ? "outline" : "default"}>{r.status.replace("_", " ")}</Badge></div>
+            </div>
+            {r.ai_summary ? <p className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm"><strong className="text-primary">AI summary: </strong>{r.ai_summary}</p> : <Button size="sm" variant="outline" className="mt-3" disabled={busy === r.id} onClick={() => void runAi(r.id)}>{busy === r.id ? "Analysing…" : "Analyse with AI"}</Button>}
+            <p className="mt-3 whitespace-pre-line rounded-lg bg-muted p-3 text-sm">{r.message}</p>
+            <div className="mt-3 grid gap-2">{replies.filter((x) => x.message_id === r.id).map((x) => <div key={x.id} className={`max-w-[90%] rounded-lg p-3 text-sm ${x.is_admin ? "ml-auto border border-primary/30 bg-primary/10" : "bg-secondary"}`}><strong className="block text-xs">{x.is_admin ? "Admin" : r.name} · {new Date(x.created_at).toLocaleString()}</strong><span className="whitespace-pre-line">{x.body}</span></div>)}</div>
+            <div className="mt-3 grid gap-2">
+              <textarea value={drafts[r.id] ?? ""} onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))} maxLength={2000} rows={3} placeholder="Write a reply…" className="w-full rounded-md border border-border bg-background p-3 text-sm" aria-label="Admin reply" />
+              <div className="flex flex-wrap gap-2">
+                {r.ai_suggested_reply && <Button size="sm" variant="outline" onClick={() => setDrafts((d) => ({ ...d, [r.id]: r.ai_suggested_reply ?? "" }))}>Use AI suggested reply</Button>}
+                <Button size="sm" onClick={() => void sendReply(r)}>Send reply</Button>
+                {r.status !== "in_progress" && r.status !== "resolved" && <Button size="sm" variant="outline" onClick={() => void mark(r.id, "in_progress")}>Mark in progress</Button>}
+                {r.status !== "resolved" ? <Button size="sm" variant="outline" onClick={() => void mark(r.id, "resolved")}>Resolve</Button> : <Button size="sm" variant="outline" onClick={() => void mark(r.id, "open")}>Reopen</Button>}
+                <Button size="sm" variant="ghost" className="text-destructive" onClick={() => void del(r.id)}>Delete</Button>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
       {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No support messages yet.</p>}
     </section>

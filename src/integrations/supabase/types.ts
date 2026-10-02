@@ -342,6 +342,10 @@ export type Database = {
       }
       support_messages: {
         Row: {
+          ai_suggested_reply: string | null
+          ai_summary: string | null
+          ai_topic: string | null
+          ai_urgency: string | null
           created_at: string
           email: string
           id: string
@@ -349,9 +353,14 @@ export type Database = {
           name: string
           status: string
           topic: string
+          updated_at: string
           user_id: string | null
         }
         Insert: {
+          ai_suggested_reply?: string | null
+          ai_summary?: string | null
+          ai_topic?: string | null
+          ai_urgency?: string | null
           created_at?: string
           email: string
           id?: string
@@ -359,9 +368,14 @@ export type Database = {
           name: string
           status?: string
           topic?: string
+          updated_at?: string
           user_id?: string | null
         }
         Update: {
+          ai_suggested_reply?: string | null
+          ai_summary?: string | null
+          ai_topic?: string | null
+          ai_urgency?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -369,9 +383,45 @@ export type Database = {
           name?: string
           status?: string
           topic?: string
+          updated_at?: string
           user_id?: string | null
         }
         Relationships: []
+      }
+      support_replies: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_admin: boolean
+          message_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_replies_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "support_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

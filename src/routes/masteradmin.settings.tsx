@@ -3,6 +3,6 @@ import { AdminSettings } from "@/components/vroomever/admin-pages";
 import { Seo } from "@/components/vroomever/marketplace-pages";
 
 export const Route = createFileRoute("/masteradmin/settings")({
-  head: () => Seo("Settings — Vroomever Admin", "Vroomever master admin: settings management and moderation."),
+  head: () => Seo("Settings — VRUMEVER Admin", "VRUMEVER master admin: settings management and moderation."),
   component: AdminSettings,
 });

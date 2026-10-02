@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ProductPage, Seo } from "@/components/vroomever/marketplace-pages";
 
 export const Route = createFileRoute("/product/$id")({
-  head: () => Seo("Listing — Vroomever", "View this approved listing on Vroomever."),
+  head: () => Seo("Listing — VRUMEVER", "View this approved listing on VRUMEVER."),
   component: ProductRoute,
 });
 

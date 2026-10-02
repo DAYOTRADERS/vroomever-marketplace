@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
+import { ArrowLeft, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
 import { useEffect, useState, type ReactNode } from "react";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 
 type DashboardMode = "buyer" | "seller";
 
-export function SiteShell({ children, dashboardMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
+export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
   const [menu, setMenu] = useState(false);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -24,6 +24,8 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => { setMenu(false); }, [path]);
+  // Dashboard menus only appear once someone is signed in.
+  const dashboardMode = role ? requestedMode : undefined;
   const canSell = role === "seller" || role === "admin";
   const dash = role === "seller" || role === "admin" ? "/seller/dashboard" : "/dashboard";
   const dashboardLinks = dashboardMode === "seller"
@@ -57,7 +59,7 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
           <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground" placeholder="Search marketplace" />
         </div>
         <div className="grid gap-2">
-          {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard], ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
+          {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ...(role ? [["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard]] : []), ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
             <Link key={label} to={to} className={`flex min-h-14 items-center gap-4 px-4 text-base rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5 text-surface-foreground"}`}><Icon className="size-5" />{label}</Link>
           ))}
           <Button variant="ghost" onClick={() => setDark(!dark)} className={`min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-surface-foreground hover:bg-white/10 hover:text-surface-foreground`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
@@ -70,8 +72,8 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
         <p className="px-3 pb-3 pt-2 text-xs font-bold uppercase text-muted-foreground">{dashboardMode === "seller" ? "Seller dashboard" : "Buyer dashboard"}</p>
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
-      <main className="min-w-0">{children}</main>
-    </div> : <main>{children}</main>}
+      <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
+    </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong py-10 text-surface-foreground sm:py-12">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-5 md:grid-cols-4">
         <div className="md:col-span-2"><Brand inverted /><p className="mt-4 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>

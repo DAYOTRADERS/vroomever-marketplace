@@ -24,13 +24,14 @@ import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { lovable } from "@/integrations/lovable/index";
 import { countryCodes, buildPhone, toIntl, whatsappLink, callLink } from "@/lib/phone";
 
 type DbProduct = { id:string; title:string; price_ksh:number; location:string|null; condition:string|null; images:string[]; is_vip:boolean; category_slug:string; seller_id:string; views:number; description?:string|null; subcategory?:string|null; video_url?:string|null };
 async function toCards(rows: DbProduct[]): Promise<CardProduct[]> {
  const firsts=await mediaUrls(rows.map(r=>r.images?.[0]??""));
  let i=0; const urls=rows.map(r=>r.images?.[0]?firsts[i++]:undefined);
- return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"Vroomever seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
+ return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"VRUMEVER seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
 }
 function useLiveProducts(category?: string) {
  const [items,setItems]=useState<CardProduct[]|null>(null);
@@ -52,7 +53,7 @@ export const Seo = (title: string, description: string) => ({ meta: [{ title }, 
 
 export function HomePage() { return <SiteShell>
  <section className="relative isolate min-h-[660px] overflow-hidden bg-surface-strong text-surface-foreground">
-  <img src={hero} alt="Shop and sell across Kenya with Vrumever" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-center" />
+  <img src={hero} alt="Shop and sell across Kenya with VRUMEVER" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-center" />
   <div className="absolute inset-0 bg-gradient-to-r from-surface-strong via-surface-strong/82 to-transparent" />
   <div className="dot-grid absolute inset-0 opacity-20" />
   <div className="relative mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-7xl items-center px-4 py-16 sm:min-h-[660px] sm:px-5 sm:py-24"><div className="max-w-2xl">
@@ -84,9 +85,8 @@ export function DashboardPage() {
  </div></SiteShell>;
 }
 
-function BackButton(){return <Button variant="ghost" size="sm" className="mb-4 -ml-2 gap-1 hover:-translate-x-0.5" onClick={()=>{if(window.history.length>1)window.history.back();else window.location.href="/dashboard";}}><ChevronLeft className="size-4"/> Back</Button>}
 
-export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><BackButton/><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"><span className="grid size-16 shrink-0 place-items-center rounded-card bg-secondary text-primary">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-14 object-contain drop-shadow-md"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div><LiveGrid category={cat.slug}/></div></div></div></SiteShell> }
+export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"><span className="grid size-16 shrink-0 place-items-center rounded-card bg-secondary text-primary">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-14 object-contain drop-shadow-md"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div><LiveGrid category={cat.slug}/></div></div></div></SiteShell> }
 
 export function ProductPage({ id }: { id: string }) {
  const sample=undefined as undefined|{title:string;price:number;location:string;condition:string;vip?:boolean;seller:string;image:string};
@@ -98,7 +98,7 @@ export function ProductPage({ id }: { id: string }) {
   const {data}=await supabase.from("products").select("*").eq("id",id).eq("status","active").maybeSingle();
   if(!data){setMissing(true);return;}
   const [{data:prof},photos,vid]=await Promise.all([supabase.from("profiles").select("full_name,phone").eq("id",data.seller_id).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
-  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"Vroomever seller",sellerId:data.seller_id,phone:toIntl((data as {contact_phone?:string|null}).contact_phone)??toIntl(prof?.phone),photos,video:vid[0]??null});
+  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"VRUMEVER seller",sellerId:data.seller_id,phone:toIntl((data as {contact_phone?:string|null}).contact_phone)??toIntl(prof?.phone),photos,video:vid[0]??null});
   const {data:{session}}=await supabase.auth.getSession();
   if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
  })();},[id,sample]);
@@ -107,8 +107,8 @@ export function ProductPage({ id }: { id: string }) {
  if(missing)return <SiteShell><div className="mx-auto max-w-3xl px-5 py-20 text-center"><h1 className="font-display text-3xl font-bold">Listing not available</h1><p className="mt-3 text-muted-foreground">It may be awaiting approval or was removed.</p><Button asChild className="mt-6"><Link to="/dashboard">Back to marketplace</Link></Button></div></SiteShell>;
  if(!p)return <SiteShell><div className="mx-auto max-w-7xl px-5 py-20 text-sm text-muted-foreground">Loading listing…</div></SiteShell>;
  const photos=p.photos.length?p.photos:["/placeholder.svg"];
- const wa=p.phone?whatsappLink(p.phone,"Hi, I'm interested in "+p.title+" on Vroomever"):null;
- return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/> Back to marketplace</Link><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={photos[active]} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">{active+1} / {photos.length} photos</span></div>{photos.length>1&&<div className="mt-3 grid grid-cols-5 gap-3">{photos.map((src,i)=><button type="button" onClick={()=>setActive(i)} key={i} className={`aspect-[4/3] overflow-hidden rounded-md border-2 bg-muted ${i===active?"border-primary":"border-border"}`}><img src={src} alt={`${p.title} photo ${i+1}`} loading="lazy" className="h-full w-full object-cover"/></button>)}</div>}{p.video&&<video src={p.video} controls className="mt-4 w-full rounded-card bg-muted"/>}<div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">{p.description||"No description provided."}</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:p.sellerId??"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Seller</small></span></Link></div>{wa?<Button asChild className="w-full" size="lg"><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> WhatsApp seller</a></Button>:<Button className="w-full" size="lg" disabled><MessageCircle/> WhatsApp seller</Button>}{p.phone&&<Button asChild variant="outline" size="lg" className="mt-3 w-full"><a href={callLink(p.phone)}><Phone/> Call +{p.phone}</a></Button>}<Button variant="ghost" className="mt-3 w-full" onClick={()=>void toggleFav()}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button>{!sample&&<Button variant="ghost" size="sm" className="mt-2 w-full text-muted-foreground" onClick={()=>void reportListing()}>Report this listing</Button>}<p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell>;
+ const wa=p.phone?whatsappLink(p.phone,"Hi, I'm interested in "+p.title+" on VRUMEVER"):null;
+ return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={photos[active]} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">{active+1} / {photos.length} photos</span></div>{photos.length>1&&<div className="mt-3 grid grid-cols-5 gap-3">{photos.map((src,i)=><button type="button" onClick={()=>setActive(i)} key={i} className={`aspect-[4/3] overflow-hidden rounded-md border-2 bg-muted ${i===active?"border-primary":"border-border"}`}><img src={src} alt={`${p.title} photo ${i+1}`} loading="lazy" className="h-full w-full object-cover"/></button>)}</div>}{p.video&&<video src={p.video} controls className="mt-4 w-full rounded-card bg-muted"/>}<div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">{p.description||"No description provided."}</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:p.sellerId??"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Seller</small></span></Link></div>{wa?<Button asChild className="w-full" size="lg"><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> WhatsApp seller</a></Button>:<Button className="w-full" size="lg" disabled><MessageCircle/> WhatsApp seller</Button>}{p.phone&&<Button asChild variant="outline" size="lg" className="mt-3 w-full"><a href={callLink(p.phone)}><Phone/> Call +{p.phone}</a></Button>}<Button variant="ghost" className="mt-3 w-full" onClick={()=>void toggleFav()}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button>{!sample&&<Button variant="ghost" size="sm" className="mt-2 w-full text-muted-foreground" onClick={()=>void reportListing()}>Report this listing</Button>}<p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell>;
 }
 
 export function SellerPage() { return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><div className="rounded-card border border-border bg-card p-5 shadow-card sm:p-7 md:flex md:items-center md:justify-between"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 sm:gap-5"><div className="grid size-16 shrink-0 place-items-center rounded-full bg-secondary text-primary sm:size-20"><Store className="size-8 sm:size-9"/></div><div className="min-w-0"><p className="flex items-center gap-1 text-sm text-primary"><BadgeCheck className="size-4"/> Verified business</p><h1 className="font-display text-2xl font-bold sm:text-3xl">Prestige Motors KE</h1><p className="mt-1 text-sm text-muted-foreground">Karen, Nairobi · Member since 2022</p></div></div><Button className="mt-5 w-full md:mt-0 md:w-auto"><MessageCircle/> Contact seller</Button></div><div className="py-10"><PageTitle title="Seller listings" copy="18 active listings · Usually responds within 10 minutes"/><LiveGrid/></div></div></SiteShell> }
@@ -133,7 +133,7 @@ export function FavoritesPage() {
       location: prod?.location ?? null,
       condition: prod?.condition ?? null,
       image: imgs[idx] ?? "/placeholder.svg",
-      seller: "VroomEver seller",
+      seller: "VRUMEVER seller",
     };
   });
   setRows(mapped);setLoading(false);
@@ -196,7 +196,7 @@ export function AuthPage({
     if (!pendingEmail || cooldown > 0) return;
     setError(""); setInfo("");
     try {
-      const { error: e } = await withTimeout(supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: `${window.location.origin}/auth/confirm` } }));
+      const { error: e } = await withTimeout(supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: `${window.location.origin}/auth/confirm?role=${role}` } }));
       if (e) throw e;
       setInfo(`A new confirmation email was sent to ${pendingEmail}. Check your inbox and spam folder.`);
     } catch (err) {
@@ -208,7 +208,7 @@ export function AuthPage({
   };
 
   const sendReset = async (email: string) => {
-    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }));
+    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password?role=${role}` }));
     if (e && /rate limit/i.test(e.message)) throw e;
     setInfo(`If an account exists for ${email}, a password reset link is on its way. Check your inbox and spam folder.`);
     setCooldown(60);
@@ -246,6 +246,39 @@ export function AuthPage({
     });
   };
 
+  // Finish Google/Apple sign-in: apply the Buyer/Seller choice made before leaving.
+  useEffect(() => {
+    const finish = async () => {
+      const chosen = sessionStorage.getItem("vroomever:oauthRole");
+      if (!chosen) return;
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      sessionStorage.removeItem("vroomever:oauthRole");
+      const { data: me } = await getMyRoleRow();
+      if (chosen === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
+      await routeByRole(data.session);
+    };
+    void finish();
+    const { data: sub } = supabase.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN") void finish(); });
+    return () => sub.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const social = async (provider: "google" | "apple") => {
+    setError(""); setInfo("");
+    sessionStorage.setItem("vroomever:oauthRole", signupRole);
+    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/auth?role=${signupRole}&mode=login` });
+    if (result.error) { sessionStorage.removeItem("vroomever:oauthRole"); setError(`${provider === "google" ? "Google" : "Apple"} sign-in failed. Please try again.`); return; }
+    if (result.redirected) return;
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      sessionStorage.removeItem("vroomever:oauthRole");
+      const { data: me } = await getMyRoleRow();
+      if (signupRole === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
+      await routeByRole(data.session);
+    }
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -267,7 +300,7 @@ export function AuthPage({
         const { data, error: signUpError } = await withTimeout(supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
+          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm?role=${signupRole}` },
         }));
         if (signUpError) throw signUpError;
         if (data.user && (data.user.identities?.length ?? 0) === 0) {
@@ -331,7 +364,7 @@ export function AuthPage({
       <div className="relative hidden overflow-hidden lg:block">
         <img
           src={hero}
-          alt="Vrumever marketplace"
+          alt="VRUMEVER marketplace"
           width={1600}
           height={1000}
           className="absolute inset-0 h-full w-full object-cover"
@@ -353,7 +386,7 @@ export function AuthPage({
           <div className="lg:hidden">
             <Brand inverted />
           </div>
-          <p className="mt-10 text-sm text-primary">{signup ? "Join Vrumever" : "Welcome back"}</p>
+          <p className="mt-10 text-sm text-primary">{signup ? "Join VRUMEVER" : "Welcome back"}</p>
           <h1 className="mt-2 font-display text-4xl font-bold">
             {signup ? "Create your account" : role === "seller" ? "Seller sign in" : "Buyer sign in"}
           </h1>
@@ -435,8 +468,8 @@ export function AuthPage({
 
           {signup && (
             <label className="mt-5 flex gap-3 text-sm text-surface-muted">
-              <Checkbox required className="mt-0.5" /> I accept the Terms & Conditions and the
-              relevant buyer or seller terms.
+              <Checkbox required className="mt-0.5" />
+              <span>I accept the <a href="/terms" target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">Terms & Conditions</a> and the <a href={signupRole === "seller" ? "/seller-terms" : "/buyer-terms"} target="_blank" rel="noreferrer" className="font-semibold text-primary underline underline-offset-2">{signupRole === "seller" ? "Seller terms" : "Buyer terms"}</a>.</span>
             </label>
           )}
 
@@ -475,9 +508,22 @@ export function AuthPage({
             {loading ? "Please wait…" : forgot ? (cooldown > 0 ? `Send again in ${cooldown}s` : "Send reset link") : signup ? "Create account" : "Sign in"}
             <ArrowRight />
           </Button>
+          {!forgot && <div className="mt-4 grid gap-2">
+            <div className="flex items-center gap-3 text-xs text-surface-muted"><span className="h-px flex-1 bg-white/10" />or continue as {signupRole === "seller" ? "SELLER" : "BUYER"} with<span className="h-px flex-1 bg-white/10" /></div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <button type="button" onClick={() => void social("google")} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <svg aria-hidden="true" viewBox="0 0 48 48" className="size-5"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+                Continue with Google
+              </button>
+              <button type="button" onClick={() => void social("apple")} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-surface-muted/40 bg-foreground px-4 text-sm font-semibold text-background shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-current"><path d="M16.37 12.62c-.02-2.1 1.72-3.11 1.8-3.16-.98-1.43-2.5-1.63-3.04-1.65-1.29-.13-2.52.76-3.18.76-.65 0-1.66-.74-2.73-.72-1.4.02-2.7.82-3.42 2.08-1.46 2.53-.37 6.28 1.05 8.33.7 1 1.52 2.13 2.6 2.09 1.05-.04 1.44-.67 2.7-.67 1.26 0 1.62.67 2.72.65 1.13-.02 1.84-1.02 2.52-2.03.8-1.16 1.13-2.29 1.14-2.35-.02-.01-2.18-.84-2.2-3.33zM14.3 6.45c.57-.7.96-1.66.85-2.62-.83.03-1.83.55-2.42 1.24-.53.61-1 1.6-.87 2.54.92.07 1.87-.47 2.44-1.16z"/></svg>
+                Continue with Apple
+              </button>
+            </div>
+          </div>}
 
           <p className="mt-6 text-center text-sm text-surface-muted">
-            {signup ? "Already a member? " : "New to Vrumever? "}
+            {signup ? "Already a member? " : "New to VRUMEVER? "}
             <Link
               to="/auth"
               search={{ role: signup ? signupRole : role, mode: signup ? "login" : "signup" }}
@@ -551,7 +597,7 @@ function SellStep({step,categorySlug,setCategorySlug,title,setTitle,price,setPri
  if(step===4)return <><h2 className="font-display text-2xl font-bold">Review your listing</h2><div className="mt-6 grid gap-5 rounded-card bg-muted p-5 md:grid-cols-[180px_1fr]"><div className="grid aspect-[4/3] place-items-center overflow-hidden rounded-card bg-secondary">{previews[0]?<img src={previews[0]} alt="Cover" className="h-full w-full object-cover"/>:<Camera/>}</div><div><Badge>Pending review</Badge><h3 className="mt-3 font-display text-xl font-bold">{title||"Your listing title"}</h3><p className="mt-2 text-muted-foreground">{cat.name} · {location||"Kenya"} · Photos {photos.length}/5 · Video {video?1:0}/1</p>{description&&<p className="mt-3 line-clamp-4 whitespace-pre-line text-sm text-muted-foreground">{description}</p>}<p className="mt-4 font-display text-2xl font-bold text-primary">KSh {Number(price||0).toLocaleString("en-KE")}</p></div></div></>;
  if(step===5)return <><h2 className="font-display text-2xl font-bold">Choose a seller package</h2><div className="mt-6 grid gap-4 md:grid-cols-3">{packages.map(p=><PackageCard key={p.name} p={p}/>)}</div></>;
  if(step===6)return <PaymentPanel/>;
- return <div className="py-12 text-center"><span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><CheckCircle2 className="size-10"/></span><h2 className="mt-6 font-display text-3xl font-bold">Saved to VroomEver</h2><p className="mx-auto mt-3 max-w-md text-muted-foreground">Your listing is now stored in the marketplace database with pending moderation status.</p></div>;
+ return <div className="py-12 text-center"><span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><CheckCircle2 className="size-10"/></span><h2 className="mt-6 font-display text-3xl font-bold">Saved to VRUMEVER</h2><p className="mx-auto mt-3 max-w-md text-muted-foreground">Your listing is now stored in the marketplace database with pending moderation status.</p></div>;
 }
 
 function PackageCard({p}:{p:(typeof packages)[number]}) { return <div className={`relative rounded-card border p-5 ${p.popular?"border-primary bg-secondary":"border-border"}`}>{p.popular&&<Badge className="absolute -top-3 left-4">Most popular</Badge>}<h3 className="font-display text-xl font-bold">{p.name}</h3><p className="mt-2 text-sm text-muted-foreground">{p.description}</p><p className="mt-5 font-display text-2xl font-bold">{formatKsh(p.price)}<small className="text-xs font-normal text-muted-foreground"> / {p.cadence}</small></p><p className="mt-3 text-xs">Up to {p.limit} active listings</p></div> }
@@ -565,60 +611,46 @@ export function SellerListingsPage() {
  const [rows,setRows]=useState<Array<{id:string;title:string;price:number;status:string;created_at:string}>>([]);
  const [loading,setLoading]=useState(true);
  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const sellerId=data.session?.user.id;if(!sellerId){window.location.href="/auth?role=seller";return;}const {data:items}=await supabase.from("products").select("id,title,price_ksh,status,created_at").eq("seller_id",sellerId).order("created_at",{ascending:false});setRows((items??[]).map(x=>({...x,price:Number(x.price_ksh)})));setLoading(false);});},[]);
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><PageTitle eyebrow="Seller workspace" title="Your listings" copy="Live listings stored in the VroomEver database." action={<Button asChild><Link to="/sell"><Plus/>Add listing</Link></Button>}/>{loading?<p className="text-sm text-muted-foreground">Loading your listings…</p>:<div className="overflow-hidden rounded-card border border-border bg-card"><div className="hidden grid-cols-[1fr_auto_auto] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-bold uppercase text-muted-foreground sm:grid"><span>Listing</span><span>Status</span><span>Price</span></div>{rows.length?rows.map(p=><div key={p.id} className="grid gap-3 border-b border-border px-4 py-4 last:border-0 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-4 sm:px-5"><div className="min-w-0"><strong className="block truncate">{p.title}</strong><small className="text-muted-foreground">{new Date(p.created_at).toLocaleString()}</small></div><Badge variant="outline" className="w-fit">{p.status}</Badge><span className="font-semibold">{formatKsh(p.price)}</span></div>):<div className="p-8 text-center text-sm text-muted-foreground">No database listings yet. Create your first listing.</div>}</div>}</div></SiteShell>
+ return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><PageTitle eyebrow="Seller workspace" title="Your listings" copy="Live listings stored in the VRUMEVER database." action={<Button asChild><Link to="/sell"><Plus/>Add listing</Link></Button>}/>{loading?<p className="text-sm text-muted-foreground">Loading your listings…</p>:<div className="overflow-hidden rounded-card border border-border bg-card"><div className="hidden grid-cols-[1fr_auto_auto] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-bold uppercase text-muted-foreground sm:grid"><span>Listing</span><span>Status</span><span>Price</span></div>{rows.length?rows.map(p=><div key={p.id} className="grid gap-3 border-b border-border px-4 py-4 last:border-0 sm:grid-cols-[1fr_auto_auto] sm:items-center sm:gap-4 sm:px-5"><div className="min-w-0"><strong className="block truncate">{p.title}</strong><small className="text-muted-foreground">{new Date(p.created_at).toLocaleString()}</small></div><Badge variant="outline" className="w-fit">{p.status}</Badge><span className="font-semibold">{formatKsh(p.price)}</span></div>):<div className="p-8 text-center text-sm text-muted-foreground">No database listings yet. Create your first listing.</div>}</div>}</div></SiteShell>
 }
 
 export function LegalPage({type}:{type:"terms"|"privacy"|"seller"|"buyer"}) {
  const content={
   terms:{title:"Terms & Conditions",sections:[
-   ["Using VroomEver","VroomEver is a Kenyan marketplace that helps buyers and sellers discover listings and communicate directly. By creating or using an account, you agree to these terms and to applicable Kenyan law."],
+   ["Using VRUMEVER","VRUMEVER is a Kenyan marketplace that helps buyers and sellers discover listings and communicate directly. By creating or using an account, you agree to these terms and to applicable Kenyan law."],
    ["Accounts and security","Provide accurate registration details, keep your password private, and do not create accounts for deceptive or unlawful purposes. You are responsible for activity performed through your account."],
    ["Listings and seller duties","Sellers must own or have authority to sell what they list, use accurate descriptions and prices, disclose material defects, and keep contact details reasonably reachable. Counterfeit, stolen, unsafe or unlawful goods are not permitted."],
-   ["Buyer responsibilities","Buyers should review listing details, verify the seller and item, inspect goods where practical, and agree delivery and payment arrangements carefully. VroomEver does not take possession of listed goods unless a specific VroomEver service says otherwise."],
+   ["Buyer responsibilities","Buyers should review listing details, verify the seller and item, inspect goods where practical, and agree delivery and payment arrangements carefully. VRUMEVER does not take possession of listed goods unless a specific VRUMEVER service says otherwise."],
    ["Communication and transactions","Users are responsible for their agreements, payments, delivery, inspection and collection arrangements. Never share passwords, one-time codes or unnecessary financial information with another user."],
-   ["Safety, reports and enforcement","Report suspicious listings, impersonation, fraud or unsafe conduct through the available reporting channels. VroomEver may restrict or remove accounts or listings that breach these terms or applicable law."],
+   ["Safety, reports and enforcement","Report suspicious listings, impersonation, fraud or unsafe conduct through the available reporting channels. VRUMEVER may restrict or remove accounts or listings that breach these terms or applicable law."],
    ["Fees and promotions","Any seller package, promotional placement or other paid feature will show its applicable price and conditions before activation. A marketplace listing does not itself guarantee a sale."],
-   ["Intellectual property and user content","You retain rights in content you lawfully upload, while granting VroomEver the limited permission needed to host, display and operate the marketplace. Do not upload material that infringes another person's rights."],
-   ["Privacy and legal compliance","Personal information is handled according to VroomEver's privacy notice. Users must comply with applicable Kenyan consumer, advertising, data-protection and other relevant laws."],
-   ["Changes and contact","VroomEver may update these terms as the service develops. Continued use after an update means the revised terms apply from their effective date. Contact VroomEver through the support channel shown on the platform for questions."]
+   ["Intellectual property and user content","You retain rights in content you lawfully upload, while granting VRUMEVER the limited permission needed to host, display and operate the marketplace. Do not upload material that infringes another person's rights."],
+   ["Privacy and legal compliance","Personal information is handled according to VRUMEVER's privacy notice. Users must comply with applicable Kenyan consumer, advertising, data-protection and other relevant laws."],
+   ["Changes and contact","VRUMEVER may update these terms as the service develops. Continued use after an update means the revised terms apply from their effective date. Contact VRUMEVER through the support channel shown on the platform for questions."]
   ]},
   privacy:{title:"Privacy Policy",sections:[
-   ["Information collected","VroomEver may process account details, listing information, contact details, device information and activity needed to operate and secure the marketplace."],
+   ["Information collected","VRUMEVER may process account details, listing information, contact details, device information and activity needed to operate and secure the marketplace."],
    ["How information is used","Information is used to authenticate users, publish listings, facilitate communication, improve the service, prevent abuse and provide support."],
-   ["Sharing","Information may be shared with service providers needed to operate VroomEver or where required by law. VroomEver does not make another user's private account credentials publicly available."],
+   ["Sharing","Information may be shared with service providers needed to operate VRUMEVER or where required by law. VRUMEVER does not make another user's private account credentials publicly available."],
    ["Your choices","Users may request correction of inaccurate account information and should avoid publishing sensitive personal information in public listings."],
-   ["Security and retention","VroomEver applies reasonable technical and organizational safeguards. Information is retained only as needed for legitimate operational, security, legal and support purposes."]
+   ["Security and retention","VRUMEVER applies reasonable technical and organizational safeguards. Information is retained only as needed for legitimate operational, security, legal and support purposes."]
   ]},
   seller:{title:"Seller Terms",sections:[
    ["Accurate listings","Describe each product or service truthfully, including condition, location, price and important limitations."],
    ["Proof and lawful ownership","Only list items or services you are legally entitled to offer. Keep relevant ownership, authorization or compliance records where applicable."],
    ["Buyer communication","Respond respectfully, avoid deceptive claims, and never request passwords, OTPs or unrelated sensitive credentials."],
    ["Fulfilment and disputes","Agree payment, collection, delivery, inspection and refund terms clearly with buyers. Keep evidence of material transaction communications."],
-   ["Moderation","VroomEver may pause, reject or remove listings that violate platform rules, applicable law or safety requirements."]
+   ["Moderation","VRUMEVER may pause, reject or remove listings that violate platform rules, applicable law or safety requirements."]
   ]},
   buyer:{title:"Buyer Terms",sections:[
    ["Review before buying","Check the listing, seller information, condition, price and location before committing."],
    ["Safe communication","Use sensible precautions when meeting sellers and do not disclose passwords, OTPs or unnecessary financial credentials."],
    ["Payments and delivery","Confirm the agreed payment recipient, amount and delivery or collection arrangement before sending funds."],
-   ["Reports","Report suspicious, misleading, counterfeit, stolen or unsafe listings so VroomEver can review them."],
-   ["Your agreement with the seller","The purchase agreement is between the buyer and seller unless VroomEver expressly provides a separate transaction service."]
+   ["Reports","Report suspicious, misleading, counterfeit, stolen or unsafe listings so VRUMEVER can review them."],
+   ["Your agreement with the seller","The purchase agreement is between the buyer and seller unless VRUMEVER expressly provides a separate transaction service."]
 
   ]}
  }[type];
- return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VroomEver legal" title={content.title} copy="Effective September 2026 · VroomEver marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
+ return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VRUMEVER legal" title={content.title} copy="Effective September 2026 · VRUMEVER marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
 }
 
-export function SupportPage(){
- const [name,setName]=useState("");const [email,setEmail]=useState("");const [topic,setTopic]=useState("help");const [message,setMessage]=useState("");
- const [uid,setUid]=useState<string|null>(null);const [busy,setBusy]=useState(false);const [msg,setMsg]=useState<{ok:boolean;text:string}|null>(null);
- useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const u=data.session?.user;if(!u)return;setUid(u.id);setEmail(u.email??"");const {data:pr}=await supabase.from("profiles").select("full_name").eq("id",u.id).maybeSingle();setName(pr?.full_name??"");});},[]);
- const send=async(e:FormEvent)=>{e.preventDefault();setMsg(null);
-  const n=name.trim(),em=email.trim(),m=message.trim();
-  if(!n||n.length>100)return setMsg({ok:false,text:"Enter your name (up to 100 characters)."});
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)||em.length>255)return setMsg({ok:false,text:"Enter a valid email so we can reply."});
-  if(m.length<5||m.length>2000)return setMsg({ok:false,text:"Write a message between 5 and 2000 characters."});
-  setBusy(true);const {error}=await supabase.from("support_messages").insert({name:n,email:em,topic,message:m,user_id:uid});setBusy(false);
-  if(error)return setMsg({ok:false,text:"Could not send right now. Please try again."});
-  setMessage("");setMsg({ok:true,text:"Thanks — your message reached our support team. We will reply by email."});};
- return <SiteShell><div className="mx-auto max-w-2xl px-4 py-8 sm:px-5 sm:py-10"><PageTitle eyebrow="Help centre" title="Contact support" copy="Report a problem, a suspicious user or ask for help. Our team reads every message."/><form onSubmit={send} className="glass-panel grid gap-4 rounded-card p-5 sm:p-6"><label className="text-sm font-semibold">Name<Input className="mt-2" value={name} onChange={e=>setName(e.target.value)} maxLength={100}/></label><label className="text-sm font-semibold">Email<Input className="mt-2" type="email" value={email} onChange={e=>setEmail(e.target.value)} maxLength={255}/></label><label className="text-sm font-semibold">Topic<select value={topic} onChange={e=>setTopic(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3"><option value="help">I need help</option><option value="report">Report a problem or user</option><option value="account">Account or login</option><option value="payment">Packages and payments</option><option value="other">Other</option></select></label><label className="text-sm font-semibold">Message<Textarea className="mt-2 min-h-36" value={message} onChange={e=>setMessage(e.target.value)} maxLength={2000}/></label>{msg&&<p className={`rounded-lg p-3 text-sm ${msg.ok?"bg-secondary text-primary":"bg-destructive/10 text-destructive"}`}>{msg.text}</p>}<Button type="submit" disabled={busy}>{busy?"Sending…":"Send message"}</Button></form></div></SiteShell>;
-}

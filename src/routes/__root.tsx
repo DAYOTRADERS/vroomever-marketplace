@@ -77,10 +77,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Vroomever — Discover, Connect, Trade" },
+      { title: "VRUMEVER — Discover, Connect, Trade" },
       { name: "description", content: "Kenya’s modern marketplace for trusted sellers and remarkable finds." },
-      { name: "author", content: "Vroomever" },
-      { property: "og:title", content: "Vroomever Marketplace" },
+      { name: "author", content: "VRUMEVER" },
+      { property: "og:title", content: "VRUMEVER Marketplace" },
       { property: "og:description", content: "Discover, connect and trade across Kenya." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
