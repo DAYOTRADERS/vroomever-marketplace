@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
-  Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
+  Settings, ShieldCheck, Sparkles, Tags, UsersRound, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
@@ -32,8 +32,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const activeItem = adminNav.find((item) => item.to === path) ?? adminNav[0];
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -60,37 +58,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-muted/40 lg:grid lg:grid-cols-[260px_1fr]">
-      <header className="sticky top-0 z-40 grid h-16 grid-cols-[minmax(0,1fr)_auto] items-center border-b border-border bg-surface-strong px-4 text-surface-foreground shadow-card lg:hidden">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-md bg-primary/15 text-primary">
-            {activeItem && <activeItem.icon className="size-5" />}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase text-surface-muted">Vroomever admin</p>
-            <p className="truncate font-display text-base font-bold">{activeItem?.label ?? "Overview"}</p>
-          </div>
-        </div>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="shrink-0 text-surface-foreground hover:bg-primary/15 hover:text-primary"
-          onClick={() => setMobileNavOpen((open) => !open)}
-          aria-label={mobileNavOpen ? "Close admin menu" : "Open admin menu"}
-          aria-expanded={mobileNavOpen}
-        >
-          {mobileNavOpen ? <X /> : <Menu />}
-        </Button>
-      </header>
-      {mobileNavOpen && (
-        <button
-          type="button"
-          aria-label="Close admin menu"
-          className="fixed inset-0 top-16 z-30 bg-foreground/35 backdrop-blur-sm lg:hidden"
-          onClick={() => setMobileNavOpen(false)}
-        />
-      )}
-      <aside className={`${mobileNavOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-16 left-0 z-40 w-[min(82vw,300px)] overflow-y-auto border-r border-border bg-surface-strong text-surface-foreground shadow-elevated transition-transform duration-300 lg:static lg:inset-auto lg:min-h-screen lg:w-auto lg:translate-x-0 lg:shadow-none`}>
+      <aside className="border-r border-border bg-surface-strong text-surface-foreground lg:min-h-screen">
         <div className="flex items-center justify-between p-5">
           <Brand inverted />
           <Badge className="bg-primary/20 text-primary">Admin</Badge>
@@ -100,26 +68,24 @@ export function AdminShell({ children }: { children: ReactNode }) {
             <Link
               key={item.to}
               to={item.to}
-              onClick={() => setMobileNavOpen(false)}
-              className={`flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-primary/10"}`}
+              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}
             >
-              <item.icon className="size-4 shrink-0" /> <span className="truncate">{item.label}</span>
+              <item.icon className="size-4" /> {item.label}
             </Link>
           ))}
-          <Button
+          <button
             type="button"
-            variant="ghost"
             onClick={async () => {
               await supabase.auth.signOut();
               navigate({ to: "/masteradmin" });
             }}
-            className="mt-3 min-h-11 justify-start gap-3 px-3 text-surface-muted hover:bg-primary/10 hover:text-surface-foreground"
+            className="mt-3 flex items-center gap-3 rounded-md px-3 py-2 text-sm text-surface-muted hover:bg-white/5"
           >
             <LogOut className="size-4" /> Sign out
-          </Button>
+          </button>
         </nav>
       </aside>
-      <main className="min-w-0 px-4 py-5 sm:p-6 lg:p-8">{children}</main>
+      <main className="p-5 lg:p-8">{children}</main>
     </div>
   );
 }
@@ -188,9 +154,9 @@ export function AdminLoginPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-card border border-border bg-card p-4 shadow-card sm:p-5">
-      <span className="block truncate text-xs text-muted-foreground sm:text-sm">{label}</span>
-      <strong className="mt-2 block truncate font-display text-2xl sm:text-3xl">{value}</strong>
+    <div className="rounded-card border border-border bg-card p-5 shadow-card">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <strong className="mt-2 block font-display text-3xl">{value}</strong>
     </div>
   );
 }
@@ -291,7 +257,7 @@ export function AdminOverview() {
   return (
     <AdminShell>
       <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the Vroomever database." />
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Total users" value={String(s.users)} />
         <Stat label="Sellers" value={String(s.sellers)} />
         <Stat label="All listings" value={String(s.listings)} />
@@ -299,8 +265,8 @@ export function AdminOverview() {
         <Stat label="Open reports" value={String(s.reports)} />
         <Stat label="Recorded revenue" value={formatKsh(s.revenue)} />
       </div>
-      <div className="mt-6 rounded-card border border-border bg-card p-4 sm:mt-8 sm:p-6">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><h2 className="min-w-0 font-display text-lg font-bold sm:text-xl">Pending moderation</h2><Button asChild size="sm" variant="outline" className="shrink-0"><Link to="/masteradmin/products">Review all</Link></Button></div>
+      <div className="mt-8 rounded-card border border-border bg-card p-6">
+        <div className="flex items-center justify-between"><h2 className="font-display text-xl font-bold">Pending moderation</h2><Button asChild size="sm" variant="outline"><Link to="/masteradmin/products">Review all</Link></Button></div>
         <div className="mt-4 grid gap-3">
           {pending.length ? pending.map((p) => (
             <div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>
