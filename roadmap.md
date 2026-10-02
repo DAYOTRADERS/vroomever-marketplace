@@ -16,3 +16,6 @@
 - [ ] Support conversations: users see admin replies and status timeline
 - [ ] Hide dashboard menu links when no user is signed in
 - [ ] Back button on every page that lacks one
+- [ ] Rename Vroomever -> VRUMEVER everywhere (incl. terms)
+- [ ] Terms checkbox links open the terms
+- [ ] Branded Google/Apple buttons with logos
