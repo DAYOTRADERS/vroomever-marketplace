@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as NotevereveresitRouteImport } from './routes/notevereveresit'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as SellRouteImport } from './routes/sell'
@@ -21,12 +23,12 @@ import { Route as SellerTermsRouteImport } from './routes/seller-terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VipRouteImport } from './routes/vip'
+import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
 import { Route as CategoryCategoryRouteImport } from './routes/category.$category'
 import { Route as MasteradminIndexRouteImport } from './routes/masteradmin.index'
 import { Route as MasteradminAnalyticsRouteImport } from './routes/masteradmin.analytics'
 import { Route as MasteradminAuditRouteImport } from './routes/masteradmin.audit'
 import { Route as MasteradminCategoriesRouteImport } from './routes/masteradmin.categories'
-import { Route as MasteradminLoginRouteImport } from './routes/masteradmin.login'
 import { Route as MasteradminPaymentsRouteImport } from './routes/masteradmin.payments'
 import { Route as MasteradminProductsRouteImport } from './routes/masteradmin.products'
 import { Route as MasteradminReportsRouteImport } from './routes/masteradmin.reports'
@@ -41,12 +43,14 @@ import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
 import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
 
-const AuthConfirmRoute = AuthConfirmRouteImport.update({
-  id: '/auth/confirm', path: '/auth/confirm', getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuyerTermsRoute = BuyerTermsRouteImport.update({
@@ -67,6 +71,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotevereveresitRoute = NotevereveresitRouteImport.update({
+  id: '/notevereveresit',
+  path: '/notevereveresit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -104,6 +113,11 @@ const VipRoute = VipRouteImport.update({
   path: '/vip',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/confirm',
+  path: '/confirm',
+  getParentRoute: () => AuthRoute,
+} as any)
 const CategoryCategoryRoute = CategoryCategoryRouteImport.update({
   id: '/category/$category',
   path: '/category/$category',
@@ -127,11 +141,6 @@ const MasteradminAuditRoute = MasteradminAuditRouteImport.update({
 const MasteradminCategoriesRoute = MasteradminCategoriesRouteImport.update({
   id: '/masteradmin/categories',
   path: '/masteradmin/categories',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MasteradminLoginRoute = MasteradminLoginRouteImport.update({
-  id: '/masteradmin/login',
-  path: '/masteradmin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasteradminPaymentsRoute = MasteradminPaymentsRouteImport.update({
@@ -201,13 +210,14 @@ const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
-  '/auth/confirm': typeof AuthConfirmRoute
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/notevereveresit': typeof NotevereveresitRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/sell': typeof SellRoute
@@ -215,11 +225,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
-  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -237,10 +247,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/notevereveresit': typeof NotevereveresitRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/sell': typeof SellRoute
@@ -248,11 +260,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
-  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -271,10 +283,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/notevereveresit': typeof NotevereveresitRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/sell': typeof SellRoute
@@ -282,11 +296,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/category/$category': typeof CategoryCategoryRoute
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
-  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -304,13 +318,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-    | '/auth/confirm'
   fullPaths:
     | '/'
+    | '/auth'
     | '/buyer-terms'
     | '/dashboard'
     | '/favorites'
     | '/login'
+    | '/notevereveresit'
     | '/privacy'
     | '/profile'
     | '/sell'
@@ -318,11 +333,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/vip'
+    | '/auth/confirm'
     | '/category/$category'
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
-    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -340,10 +355,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/buyer-terms'
     | '/dashboard'
     | '/favorites'
     | '/login'
+    | '/notevereveresit'
     | '/privacy'
     | '/profile'
     | '/sell'
@@ -351,11 +368,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/vip'
+    | '/auth/confirm'
     | '/category/$category'
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
-    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -373,10 +390,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/buyer-terms'
     | '/dashboard'
     | '/favorites'
     | '/login'
+    | '/notevereveresit'
     | '/privacy'
     | '/profile'
     | '/sell'
@@ -384,11 +403,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/terms'
     | '/vip'
+    | '/auth/confirm'
     | '/category/$category'
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
-    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -405,13 +424,14 @@ export interface FileRouteTypes {
     | '/subscriptions/'
   fileRoutesById: FileRoutesById
 }
-  AuthConfirmRoute: typeof AuthConfirmRoute
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
   BuyerTermsRoute: typeof BuyerTermsRoute
   DashboardRoute: typeof DashboardRoute
   FavoritesRoute: typeof FavoritesRoute
   LoginRoute: typeof LoginRoute
+  NotevereveresitRoute: typeof NotevereveresitRoute
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   SellRoute: typeof SellRoute
@@ -423,7 +443,6 @@ export interface RootRouteChildren {
   MasteradminAnalyticsRoute: typeof MasteradminAnalyticsRoute
   MasteradminAuditRoute: typeof MasteradminAuditRoute
   MasteradminCategoriesRoute: typeof MasteradminCategoriesRoute
-  MasteradminLoginRoute: typeof MasteradminLoginRoute
   MasteradminPaymentsRoute: typeof MasteradminPaymentsRoute
   MasteradminProductsRoute: typeof MasteradminProductsRoute
   MasteradminReportsRoute: typeof MasteradminReportsRoute
@@ -447,6 +466,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buyer-terms': {
@@ -475,6 +501,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notevereveresit': {
+      id: '/notevereveresit'
+      path: '/notevereveresit'
+      fullPath: '/notevereveresit'
+      preLoaderRoute: typeof NotevereveresitRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -526,6 +559,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VipRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/category/$category': {
       id: '/category/$category'
       path: '/category/$category'
@@ -559,13 +599,6 @@ declare module '@tanstack/react-router' {
       path: '/masteradmin/categories'
       fullPath: '/masteradmin/categories'
       preLoaderRoute: typeof MasteradminCategoriesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/masteradmin/login': {
-      id: '/masteradmin/login'
-      path: '/masteradmin/login'
-      fullPath: '/masteradmin/login'
-      preLoaderRoute: typeof MasteradminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/masteradmin/payments': {
@@ -662,13 +695,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteChildren {
+  AuthConfirmRoute: typeof AuthConfirmRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
   AuthConfirmRoute: AuthConfirmRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
   BuyerTermsRoute: BuyerTermsRoute,
   DashboardRoute: DashboardRoute,
   FavoritesRoute: FavoritesRoute,
   LoginRoute: LoginRoute,
+  NotevereveresitRoute: NotevereveresitRoute,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   SellRoute: SellRoute,
@@ -680,7 +724,6 @@ const rootRouteChildren: RootRouteChildren = {
   MasteradminAnalyticsRoute: MasteradminAnalyticsRoute,
   MasteradminAuditRoute: MasteradminAuditRoute,
   MasteradminCategoriesRoute: MasteradminCategoriesRoute,
-  MasteradminLoginRoute: MasteradminLoginRoute,
   MasteradminPaymentsRoute: MasteradminPaymentsRoute,
   MasteradminProductsRoute: MasteradminProductsRoute,
   MasteradminReportsRoute: MasteradminReportsRoute,
