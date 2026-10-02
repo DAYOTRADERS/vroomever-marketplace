@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { getMyRoleRow } from "@/lib/roles";
 
 /**
  * Browser-only admin setup that needs nothing but the public key.
@@ -45,8 +46,8 @@ export async function createAdminInBrowser(input: { fullName: string; email: str
   if (!firstAdmin) {
     const { data: s } = await supabase.auth.getSession();
     if (!s.session) throw new Error("An administrator already exists. Sign in at /masteradmin/login first, then return here to create more admins.");
-    const { data: amAdmin } = await (supabase as any).rpc("has_role", { _user_id: s.session.user.id, _role: "admin" });
-    if (!amAdmin) throw new Error("Only a signed-in administrator can create more admin accounts. Sign in at /masteradmin/login first.");
+    const { data: me } = await getMyRoleRow();
+    if (me?.role !== "admin") throw new Error("Only a signed-in administrator can create more admin accounts. Sign in at /masteradmin/login first.");
   }
 
   const { data, error } = await isolatedClient().auth.signUp({
