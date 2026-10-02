@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { BadgeCheck, Heart, MapPin, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import type { CardProduct } from "@/types/marketplace";
 
 export function ProductCard({ product }: { product: CardProduct }) {
+  const navigate = useNavigate();
   const [liked, setLiked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -33,7 +34,11 @@ export function ProductCard({ product }: { product: CardProduct }) {
   }, [product.id]);
 
   const toggleFavorite = async () => {
-    if (!userId || busy) return;
+    if (!userId) {
+      await navigate({ to: "/auth", search: { role: "buyer", mode: "login" } });
+      return;
+    }
+    if (busy) return;
     setBusy(true);
     if (liked) {
       await supabase.from("favorites").delete().eq("user_id", userId).eq("product_id", product.id);
@@ -45,10 +50,20 @@ export function ProductCard({ product }: { product: CardProduct }) {
     setBusy(false);
   };
 
+  const openListing = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      await navigate({ to: "/auth", search: { role: "buyer", mode: "login" } });
+      return;
+    }
+    await navigate({ to: "/product/$id", params: { id: product.id } });
+  };
+
   return (
     <article className="group overflow-hidden rounded-card border border-border bg-card shadow-card card-3d">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <Link to="/product/$id" params={{ id: product.id }}>
+        <Link to="/product/$id" params={{ id: product.id }} onClick={(event) => void openListing(event)}>
           <img
             src={product.image}
             alt={product.title}
@@ -85,6 +100,7 @@ export function ProductCard({ product }: { product: CardProduct }) {
         <Link
           to="/product/$id"
           params={{ id: product.id }}
+          onClick={(event) => void openListing(event)}
           className="mt-2 block font-semibold leading-snug hover:text-primary"
         >
           {product.title}
