@@ -117,8 +117,8 @@ export function AdminDiagnostics() {
                   {icon[c.status]}
                   <div className="min-w-0">
                     <p className="font-semibold">{c.label}</p>
-                    <p className="text-sm text-muted-foreground">{c.detail}</p>
-                    {c.tip && <p className="mt-1 text-xs text-foreground">Fix: {c.tip}</p>}
+                    <p className="break-words text-sm text-muted-foreground">{c.detail}</p>
+                    {c.tip && <p className="mt-1 break-words text-xs text-foreground">Fix: {c.tip}</p>}
                   </div>
                 </div>
               ))}
