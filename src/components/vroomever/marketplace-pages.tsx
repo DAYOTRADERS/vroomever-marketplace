@@ -175,6 +175,40 @@ export function AuthPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const [timedOut, setTimedOut] = useState(false);
+  const [forgot, setForgot] = useState(false);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
+
+  const withTimeout = <T,>(p: Promise<T>, ms = 20000) =>
+    Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error("__timeout__")), ms))]);
+
+  const resend = async () => {
+    if (!pendingEmail || cooldown > 0) return;
+    setError(""); setInfo("");
+    try {
+      const { error: e } = await withTimeout(supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: `${window.location.origin}/auth/confirm` } }));
+      if (e) throw e;
+      setInfo(`A new confirmation email was sent to ${pendingEmail}. Check your inbox and spam folder.`);
+    } catch (err) {
+      const m = err instanceof Error ? err.message : "";
+      setError(m === "__timeout__" ? "The email service is slow right now. Wait a minute, then try resending." : friendly(m || "Could not resend the email."));
+    } finally {
+      setCooldown(60);
+    }
+  };
+
+  const sendReset = async (email: string) => {
+    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }));
+    if (e && /rate limit/i.test(e.message)) throw e;
+    setInfo(`If an account exists for ${email}, a password reset link is on its way. Check your inbox and spam folder.`);
+    setCooldown(60);
+  };
 
   const signupRole = role;
   const friendly = (msg: string) => {
@@ -212,6 +246,7 @@ export function AuthPage({
     e.preventDefault();
     setError("");
     setInfo("");
+    setTimedOut(false);
     setLoading(true);
 
     const form = new FormData(e.currentTarget as HTMLFormElement);
@@ -220,12 +255,16 @@ export function AuthPage({
     const fullName = String(form.get("fullName") ?? "").trim();
 
     try {
+      if (forgot) {
+        await sendReset(email);
+        return;
+      }
       if (signup) {
-        const { data, error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await withTimeout(supabase.auth.signUp({
           email,
           password,
           options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
-        });
+        }));
         if (signUpError) throw signUpError;
         if (data.user && (data.user.identities?.length ?? 0) === 0) {
           throw new Error("This email is already used. Please log in or use another email.");
@@ -233,6 +272,8 @@ export function AuthPage({
 
         const session = data.session;
         if (!session) {
+          setPendingEmail(email);
+          setCooldown(60);
           setInfo(`Your ${signupRole.toUpperCase()} account was created. Check your email to confirm it, then sign in using the ${signupRole === "seller" ? "Seller" : "Buyer"} login form.`);
           return;
         }
@@ -244,8 +285,11 @@ export function AuthPage({
       }
 
       // Login path — each form only accepts its own account type
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) throw signInError;
+      const { data, error: signInError } = await withTimeout(supabase.auth.signInWithPassword({ email, password }));
+      if (signInError) {
+        if (/email not confirmed/i.test(signInError.message)) setPendingEmail(email);
+        throw signInError;
+      }
       const { data: roleRow } = await getMyRoleRow();
       const actual = roleRow?.role ?? "buyer";
       const expected = role;
@@ -262,6 +306,16 @@ export function AuthPage({
       }
       await routeByRole(data.session);
     } catch (err) {
+      if (err instanceof Error && err.message === "__timeout__") {
+        if (signup) {
+          setPendingEmail(email);
+          setTimedOut(true);
+          setError("This is taking longer than usual. Your account may still have been created. Check your email, resend the confirmation, or try signing in.");
+        } else {
+          setError("The request timed out. Check your connection and try again.");
+        }
+        return;
+      }
       setError(err instanceof Error ? friendly(err.message) : "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
@@ -386,9 +440,33 @@ export function AuthPage({
           {info && (
             <p className="mt-4 rounded-md bg-primary/10 p-3 text-sm text-primary">{info}</p>
           )}
+          {pendingEmail && !forgot && (
+            <div className="mt-4 rounded-md border border-primary/30 bg-white/5 p-4 text-sm">
+              <p className="font-semibold">Confirmation email status</p>
+              <p className="mt-1 text-surface-muted">
+                Sent to <strong className="text-surface-foreground">{pendingEmail}</strong>. Open the link in that email, then sign in with the {signupRole === "seller" ? "Seller" : "Buyer"} login form. Didn't get it? Check spam, then resend.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={() => void resend()} disabled={cooldown > 0}>
+                  {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend confirmation email"}
+                </Button>
+                {timedOut && (
+                  <>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => nav({ to: "/auth", search: { role: signupRole, mode: "login" } })}>Try signing in</Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => { setPendingEmail(""); setTimedOut(false); setError(""); setInfo(""); }}>Use a different email</Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
 
-          <Button size="lg" className="mt-7 w-full" type="submit" disabled={loading}>
-            {loading ? "Please wait…" : signup ? "Create account" : "Sign in"}
+          {!signup && (
+            <button type="button" onClick={() => { setForgot(!forgot); setError(""); setInfo(""); }} className="mt-4 block text-sm font-semibold text-primary">
+              {forgot ? "Back to sign in" : "Forgot password?"}
+            </button>
+          )}
+          <Button size="lg" className="mt-7 w-full" type="submit" disabled={loading || (forgot && cooldown > 0)}>
+            {loading ? "Please wait…" : forgot ? (cooldown > 0 ? `Send again in ${cooldown}s` : "Send reset link") : signup ? "Create account" : "Sign in"}
             <ArrowRight />
           </Button>
 
