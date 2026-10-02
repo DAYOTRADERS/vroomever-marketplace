@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, CheckCircle2, Loader2, MailCheck } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
+import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brand } from "@/components/vroomever/brand";
@@ -41,11 +42,7 @@ function BootstrapAdminPage() {
     setSessionEmail(session?.user.email ?? null);
 
     if (session) {
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .maybeSingle();
+      const { data: profile, error: profileError } = await getMyRoleRow();
 
       if (profileError) {
         setError(profileError.message);
@@ -90,11 +87,7 @@ function BootstrapAdminPage() {
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", userId)
-      .maybeSingle();
+    const { data: profile, error: profileError } = await getMyRoleRow();
 
     if (profileError) {
       setError(profileError.message);

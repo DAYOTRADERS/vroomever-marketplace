@@ -3,8 +3,8 @@ import { AuthPage, Seo } from "@/components/vroomever/marketplace-pages";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
-    role: search.role === "seller" ? "seller" : search.role === "buyer" ? "buyer" : undefined,
-    mode: search.mode === "signup" ? "signup" : "login",
+    role: search["role"] === "seller" ? "seller" : search["role"] === "buyer" ? "buyer" : undefined,
+    mode: search["mode"] === "signup" ? "signup" : "login",
   }),
   head: () => Seo("Vrumever — Account", "Sign in or create a Vrumever buyer or seller account."),
   component: AuthRoute,
@@ -12,5 +12,5 @@ export const Route = createFileRoute("/auth")({
 
 function AuthRoute() {
   const search = Route.useSearch();
-  return <AuthPage signup={search.mode === "signup"} lockedRole={search.role} />;
+  return <AuthPage signup={search["mode"] === "signup"} lockedRole={search.role} />;
 }

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { getMyRoleRow } from "@/lib/roles";
 import { Brand } from "@/components/vroomever/brand";
 import { Button } from "@/components/ui/button";
 
@@ -60,11 +61,7 @@ function AuthConfirmPage() {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", id)
-        .maybeSingle();
+      const { data: profile } = await getMyRoleRow();
 
       if (!profile?.role) {
         if (alive) {
@@ -97,11 +94,7 @@ function AuthConfirmPage() {
       nav({ to: "/auth", search: { role: "buyer", mode: "login" } });
       return;
     }
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.session.user.id)
-      .maybeSingle();
+    const { data: profile } = await getMyRoleRow();
     if (profile?.role === "seller") nav({ to: "/seller/dashboard", replace: true });
     else if (profile?.role === "admin") nav({ to: "/masteradmin", replace: true });
     else nav({ to: "/dashboard", replace: true });

@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
+import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,11 +38,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         navigate({ to: "/masteradmin", replace: true });
         return;
       }
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", data.session.user.id)
-        .maybeSingle();
+      const { data: profile } = await getMyRoleRow();
       if (profile?.role !== "admin") {
         await supabase.auth.signOut();
         navigate({ to: "/masteradmin", replace: true });
@@ -115,11 +112,7 @@ export function AdminLoginPage() {
       setLoading(false);
       return;
     }
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", sessionData.session.user.id)
-      .maybeSingle();
+    const { data: profile, error: profileError } = await getMyRoleRow();
     if (profileError) {
       setError(profileError.message);
       setLoading(false);
@@ -210,7 +203,7 @@ export function AdminEntryPage() {
         setChecking(false);
         return;
       }
-      const { data: profile } = await supabase.from("profiles").select("role").eq("id", sessionData.session.user.id).maybeSingle();
+      const { data: profile } = await getMyRoleRow();
       if (!active) return;
       if (profile?.role === "admin") setAuthenticatedAdmin(true);
       else {
@@ -315,12 +308,12 @@ export function AdminProducts() {
   useEffect(() => {
     supabase
       .from("products")
-      .select("id,title,price,status,seller_id")
+      .select("id,title,price_ksh,status,seller_id")
       .order("created_at", { ascending: false })
-      .then(({ data }) => setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price) }))));
+      .then(({ data }) => setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))));
   }, []);
   const setStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("products").update({ status }).eq("id", id);
+    const { error } = await supabase.from("products").update({ status: status as "active" | "hidden" | "pending" | "rejected" }).eq("id", id);
     if (!error) setRows(rows.map((r) => (r.id === id ? { ...r, status } : r)));
   };
   return (
@@ -546,7 +539,7 @@ export function AdminDatabasePage() {
       return;
     }
     setSessionReady(true);
-    const { data: profile, error: profileError } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
+    const { data: profile, error: profileError } = await getMyRoleRow();
     if (profileError) {
       setError(profileError.message);
       setLoading(false);
@@ -560,7 +553,7 @@ export function AdminDatabasePage() {
     setIsAdmin(true);
     const [{ data: profileRows, error: usersError }, { data: productsData, error: productsError }] = await Promise.all([
       supabase.rpc("admin_users"),
-      supabase.from("products").select("id,title,seller_id,price,status,created_at").order("created_at", { ascending: false }),
+      supabase.from("products").select("id,title,seller_id,price_ksh,status,created_at").order("created_at", { ascending: false }),
     ]);
     if (usersError) {
       setError(usersError.message);
@@ -586,7 +579,7 @@ export function AdminDatabasePage() {
         id: row.id,
         title: row.title,
         seller_id: row.seller_id,
-        price: Number(row.price),
+        price: Number(row.price_ksh),
         status: row.status,
         created_at: row.created_at,
       })),
