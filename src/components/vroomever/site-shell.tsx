@@ -17,8 +17,9 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
   const [role, setRole] = useState<AppRole | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   useEffect(() => {
-    const load = () => getMyRoleRow().then(({ data }) => setRole(data?.role ?? null)).catch(() => setRole(null));
+    const load = () => getMyRoleRow().then(({ data }) => { setRole(data?.role ?? null); setAuthReady(true); }).catch(() => { setRole(null); setAuthReady(true); });
     load();
     const { data } = supabase.auth.onAuthStateChange((e) => { if (e === "SIGNED_IN" || e === "SIGNED_OUT" || e === "USER_UPDATED") load(); });
     return () => data.subscription.unsubscribe();
@@ -47,7 +48,7 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
           {canSell && <Button asChild className="glow-ring hover:-translate-y-0.5"><Link to="/sell"><Plus /> Sell</Link></Button>}
         </nav>
         <div className={`shrink-0 sm:ml-auto ${dashboardMode ? "" : "lg:hidden"}`}><AccountMenu /></div>
-        <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setMenu(true)} aria-label="Open menu"><Menu /></Button>
+        {authReady && role && <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setMenu(true)} aria-label="Open menu"><Menu /></Button>}
       </div>
     </header>
     {menu && <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
