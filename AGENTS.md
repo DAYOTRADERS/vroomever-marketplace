@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Buyer and seller dashboards use a desktop side navigation and a full-screen mobile menu, while the account menu remains in the top bar so profile and sign-out stay consistently accessible.
