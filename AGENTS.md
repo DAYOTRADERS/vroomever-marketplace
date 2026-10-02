@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Buyer and seller dashboards use a desktop side navigation and a full-screen mobile menu, while the account menu remains in the top bar so profile and sign-out stay consistently accessible.
+- The landing page owns the only WebGL scene and is client-rendered; keep marketplace and dashboard routes server-renderable for speed and reliability.
