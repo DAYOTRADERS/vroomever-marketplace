@@ -83,7 +83,7 @@ export function SupportPage() {
     if (error) return setMsg({ ok: false, text: "Could not send right now. Please try again." });
     setMessage("");
     setMsg({ ok: true, text: uid ? "Sent! Track its status and our replies below." : "Thanks — our support team received your message and will reply by email. Sign in next time to track replies here." });
-    void analyze({ data: { id } }).catch(() => undefined);
+    void analyze({ data: { id } }).then((r) => { if (!r.ok) console.warn("Support AI:", r.error); }).catch((e) => console.warn("Support AI failed", e));
     if (uid) void loadTickets();
   };
 
