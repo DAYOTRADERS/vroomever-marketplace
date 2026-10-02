@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 
 type DashboardMode = "buyer" | "seller";
 
-export function SiteShell({ children, dashboardMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
+export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
   const [menu, setMenu] = useState(false);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -24,6 +24,8 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => { setMenu(false); }, [path]);
+  // Dashboard menus only appear once someone is signed in.
+  const dashboardMode = role ? requestedMode : undefined;
   const canSell = role === "seller" || role === "admin";
   const dash = role === "seller" || role === "admin" ? "/seller/dashboard" : "/dashboard";
   const dashboardLinks = dashboardMode === "seller"
@@ -57,7 +59,7 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
           <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground" placeholder="Search marketplace" />
         </div>
         <div className="grid gap-2">
-          {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard], ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
+          {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ...(role ? [["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard]] : []), ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
             <Link key={label} to={to} className={`flex min-h-14 items-center gap-4 px-4 text-base rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5 text-surface-foreground"}`}><Icon className="size-5" />{label}</Link>
           ))}
           <Button variant="ghost" onClick={() => setDark(!dark)} className={`min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-surface-foreground hover:bg-white/10 hover:text-surface-foreground`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
