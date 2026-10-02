@@ -316,9 +316,9 @@ export function AuthPage({
               <div className="mt-7 grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  disabled={!!lockedRole}
+
                   onClick={() => setRole("buyer")}
-                  className={`rounded-card border p-4 text-left transition ${signupRole === "buyer" ? "border-primary bg-primary/10" : "border-border bg-background/50"}`}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "buyer" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/30 bg-transparent opacity-70 hover:opacity-100"}`}
                 >
                   <UserRound className="size-5 text-primary" />
                   <strong className="mt-2 block">Buyer</strong>
@@ -326,9 +326,9 @@ export function AuthPage({
                 </button>
                 <button
                   type="button"
-                  disabled={!!lockedRole}
+
                   onClick={() => setRole("seller")}
-                  className={`rounded-card border p-4 text-left transition ${signupRole === "seller" ? "border-primary bg-primary/10" : "border-border bg-background/50"}`}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "seller" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/30 bg-transparent opacity-70 hover:opacity-100"}`}
                 >
                   <Store className="size-5 text-primary" />
                   <strong className="mt-2 block">Seller</strong>
