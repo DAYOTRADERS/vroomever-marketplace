@@ -509,6 +509,16 @@ export type Database = {
         Returns: boolean
       }
       get_my_role: { Args: never; Returns: string }
+      get_public_profile: {
+        Args: { _id: string }
+        Returns: {
+          created_at: string
+          full_name: string
+          id_verified: boolean
+          location: string
+          phone: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
