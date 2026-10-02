@@ -15,3 +15,4 @@
 - [ ] AI support triage: summary, topic, urgency, suggested reply for admins
 - [ ] Support conversations: users see admin replies and status timeline
 - [ ] Hide dashboard menu links when no user is signed in
+- [ ] Back button on every page that lacks one
