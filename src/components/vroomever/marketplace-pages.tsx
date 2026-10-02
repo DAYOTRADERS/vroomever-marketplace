@@ -273,6 +273,8 @@ export function AuthPage({
 
   const social = async (provider: "google" | "apple") => {
     setError(""); setInfo("");
+    const host = window.location.hostname;
+    if (host.endsWith(".vercel.app")) { setError(`${provider === "google" ? "Google" : "Apple"} sign-in only works on the VRUMEVER site published from Lovable (vrumever.lovable.app) or a custom domain connected there. Please sign in with email and password here.`); return; }
     sessionStorage.setItem("vroomever:oauthRole", signupRole);
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/auth?role=${signupRole}&mode=login` });
     if (result.error) { sessionStorage.removeItem("vroomever:oauthRole"); setError(`${provider === "google" ? "Google" : "Apple"} sign-in failed. Please try again.`); return; }
