@@ -75,10 +75,10 @@ function AuthConfirmPage() {
         setState("success");
         setMessage(
           profile.role === "seller"
-            ? "Your seller account is verified and ready."
+            ? "Your SELLER account is verified. Sign in only through the Seller login form."
             : profile.role === "admin"
               ? "Your administrator account is verified and ready."
-              : "Your Vroomever account is verified and ready.",
+              : "Your BUYER account is verified. Sign in only through the Buyer login form.",
         );
         window.history.replaceState({}, "", "/auth/confirm");
       }

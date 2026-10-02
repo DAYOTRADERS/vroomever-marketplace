@@ -213,7 +213,7 @@ export function AuthPage({
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName, role: signupRole } },
+          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
         });
         if (signUpError) throw signUpError;
 
