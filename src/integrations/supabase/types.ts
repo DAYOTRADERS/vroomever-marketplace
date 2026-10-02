@@ -295,6 +295,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_exists: { Args: never; Returns: boolean }
+      admin_set_user_role: {
+        Args: { target_role: string; target_user_id: string }
+        Returns: boolean
+      }
+      admin_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: string
+        }[]
+      }
+      become_seller: { Args: never; Returns: boolean }
+      bootstrap_first_admin: {
+        Args: { target_full_name?: string }
+        Returns: boolean
+      }
+      get_my_role: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
