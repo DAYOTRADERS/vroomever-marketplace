@@ -22,6 +22,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SellerTermsRouteImport } from './routes/seller-terms'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as VipRouteImport } from './routes/vip'
 import { Route as AuthConfirmRouteImport } from './routes/auth.confirm'
@@ -109,6 +110,11 @@ const SellerTermsRoute = SellerTermsRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/vip': typeof VipRoute
   '/auth/confirm': typeof AuthConfirmRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/seller-terms'
     | '/signup'
+    | '/support'
     | '/terms'
     | '/vip'
     | '/auth/confirm'
@@ -397,6 +407,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/seller-terms'
     | '/signup'
+    | '/support'
     | '/terms'
     | '/vip'
     | '/auth/confirm'
@@ -435,6 +446,7 @@ export interface FileRouteTypes {
     | '/sell'
     | '/seller-terms'
     | '/signup'
+    | '/support'
     | '/terms'
     | '/vip'
     | '/auth/confirm'
@@ -474,6 +486,7 @@ export interface RootRouteChildren {
   SellRoute: typeof SellRoute
   SellerTermsRoute: typeof SellerTermsRoute
   SignupRoute: typeof SignupRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   VipRoute: typeof VipRoute
   CategoryCategoryRoute: typeof CategoryCategoryRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -779,6 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   SellRoute: SellRoute,
   SellerTermsRoute: SellerTermsRoute,
   SignupRoute: SignupRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   VipRoute: VipRoute,
   CategoryCategoryRoute: CategoryCategoryRoute,

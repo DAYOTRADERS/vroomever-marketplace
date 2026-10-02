@@ -131,6 +131,7 @@ export type Database = {
         Row: {
           category_slug: string
           condition: string | null
+          contact_phone: string | null
           created_at: string
           description: string | null
           id: string
@@ -150,6 +151,7 @@ export type Database = {
         Insert: {
           category_slug: string
           condition?: string | null
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -169,6 +171,7 @@ export type Database = {
         Update: {
           category_slug?: string
           condition?: string | null
+          contact_phone?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -336,6 +339,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      support_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          topic: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          topic?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          topic?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
