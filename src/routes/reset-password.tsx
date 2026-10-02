@@ -103,7 +103,7 @@ function ResetPasswordPage() {
             <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save new password"}</Button>
           </form>
         )}
-        <Button variant="ghost" className="mt-2 w-full" onClick={() => nav({ to: "/auth", search: { role: "buyer", mode: "login" } })}>Back to sign in</Button>
+        <Button variant="ghost" className="mt-2 w-full" onClick={() => nav({ to: "/auth", search: { role: new URLSearchParams(window.location.search).get("role") === "seller" ? "seller" : "buyer", mode: "login" } })}>Back to sign in</Button>
       </div>
     </div>
   );
