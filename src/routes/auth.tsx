@@ -12,5 +12,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthRoute() {
   const search = Route.useSearch();
-  return <AuthPage signup={search["mode"] === "signup"} lockedRole={search.role} />;
+  const role = search.role === "seller" || search.role === "buyer" ? search.role : undefined;
+  return <AuthPage key={`${search.mode}-${role ?? ""}`} signup={search.mode === "signup"} {...(role ? { lockedRole: role } : {})} />;
 }

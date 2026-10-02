@@ -29,6 +29,7 @@ import { Route as MasteradminIndexRouteImport } from './routes/masteradmin.index
 import { Route as MasteradminAnalyticsRouteImport } from './routes/masteradmin.analytics'
 import { Route as MasteradminAuditRouteImport } from './routes/masteradmin.audit'
 import { Route as MasteradminCategoriesRouteImport } from './routes/masteradmin.categories'
+import { Route as MasteradminLoginRouteImport } from './routes/masteradmin.login'
 import { Route as MasteradminPaymentsRouteImport } from './routes/masteradmin.payments'
 import { Route as MasteradminProductsRouteImport } from './routes/masteradmin.products'
 import { Route as MasteradminReportsRouteImport } from './routes/masteradmin.reports'
@@ -143,6 +144,11 @@ const MasteradminCategoriesRoute = MasteradminCategoriesRouteImport.update({
   path: '/masteradmin/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasteradminLoginRoute = MasteradminLoginRouteImport.update({
+  id: '/masteradmin/login',
+  path: '/masteradmin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MasteradminPaymentsRoute = MasteradminPaymentsRouteImport.update({
   id: '/masteradmin/payments',
   path: '/masteradmin/payments',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -265,6 +272,7 @@ export interface FileRoutesByTo {
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/masteradmin/analytics': typeof MasteradminAnalyticsRoute
   '/masteradmin/audit': typeof MasteradminAuditRoute
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
+  '/masteradmin/login': typeof MasteradminLoginRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
@@ -338,6 +347,7 @@ export interface FileRouteTypes {
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
+    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
+    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -408,6 +419,7 @@ export interface FileRouteTypes {
     | '/masteradmin/analytics'
     | '/masteradmin/audit'
     | '/masteradmin/categories'
+    | '/masteradmin/login'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
@@ -443,6 +455,7 @@ export interface RootRouteChildren {
   MasteradminAnalyticsRoute: typeof MasteradminAnalyticsRoute
   MasteradminAuditRoute: typeof MasteradminAuditRoute
   MasteradminCategoriesRoute: typeof MasteradminCategoriesRoute
+  MasteradminLoginRoute: typeof MasteradminLoginRoute
   MasteradminPaymentsRoute: typeof MasteradminPaymentsRoute
   MasteradminProductsRoute: typeof MasteradminProductsRoute
   MasteradminReportsRoute: typeof MasteradminReportsRoute
@@ -601,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasteradminCategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masteradmin/login': {
+      id: '/masteradmin/login'
+      path: '/masteradmin/login'
+      fullPath: '/masteradmin/login'
+      preLoaderRoute: typeof MasteradminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/masteradmin/payments': {
       id: '/masteradmin/payments'
       path: '/masteradmin/payments'
@@ -724,6 +744,7 @@ const rootRouteChildren: RootRouteChildren = {
   MasteradminAnalyticsRoute: MasteradminAnalyticsRoute,
   MasteradminAuditRoute: MasteradminAuditRoute,
   MasteradminCategoriesRoute: MasteradminCategoriesRoute,
+  MasteradminLoginRoute: MasteradminLoginRoute,
   MasteradminPaymentsRoute: MasteradminPaymentsRoute,
   MasteradminProductsRoute: MasteradminProductsRoute,
   MasteradminReportsRoute: MasteradminReportsRoute,
