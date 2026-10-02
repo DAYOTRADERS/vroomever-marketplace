@@ -9,7 +9,7 @@ import { AdminShell } from "./admin-pages";
 import { PageTitle } from "./marketplace-pages";
 
 type Status = "pass" | "warn" | "fail";
-type Check = { group: string; label: string; status: Status; detail: string; tip?: string };
+type Check = { group: string; label: string; status: Status; detail: string; tip?: string | undefined };
 
 const TABLES = ["profiles", "user_roles", "categories", "products", "subscription_packages", "subscriptions", "payments", "favorites", "reports", "audit_logs"];
 
