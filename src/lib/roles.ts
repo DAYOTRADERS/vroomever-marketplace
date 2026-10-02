@@ -29,6 +29,9 @@ export async function getMyRoleRow(): Promise<{ data: { role: AppRole } | null; 
   }).select("role").eq("id", uid).maybeSingle();
   if (!profError && prof?.role) return { data: { role: rank([prof.role]) ?? "buyer" }, error: null };
 
+  // Last resort: the role chosen at sign-up (stored with the account)
+  const metaRole = String(userData.user?.user_metadata?.["role"] ?? "");
+  if (metaRole === "seller" || metaRole === "buyer") return { data: { role: metaRole }, error: null };
   if (rolesError && profError) return { data: null, error: new Error(rolesError.message) };
   return { data: { role: "buyer" }, error: null };
 }
