@@ -24,6 +24,7 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin/payments", label: "Payments", icon: CircleDollarSign },
   { to: "/masteradmin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/masteradmin/audit", label: "Audit log", icon: FileClock },
+  { to: "/masteradmin/diagnostics", label: "Diagnostics", icon: ShieldCheck },
   { to: "/masteradmin/settings", label: "Settings", icon: Settings },
 ];
 
