@@ -19,3 +19,10 @@
 - [x] Rename Vroomever -> VRUMEVER everywhere (incl. terms)
 - [x] Terms checkbox links open the terms
 - [x] Branded Google/Apple buttons with logos
+- [x] Real data only on seller dashboard, seller storefront, listings (enquiries + views recorded)
+- [x] WhatsApp/Call use seller's chosen country code
+- [x] Admin approve/reject listings with reason (seller sees reason)
+- [x] VRUMEVER logo, favicon.png, favicon.ico
+- [x] Buyer flow test: signup -> confirm -> login -> support -> admin inbox
+- [ ] Emails from vrumever.vercel.app — blocked: needs a domain the owner controls
+- [ ] Google/Apple on Vercel — blocked: only works on Lovable-hosted domains
