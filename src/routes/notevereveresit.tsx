@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brand } from "@/components/vroomever/brand";
 import { createAdminAccount, getAdminSetupState } from "@/lib/admin-accounts.functions";
+import { adminExistsPublic, createAdminInBrowser, isServerKeyMissing } from "@/lib/admin-setup";
 
 export const Route = createFileRoute("/notevereveresit")({
   component: CreateAdminPage,
@@ -22,7 +23,9 @@ function CreateAdminPage() {
 
   useEffect(() => {
     getState()
-      .then((s) => setAdminExists(s.adminExists))
+      .then((s) => s.adminExists)
+      .catch((e) => (isServerKeyMissing(e) ? adminExistsPublic() : Promise.reject(e)))
+      .then((exists) => setAdminExists(exists))
       .catch((e) => setError(e instanceof Error ? e.message : "Could not check administrator setup."))
       .finally(() => setChecking(false));
   }, [getState]);
@@ -36,14 +39,24 @@ function CreateAdminPage() {
     setError("");
     setInfo("");
     try {
-      const res = await create({
-        data: {
-          fullName: String(form.get("fullName") ?? ""),
-          email: String(form.get("email") ?? ""),
-          password: String(form.get("password") ?? ""),
-        },
-      });
-      setInfo(`Administrator account created for ${res.email}. Sign in at /masteradmin/login.`);
+      const input = {
+        fullName: String(form.get("fullName") ?? ""),
+        email: String(form.get("email") ?? ""),
+        password: String(form.get("password") ?? ""),
+      };
+      let email: string;
+      let needsConfirmation = false;
+      try {
+        email = (await create({ data: input })).email;
+      } catch (serverErr) {
+        if (!isServerKeyMissing(serverErr)) throw serverErr;
+        const res = await createAdminInBrowser(input, !adminExists);
+        email = res.email;
+        needsConfirmation = res.needsConfirmation;
+      }
+      setInfo(needsConfirmation
+        ? `Administrator account created for ${email}. Open the confirmation email we sent, then sign in at /masteradmin/login.`
+        : `Administrator account created for ${email}. Sign in at /masteradmin/login.`);
       setAdminExists(true);
       formEl.reset();
     } catch (err) {
