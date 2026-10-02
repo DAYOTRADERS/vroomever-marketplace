@@ -196,7 +196,7 @@ export function AuthPage({
     if (!pendingEmail || cooldown > 0) return;
     setError(""); setInfo("");
     try {
-      const { error: e } = await withTimeout(supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: `${window.location.origin}/auth/confirm` } }));
+      const { error: e } = await withTimeout(supabase.auth.resend({ type: "signup", email: pendingEmail, options: { emailRedirectTo: `${window.location.origin}/auth/confirm?role=${role}` } }));
       if (e) throw e;
       setInfo(`A new confirmation email was sent to ${pendingEmail}. Check your inbox and spam folder.`);
     } catch (err) {
@@ -208,7 +208,7 @@ export function AuthPage({
   };
 
   const sendReset = async (email: string) => {
-    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password` }));
+    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password?role=${role}` }));
     if (e && /rate limit/i.test(e.message)) throw e;
     setInfo(`If an account exists for ${email}, a password reset link is on its way. Check your inbox and spam folder.`);
     setCooldown(60);
@@ -267,7 +267,7 @@ export function AuthPage({
         const { data, error: signUpError } = await withTimeout(supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
+          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm?role=${signupRole}` },
         }));
         if (signUpError) throw signUpError;
         if (data.user && (data.user.identities?.length ?? 0) === 0) {
