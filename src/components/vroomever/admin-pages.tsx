@@ -353,16 +353,20 @@ export function AdminUsers() {
 }
 
 export function AdminProducts() {
-  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string }>>([]);
+  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string; rejection_reason: string | null }>>([]);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
   const [filter, setFilter] = useState<"all" | ProductStatus>("all");
   const n = useNotice();
-  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at").order("created_at", { ascending: false })
+  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at,rejection_reason").order("created_at", { ascending: false })
     .then(({ data, error }) => { if (error) n.show(error, ""); setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))); });
   useEffect(() => { void load(); }, []);
   const setStatus = async (id: string, status: ProductStatus) => {
-    const { error } = await supabase.from("products").update({ status }).eq("id", id);
+    const reason = (reasons[id] ?? "").trim().slice(0, 500);
+    if (status === "rejected" && !reason) { n.show({ message: "Type a reason before rejecting this listing." }, ""); return; }
+    const rejection_reason = status === "rejected" ? reason : null;
+    const { error } = await supabase.from("products").update({ status, rejection_reason }).eq("id", id);
     n.show(error, `Listing marked ${status}.`);
-    if (!error) setRows(rows.map((r) => (r.id === id ? { ...r, status } : r)));
+    if (!error) setRows(rows.map((r) => (r.id === id ? { ...r, status, rejection_reason } : r)));
   };
   const remove = async (id: string, title: string) => {
     if (!confirmDo(`Delete "${title}" permanently?`)) return;
@@ -373,7 +377,7 @@ export function AdminProducts() {
   const shown = filter === "all" ? rows : rows.filter((r) => r.status === filter);
   return (
     <AdminShell>
-      <PageTitle eyebrow="Catalogue" title="Product moderation" copy="Approve, reject, hide or delete any seller listing." />
+      <PageTitle eyebrow="Catalogue" title="Product moderation" copy="New seller listings wait here until you approve them. Rejecting needs a reason, which the seller sees." />
       {n.el}
       <div className="mb-4 flex flex-wrap gap-2">{(["all", "pending", "active", "hidden", "rejected"] as const).map((f) => <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>{f} ({f === "all" ? rows.length : rows.filter((r) => r.status === f).length})</Button>)}</div>
       <Table
@@ -381,8 +385,9 @@ export function AdminProducts() {
         rows={shown.map((p) => [
           <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{p.category_slug} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small></div>,
           formatKsh(p.price),
-          <Badge variant="outline">{p.status}</Badge>,
+          <div><Badge variant="outline">{p.status}</Badge>{p.status === "rejected" && p.rejection_reason && <small className="mt-1 block max-w-48 text-muted-foreground">Reason: {p.rejection_reason}</small>}</div>,
           <span className="flex flex-wrap gap-2">
+            <Input className="h-8 w-full min-w-48" placeholder="Reason (required to reject)" value={reasons[p.id] ?? ""} maxLength={500} onChange={(e) => setReasons({ ...reasons, [p.id]: e.target.value })} />
             <Button size="sm" disabled={p.status === "active"} onClick={() => void setStatus(p.id, "active")}>Approve</Button>
             <Button size="sm" variant="outline" disabled={p.status === "rejected"} onClick={() => void setStatus(p.id, "rejected")}>Reject</Button>
             <Button size="sm" variant="outline" disabled={p.status === "hidden"} onClick={() => void setStatus(p.id, "hidden")}>Hide</Button>
