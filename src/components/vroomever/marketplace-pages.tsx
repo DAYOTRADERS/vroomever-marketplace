@@ -24,6 +24,7 @@ import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { lovable } from "@/integrations/lovable/index";
 import { countryCodes, buildPhone, toIntl, whatsappLink, callLink } from "@/lib/phone";
 
 type DbProduct = { id:string; title:string; price_ksh:number; location:string|null; condition:string|null; images:string[]; is_vip:boolean; category_slug:string; seller_id:string; views:number; description?:string|null; subcategory?:string|null; video_url?:string|null };
@@ -244,6 +245,39 @@ export function AuthPage({
             : "/dashboard",
       replace: true,
     });
+  };
+
+  // Finish Google/Apple sign-in: apply the Buyer/Seller choice made before leaving.
+  useEffect(() => {
+    const finish = async () => {
+      const chosen = sessionStorage.getItem("vroomever:oauthRole");
+      if (!chosen) return;
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      sessionStorage.removeItem("vroomever:oauthRole");
+      const { data: me } = await getMyRoleRow();
+      if (chosen === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
+      await routeByRole(data.session);
+    };
+    void finish();
+    const { data: sub } = supabase.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN") void finish(); });
+    return () => sub.subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const social = async (provider: "google" | "apple") => {
+    setError(""); setInfo("");
+    sessionStorage.setItem("vroomever:oauthRole", signupRole);
+    const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/auth?role=${signupRole}&mode=login` });
+    if (result.error) { sessionStorage.removeItem("vroomever:oauthRole"); setError(`${provider === "google" ? "Google" : "Apple"} sign-in failed. Please try again.`); return; }
+    if (result.redirected) return;
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      sessionStorage.removeItem("vroomever:oauthRole");
+      const { data: me } = await getMyRoleRow();
+      if (signupRole === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
+      await routeByRole(data.session);
+    }
   };
 
   const submit = async (e: FormEvent) => {
@@ -475,6 +509,13 @@ export function AuthPage({
             {loading ? "Please wait…" : forgot ? (cooldown > 0 ? `Send again in ${cooldown}s` : "Send reset link") : signup ? "Create account" : "Sign in"}
             <ArrowRight />
           </Button>
+          {!forgot && <div className="mt-4 grid gap-2">
+            <div className="flex items-center gap-3 text-xs text-surface-muted"><span className="h-px flex-1 bg-white/10" />or continue as {signupRole === "seller" ? "SELLER" : "BUYER"} with<span className="h-px flex-1 bg-white/10" /></div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button type="button" variant="outline" className="bg-background text-foreground" onClick={() => void social("google")}>Google</Button>
+              <Button type="button" variant="outline" className="bg-background text-foreground" onClick={() => void social("apple")}>Apple</Button>
+            </div>
+          </div>}
 
           <p className="mt-6 text-center text-sm text-surface-muted">
             {signup ? "Already a member? " : "New to Vrumever? "}
