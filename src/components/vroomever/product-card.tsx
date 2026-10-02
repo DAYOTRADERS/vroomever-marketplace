@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { BadgeCheck, Heart, MapPin, Sparkles } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatKsh } from "@/data/marketplace";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: CardProduct }) {
     setBusy(false);
   };
 
-  const openListing = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+  const openListing = async (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
