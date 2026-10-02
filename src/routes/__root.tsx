@@ -118,6 +118,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // If a password-reset email lands on another page, send it to the reset page.
+  useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    if (pathname === "/reset-password") return;
+    if (/type=recovery/.test(hash) || /type=recovery/.test(search)) window.location.replace(`/reset-password${search}${hash}`);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

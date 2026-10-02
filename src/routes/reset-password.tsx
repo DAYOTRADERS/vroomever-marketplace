@@ -31,10 +31,33 @@ function ResetPasswordPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || session) setReady(true);
     });
-    supabase.auth.getSession().then(({ data }) => {
+    (async () => {
+      // Support every link format the reset email can use.
+      const url = new URL(window.location.href);
+      const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+      const code = url.searchParams.get("code");
+      const tokenHash = url.searchParams.get("token_hash") ?? hash.get("token_hash");
+      const linkError = url.searchParams.get("error_description") ?? hash.get("error_description");
+      try {
+        if (linkError) throw new Error(linkError);
+        if (code) {
+          const { error: ex } = await supabase.auth.exchangeCodeForSession(code);
+          if (ex) throw ex;
+        } else if (tokenHash) {
+          const { error: ve } = await supabase.auth.verifyOtp({ type: "recovery", token_hash: tokenHash });
+          if (ve) throw ve;
+        } else if (hash.get("access_token") && hash.get("refresh_token")) {
+          const { error: se } = await supabase.auth.setSession({ access_token: hash.get("access_token")!, refresh_token: hash.get("refresh_token")! });
+          if (se) throw se;
+        }
+        if (code || tokenHash || hash.get("access_token")) window.history.replaceState(null, "", "/reset-password");
+      } catch {
+        /* falls through to the expired-link message */
+      }
+      const { data } = await supabase.auth.getSession();
       if (data.session) setReady(true);
-      setTimeout(() => setChecked(true), 1500);
-    });
+      setChecked(true);
+    })();
     return () => sub.subscription.unsubscribe();
   }, []);
 
