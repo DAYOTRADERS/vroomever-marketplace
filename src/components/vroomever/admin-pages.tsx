@@ -362,7 +362,7 @@ export function AdminProducts() {
   useEffect(() => { void load(); }, []);
   const setStatus = async (id: string, status: ProductStatus) => {
     const reason = (reasons[id] ?? "").trim().slice(0, 500);
-    if (status === "rejected" && !reason) { n.show({ message: "Type a reason before rejecting this listing." } as Error, ""); return; }
+    if (status === "rejected" && !reason) { n.show({ message: "Type a reason before rejecting this listing." }, ""); return; }
     const rejection_reason = status === "rejected" ? reason : null;
     const { error } = await supabase.from("products").update({ status, rejection_reason }).eq("id", id);
     n.show(error, `Listing marked ${status}.`);
