@@ -7,85 +7,33 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
-      admin_profiles: {
-        Row: {
-          created_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "admin_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      buyer_profiles: {
-        Row: {
-          created_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "buyer_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       categories: {
         Row: {
-          id: string
           name: string
-          parent_id: string | null
+          position: number
           slug: string
+          subcategories: string[]
         }
         Insert: {
-          id?: string
           name: string
-          parent_id?: string | null
+          position?: number
           slug: string
+          subcategories?: string[]
         }
         Update: {
-          id?: string
           name?: string
-          parent_id?: string | null
+          position?: number
           slug?: string
+          subcategories?: string[]
         }
-        Relationships: [
-          {
-            foreignKeyName: "categories_parent_id_fkey"
-            columns: ["parent_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       favorites: {
         Row: {
@@ -146,182 +94,112 @@ export type Database = {
         }
         Relationships: []
       }
-      product_media: {
-        Row: {
-          created_at: string
-          id: string
-          media_type: string
-          product_id: string
-          storage_path: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          media_type: string
-          product_id: string
-          storage_path: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          media_type?: string
-          product_id?: string
-          storage_path?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_media_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       products: {
         Row: {
-          category_id: string | null
+          category_slug: string
           condition: string | null
           created_at: string
-          description: string
+          description: string | null
           id: string
+          images: string[]
+          is_vip: boolean
           location: string | null
-          price: number
+          price_ksh: number
           seller_id: string
-          status: string
+          status: Database["public"]["Enums"]["product_status"]
+          subcategory: string | null
           title: string
           updated_at: string
+          video_url: string | null
+          views: number
+          vip_expires_at: string | null
         }
         Insert: {
-          category_id?: string | null
+          category_slug: string
           condition?: string | null
           created_at?: string
-          description?: string
+          description?: string | null
           id?: string
+          images?: string[]
+          is_vip?: boolean
           location?: string | null
-          price?: number
+          price_ksh?: number
           seller_id: string
-          status?: string
+          status?: Database["public"]["Enums"]["product_status"]
+          subcategory?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
+          views?: number
+          vip_expires_at?: string | null
         }
         Update: {
-          category_id?: string | null
+          category_slug?: string
           condition?: string | null
           created_at?: string
-          description?: string
+          description?: string | null
           id?: string
+          images?: string[]
+          is_vip?: boolean
           location?: string | null
-          price?: number
+          price_ksh?: number
           seller_id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["product_status"]
+          subcategory?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
+          views?: number
+          vip_expires_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "products_category_slug_fkey"
+            columns: ["category_slug"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["slug"]
           },
         ]
       }
       profiles: {
         Row: {
+          about: string | null
           avatar_url: string | null
           created_at: string
-          full_name: string
+          full_name: string | null
           id: string
+          id_document_url: string | null
+          id_verified: boolean
+          location: string | null
           phone: string | null
-          role: string
           updated_at: string
         }
         Insert: {
+          about?: string | null
           avatar_url?: string | null
           created_at?: string
-          full_name?: string
+          full_name?: string | null
           id: string
+          id_document_url?: string | null
+          id_verified?: boolean
+          location?: string | null
           phone?: string | null
-          role?: string
           updated_at?: string
         }
         Update: {
+          about?: string | null
           avatar_url?: string | null
           created_at?: string
-          full_name?: string
+          full_name?: string | null
           id?: string
+          id_document_url?: string | null
+          id_verified?: boolean
+          location?: string | null
           phone?: string | null
-          role?: string
           updated_at?: string
         }
         Relationships: []
-      }
-      seller_accounts: {
-        Row: {
-          created_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "seller_accounts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      seller_profiles: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          shop_name: string | null
-          user_id: string
-          verified: boolean
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          shop_name?: string | null
-          user_id: string
-          verified?: boolean
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          shop_name?: string | null
-          user_id?: string
-          verified?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "seller_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       subscription_packages: {
         Row: {
@@ -391,44 +269,64 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      admin_exists: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      admin_exists: { Args: never; Returns: boolean }
       admin_set_user_role: {
-        Args: { target_user_id: string; target_role: string }
+        Args: { target_role: string; target_user_id: string }
         Returns: boolean
       }
       admin_users: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          id: string
+          created_at: string
           email: string
           full_name: string
+          id: string
           role: string
-          created_at: string
         }[]
       }
+      become_seller: { Args: never; Returns: boolean }
       bootstrap_first_admin: {
         Args: { target_full_name?: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      sync_my_seller_role: {
-        Args: Record<PropertyKey, never>
+      get_my_role: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
         Returns: boolean
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "seller" | "buyer"
+      product_status: "pending" | "active" | "hidden" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -548,13 +446,16 @@ export type CompositeTypes<
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][PublicCompositeTypeNameOrOptions["schema"]]
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "seller", "buyer"],
+      product_status: ["pending", "active", "hidden", "rejected"],
+    },
   },
 } as const
