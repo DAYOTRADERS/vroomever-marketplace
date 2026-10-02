@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
 import { PageTitle } from "./marketplace-pages";
-import { categories, formatKsh, packages, products, vipOptions } from "@/data/marketplace";
+import { categories, formatKsh, vipOptions } from "@/data/marketplace";
 
 const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin", label: "Overview", icon: LayoutDashboard },
@@ -220,42 +220,56 @@ export function AdminEntryPage() {
   return authenticatedAdmin ? <AdminOverview /> : <AdminLoginPage />;
 }
 
+type ProductStatus = "pending" | "active" | "hidden" | "rejected";
+const confirmDo = (msg: string) => typeof window !== "undefined" && window.confirm(msg);
+function useNotice() {
+  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const show = (error: { message: string } | null, okText: string) => setNotice(error ? { ok: false, text: error.message } : { ok: true, text: okText });
+  const el = notice ? <p className={`mb-4 rounded-lg p-3 text-sm ${notice.ok ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>{notice.text}</p> : null;
+  return { show, el };
+}
+
 export function AdminOverview() {
-  const [users, setUsers] = useState(0);
-  const [listings, setListings] = useState(0);
+  const [s, setS] = useState({ users: 0, sellers: 0, listings: 0, pending: 0, reports: 0, revenue: 0 });
   const [pending, setPending] = useState<Array<{ id: string; title: string; status: string }>>([]);
   useEffect(() => {
-    Promise.all([
-      supabase.rpc("admin_users"),
-      supabase.from("products").select("id,title,status").order("created_at", { ascending: false }),
-    ]).then(([u, p]) => {
-      setUsers((u.data ?? []).length);
-      setListings((p.data ?? []).length);
-      setPending((p.data ?? []).filter((x) => x.status === "pending").slice(0, 10));
-    });
+    void (async () => {
+      const [u, p, r, pay] = await Promise.all([
+        supabase.rpc("admin_users"),
+        supabase.from("products").select("id,title,status").order("created_at", { ascending: false }),
+        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "open"),
+        supabase.from("payments").select("amount_ksh,status"),
+      ]);
+      const users = u.data ?? [];
+      const prods = p.data ?? [];
+      setS({
+        users: users.length,
+        sellers: users.filter((x) => x.role === "seller").length,
+        listings: prods.length,
+        pending: prods.filter((x) => x.status === "pending").length,
+        reports: r.count ?? 0,
+        revenue: (pay.data ?? []).filter((x) => x.status === "success" || x.status === "successful").reduce((a, b) => a + b.amount_ksh, 0),
+      });
+      setPending(prods.filter((x) => x.status === "pending").slice(0, 10));
+    })();
   }, []);
   return (
     <AdminShell>
-      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live VroomEver platform data from Supabase." />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Total users" value={String(users)} />
-        <Stat label="Database listings" value={String(listings)} />
-        <Stat label="Pending moderation" value={String(pending.length)} />
-        <Stat label="Categories" value="21" />
+      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the Vroomever database." />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Stat label="Total users" value={String(s.users)} />
+        <Stat label="Sellers" value={String(s.sellers)} />
+        <Stat label="All listings" value={String(s.listings)} />
+        <Stat label="Pending moderation" value={String(s.pending)} />
+        <Stat label="Open reports" value={String(s.reports)} />
+        <Stat label="Recorded revenue" value={formatKsh(s.revenue)} />
       </div>
       <div className="mt-8 rounded-card border border-border bg-card p-6">
-        <h2 className="font-display text-xl font-bold">Pending moderation</h2>
+        <div className="flex items-center justify-between"><h2 className="font-display text-xl font-bold">Pending moderation</h2><Button asChild size="sm" variant="outline"><Link to="/masteradmin/products">Review all</Link></Button></div>
         <div className="mt-4 grid gap-3">
-          {pending.length ? (
-            pending.map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3">
-                <span className="truncate text-sm">{p.title}</span>
-                <Badge variant="outline">{p.status}</Badge>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">No pending listings.</p>
-          )}
+          {pending.length ? pending.map((p) => (
+            <div key={p.id} className="flex items-center justify-between gap-3 border-b border-border pb-3"><span className="truncate text-sm">{p.title}</span><Badge variant="outline">{p.status}</Badge></div>
+          )) : <p className="text-sm text-muted-foreground">No pending listings.</p>}
         </div>
       </div>
     </AdminShell>
@@ -265,37 +279,45 @@ export function AdminOverview() {
 export function AdminUsers() {
   const [rows, setRows] = useState<Array<{ id: string; name: string; email: string; role: string; created_at: string }>>([]);
   const [busy, setBusy] = useState("");
+  const [q, setQ] = useState("");
+  const n = useNotice();
   const load = async () => {
-    const { data } = await supabase.rpc("admin_users");
+    const { data, error } = await supabase.rpc("admin_users");
+    if (error) n.show(error, "");
     setRows((data ?? []).map((u) => ({ id: u.id, name: u.full_name || "Unnamed user", email: u.email || "", role: u.role || "buyer", created_at: u.created_at })));
   };
-  useEffect(() => {
-    void load();
-  }, []);
+  useEffect(() => { void load(); }, []);
   const setRole = async (id: string, role: "buyer" | "seller" | "admin") => {
     setBusy(id);
     const { error } = await supabase.rpc("admin_set_user_role", { target_user_id: id, target_role: role });
+    n.show(error, `Role changed to ${role}.`);
     if (!error) await load();
     setBusy("");
   };
+  const remove = async (id: string, email: string) => {
+    if (!confirmDo(`Permanently delete ${email} and all their listings?`)) return;
+    setBusy(id);
+    const { error } = await supabase.rpc("admin_delete_user", { target_user_id: id });
+    n.show(error, `${email} deleted.`);
+    if (!error) await load();
+    setBusy("");
+  };
+  const shown = rows.filter((u) => `${u.name} ${u.email} ${u.role}`.toLowerCase().includes(q.toLowerCase()));
   return (
     <AdminShell>
-      <PageTitle eyebrow="People" title="Users & roles" copy="Live buyer, seller and administrator accounts. Correct legacy role mismatches here." />
+      <PageTitle eyebrow="People" title="Users & roles" copy="Every buyer, seller and administrator account." action={<Input placeholder="Search users" value={q} onChange={(e) => setQ(e.target.value)} className="w-64" />} />
+      {n.el}
       <Table
-        head={["User", "Role", "Created", "Role actions"]}
-        rows={rows.map((u) => [
-          <div>
-            <strong className="block">{u.name}</strong>
-            <small className="text-muted-foreground">{u.email}</small>
-          </div>,
+        head={["User", "Role", "Joined", "Actions"]}
+        rows={shown.map((u) => [
+          <div><strong className="block">{u.name}</strong><small className="text-muted-foreground">{u.email}</small></div>,
           <Badge variant="outline">{u.role}</Badge>,
-          new Date(u.created_at).toLocaleString(),
+          new Date(u.created_at).toLocaleDateString(),
           <div className="flex flex-wrap gap-2">
             {(["buyer", "seller", "admin"] as const).map((role) => (
-              <Button key={role} size="sm" variant={u.role === role ? "default" : "outline"} disabled={busy === u.id || u.role === role} onClick={() => void setRole(u.id, role)}>
-                {busy === u.id ? "Saving…" : role}
-              </Button>
+              <Button key={role} size="sm" variant={u.role === role ? "default" : "outline"} disabled={busy === u.id || u.role === role} onClick={() => void setRole(u.id, role)}>{role}</Button>
             ))}
+            <Button size="sm" variant="ghost" className="text-destructive" disabled={busy === u.id} onClick={() => void remove(u.id, u.email)}>Delete</Button>
           </div>,
         ])}
       />
@@ -304,40 +326,40 @@ export function AdminUsers() {
 }
 
 export function AdminProducts() {
-  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string }>>([]);
-  useEffect(() => {
-    supabase
-      .from("products")
-      .select("id,title,price_ksh,status,seller_id")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))));
-  }, []);
-  const setStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("products").update({ status: status as "active" | "hidden" | "pending" | "rejected" }).eq("id", id);
+  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string }>>([]);
+  const [filter, setFilter] = useState<"all" | ProductStatus>("all");
+  const n = useNotice();
+  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at").order("created_at", { ascending: false })
+    .then(({ data, error }) => { if (error) n.show(error, ""); setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))); });
+  useEffect(() => { void load(); }, []);
+  const setStatus = async (id: string, status: ProductStatus) => {
+    const { error } = await supabase.from("products").update({ status }).eq("id", id);
+    n.show(error, `Listing marked ${status}.`);
     if (!error) setRows(rows.map((r) => (r.id === id ? { ...r, status } : r)));
   };
+  const remove = async (id: string, title: string) => {
+    if (!confirmDo(`Delete "${title}" permanently?`)) return;
+    const { error } = await supabase.from("products").delete().eq("id", id);
+    n.show(error, "Listing deleted.");
+    if (!error) setRows(rows.filter((r) => r.id !== id));
+  };
+  const shown = filter === "all" ? rows : rows.filter((r) => r.status === filter);
   return (
     <AdminShell>
-      <PageTitle eyebrow="Catalogue" title="Product moderation" copy="Live listings stored in Supabase." />
+      <PageTitle eyebrow="Catalogue" title="Product moderation" copy="Approve, reject, hide or delete any seller listing." />
+      {n.el}
+      <div className="mb-4 flex flex-wrap gap-2">{(["all", "pending", "active", "hidden", "rejected"] as const).map((f) => <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>{f} ({f === "all" ? rows.length : rows.filter((r) => r.status === f).length})</Button>)}</div>
       <Table
         head={["Listing", "Price", "Status", "Actions"]}
-        rows={rows.map((p) => [
-          <div>
-            <strong className="block">{p.title}</strong>
-            <small className="text-muted-foreground">{p.seller_id}</small>
-          </div>,
+        rows={shown.map((p) => [
+          <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{p.category_slug} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small></div>,
           formatKsh(p.price),
           <Badge variant="outline">{p.status}</Badge>,
           <span className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => void setStatus(p.id, "active")}>
-              Approve
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => void setStatus(p.id, "rejected")}>
-              Reject
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => void setStatus(p.id, "hidden")}>
-              Hide
-            </Button>
+            <Button size="sm" disabled={p.status === "active"} onClick={() => void setStatus(p.id, "active")}>Approve</Button>
+            <Button size="sm" variant="outline" disabled={p.status === "rejected"} onClick={() => void setStatus(p.id, "rejected")}>Reject</Button>
+            <Button size="sm" variant="outline" disabled={p.status === "hidden"} onClick={() => void setStatus(p.id, "hidden")}>Hide</Button>
+            <Button size="sm" variant="ghost" className="text-destructive" onClick={() => void remove(p.id, p.title)}>Delete</Button>
           </span>,
         ])}
       />
@@ -346,142 +368,203 @@ export function AdminProducts() {
 }
 
 export function AdminCategories() {
+  const [rows, setRows] = useState<Array<{ slug: string; name: string; subcategories: string[]; position: number }>>([]);
+  const [draft, setDraft] = useState({ name: "", subs: "" });
+  const n = useNotice();
+  const load = () => supabase.from("categories").select("*").order("position").then(({ data }) => setRows(data ?? []));
+  useEffect(() => { void load(); }, []);
+  const save = async (slug: string, name: string, subs: string) => {
+    const { error } = await supabase.from("categories").update({ name, subcategories: subs.split(",").map((s) => s.trim()).filter(Boolean) }).eq("slug", slug);
+    n.show(error, `${name} saved.`);
+    if (!error) void load();
+  };
+  const add = async (e: FormEvent) => {
+    e.preventDefault();
+    const slug = draft.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    if (!slug) return;
+    const { error } = await supabase.from("categories").insert({ slug, name: draft.name.trim(), subcategories: draft.subs.split(",").map((s) => s.trim()).filter(Boolean), position: rows.length + 1 });
+    n.show(error, `${draft.name} added.`);
+    if (!error) { setDraft({ name: "", subs: "" }); void load(); }
+  };
+  const remove = async (slug: string, name: string) => {
+    if (!confirmDo(`Delete category "${name}"? Categories that still have listings cannot be deleted.`)) return;
+    const { error } = await supabase.from("categories").delete().eq("slug", slug);
+    n.show(error ? { message: error.message.includes("foreign key") ? "This category still has listings. Move or delete them first." : error.message } : null, `${name} deleted.`);
+    if (!error) void load();
+  };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Taxonomy" title="Categories & subcategories" copy="Centralized configuration powering the whole marketplace." />
-      <div className="grid gap-4 md:grid-cols-2">
-        {categories.map((c) => (
-          <div key={c.slug} className="rounded-card border border-border bg-card p-5">
-            <div className="flex items-center gap-3">
-              <c.icon className="text-primary" />
-              <strong>{c.name}</strong>
-              <Badge variant="outline" className="ml-auto">
-                {c.subcategories.length}
-              </Badge>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {c.subcategories.map((s) => (
-                <span key={s} className="rounded-full bg-muted px-3 py-1 text-xs">
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      <PageTitle eyebrow="Taxonomy" title="Categories & subcategories" copy="Edit names and subcategories (comma separated). Changes apply instantly." />
+      {n.el}
+      <form onSubmit={add} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-5 md:grid-cols-[1fr_2fr_auto]">
+        <Input placeholder="New category name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required />
+        <Input placeholder="Subcategories, comma separated" value={draft.subs} onChange={(e) => setDraft({ ...draft, subs: e.target.value })} />
+        <Button type="submit">Add category</Button>
+      </form>
+      <div className="grid gap-4 md:grid-cols-2">{rows.map((c) => <CategoryEditor key={c.slug + c.subcategories.join()} c={c} onSave={save} onDelete={remove} />)}</div>
     </AdminShell>
+  );
+}
+function CategoryEditor({ c, onSave, onDelete }: { c: { slug: string; name: string; subcategories: string[] }; onSave: (s: string, n: string, subs: string) => void; onDelete: (s: string, n: string) => void }) {
+  const [name, setName] = useState(c.name);
+  const [subs, setSubs] = useState(c.subcategories.join(", "));
+  return (
+    <div className="rounded-card border border-border bg-card p-5">
+      <Input value={name} onChange={(e) => setName(e.target.value)} className="font-semibold" />
+      <textarea value={subs} onChange={(e) => setSubs(e.target.value)} className="mt-3 min-h-20 w-full rounded-md border border-border bg-background p-2 text-sm" />
+      <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => onSave(c.slug, name, subs)}>Save</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => onDelete(c.slug, c.name)}>Delete</Button></div>
+    </div>
   );
 }
 
 export function AdminSubscriptions() {
+  const [pk, setPk] = useState<Array<{ id: string; name: string; cadence: string; price_ksh: number; listing_limit: number; popular: boolean }>>([]);
+  const [subs, setSubs] = useState<Array<{ id: string; user_id: string; package_id: string; status: string; started_at: string; expires_at: string | null }>>([]);
+  const n = useNotice();
+  const load = async () => {
+    const [a, b] = await Promise.all([supabase.from("subscription_packages").select("*").order("price_ksh"), supabase.from("subscriptions").select("*").order("created_at", { ascending: false })]);
+    setPk(a.data ?? []); setSubs(b.data ?? []);
+  };
+  useEffect(() => { void load(); }, []);
+  const savePkg = async (id: string, price: number, limit: number) => {
+    const { error } = await supabase.from("subscription_packages").update({ price_ksh: price, listing_limit: limit }).eq("id", id);
+    n.show(error, "Package updated."); if (!error) void load();
+  };
+  const setSub = async (id: string, status: string) => {
+    const { error } = await supabase.from("subscriptions").update({ status }).eq("id", id);
+    n.show(error, `Subscription ${status}.`); if (!error) void load();
+  };
+  const delSub = async (id: string) => {
+    if (!confirmDo("Delete this subscription?")) return;
+    const { error } = await supabase.from("subscriptions").delete().eq("id", id);
+    n.show(error, "Subscription deleted."); if (!error) void load();
+  };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Revenue" title="Seller subscriptions" copy="Packages, limits and active seller plans." />
-      <Table
-        head={["Package", "Cadence", "Price", "Listing limit", "Active sellers"]}
-        rows={packages.map((p, i) => [<strong>{p.name}</strong>, p.cadence, formatKsh(p.price), `${p.limit}`, `${[612, 431, 204][i]}`])}
-      />
+      <PageTitle eyebrow="Revenue" title="Seller subscriptions" copy="Edit package prices and limits, and manage every seller plan." />
+      {n.el}
+      <div className="grid gap-4 md:grid-cols-3">{pk.map((p) => <PackageEditor key={p.id + p.price_ksh + p.listing_limit} p={p} onSave={savePkg} active={subs.filter((s) => s.package_id === p.id && s.status === "active").length} />)}</div>
+      <h2 className="mb-3 mt-10 font-display text-xl font-bold">All subscriptions</h2>
+      <Table head={["Seller ID", "Package", "Status", "Started", "Actions"]} rows={subs.map((s) => [
+        <small className="font-mono">{s.user_id.slice(0, 8)}…</small>, s.package_id, <Badge variant="outline">{s.status}</Badge>, new Date(s.started_at).toLocaleDateString(),
+        <span className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void setSub(s.id, s.status === "active" ? "cancelled" : "active")}>{s.status === "active" ? "Cancel" : "Activate"}</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => void delSub(s.id)}>Delete</Button></span>,
+      ])} />
+      {!subs.length && <p className="mt-3 text-sm text-muted-foreground">No subscriptions yet.</p>}
     </AdminShell>
+  );
+}
+function PackageEditor({ p, onSave, active }: { p: { id: string; name: string; cadence: string; price_ksh: number; listing_limit: number }; onSave: (id: string, price: number, limit: number) => void; active: number }) {
+  const [price, setPrice] = useState(String(p.price_ksh));
+  const [limit, setLimit] = useState(String(p.listing_limit));
+  return (
+    <div className="rounded-card border border-border bg-card p-5">
+      <strong className="font-display text-lg">{p.name}</strong> <small className="text-muted-foreground">/ {p.cadence} · {active} active</small>
+      <label className="mt-3 block text-xs font-semibold">Price (KSh)<Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1" /></label>
+      <label className="mt-3 block text-xs font-semibold">Listing limit<Input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} className="mt-1" /></label>
+      <Button size="sm" className="mt-3" onClick={() => onSave(p.id, Number(price), Number(limit))}>Save</Button>
+    </div>
   );
 }
 
 export function AdminVip() {
+  const [rows, setRows] = useState<Array<{ id: string; title: string; is_vip: boolean; vip_expires_at: string | null; status: string }>>([]);
+  const n = useNotice();
+  const load = () => supabase.from("products").select("id,title,is_vip,vip_expires_at,status").order("is_vip", { ascending: false }).order("created_at", { ascending: false }).then(({ data }) => setRows(data ?? []));
+  useEffect(() => { void load(); }, []);
+  const setVip = async (id: string, days: number | null) => {
+    const { error } = await supabase.from("products").update(days ? { is_vip: true, vip_expires_at: new Date(Date.now() + days * 864e5).toISOString() } : { is_vip: false, vip_expires_at: null }).eq("id", id);
+    n.show(error, days ? `VIP granted for ${days} days.` : "VIP removed."); if (!error) void load();
+  };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Promotions" title="VIP advertisements" copy="Durations, pricing and active promotions." />
-      <Table
-        head={["Duration", "Price", "Active", "Actions"]}
-        rows={vipOptions.map((o, i) => [o.duration, formatKsh(o.price), `${[38, 74, 29, 61][i]}`, <Button size="sm" variant="outline">Adjust</Button>])}
-      />
+      <PageTitle eyebrow="Promotions" title="VIP advertisements" copy={`Grant or remove VIP placement. Prices: ${vipOptions.map((o) => `${o.duration} ${formatKsh(o.price)}`).join(" · ")}`} />
+      {n.el}
+      <Table head={["Listing", "Status", "VIP", "Actions"]} rows={rows.map((p) => [
+        p.title, <Badge variant="outline">{p.status}</Badge>,
+        p.is_vip ? <Badge className="bg-vip text-vip-foreground">VIP{p.vip_expires_at ? ` until ${new Date(p.vip_expires_at).toLocaleDateString()}` : ""}</Badge> : "—",
+        <span className="flex flex-wrap gap-2">{[7, 14, 30].map((d) => <Button key={d} size="sm" variant="outline" onClick={() => void setVip(p.id, d)}>{d} days</Button>)}{p.is_vip && <Button size="sm" variant="ghost" className="text-destructive" onClick={() => void setVip(p.id, null)}>Remove</Button>}</span>,
+      ])} />
     </AdminShell>
   );
 }
 
 export function AdminReports() {
-  const [rows, setRows] = useState([
-    { item: "Graphite Pro 256GB, Mint", reason: "Suspected counterfeit", status: "Open" },
-    { item: "Serviced 50×100 Plots", reason: "Misleading location", status: "Open" },
-    { item: "Emerald 3-Seater Premium Sofa", reason: "Duplicate listing", status: "Resolved" },
-  ]);
+  const [rows, setRows] = useState<Array<{ id: string; reason: string; status: string; created_at: string; product_id: string; products: { title: string } | null }>>([]);
+  const n = useNotice();
+  const load = () => supabase.from("reports").select("id,reason,status,created_at,product_id,products(title)").order("created_at", { ascending: false }).then(({ data }) => setRows((data ?? []) as never));
+  useEffect(() => { void load(); }, []);
+  const resolve = async (id: string) => { const { error } = await supabase.from("reports").update({ status: "resolved" }).eq("id", id); n.show(error, "Report resolved."); if (!error) void load(); };
+  const delListing = async (pid: string) => { if (!confirmDo("Delete the reported listing?")) return; const { error } = await supabase.from("products").delete().eq("id", pid); n.show(error, "Listing deleted."); if (!error) void load(); };
+  const delReport = async (id: string) => { const { error } = await supabase.from("reports").delete().eq("id", id); n.show(error, "Report deleted."); if (!error) void load(); };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Trust & safety" title="Reported listings" copy="Review and action buyer reports." />
-      <Table
-        head={["Listing", "Reason", "Status", "Actions"]}
-        rows={rows.map((r, i) => [
-          r.item,
-          r.reason,
-          <Badge variant="outline">{r.status}</Badge>,
-          <span className="flex gap-2">
-            <Button size="sm" onClick={() => setRows(rows.map((x, y) => (y === i ? { ...x, status: "Resolved" } : x)))}>
-              Resolve
-            </Button>
-            <Button size="sm" variant="outline">
-              Delete listing
-            </Button>
-          </span>,
-        ])}
-      />
+      <PageTitle eyebrow="Trust & safety" title="Reported listings" copy="Reports filed by buyers from listing pages." />
+      {n.el}
+      <Table head={["Listing", "Reason", "Status", "Actions"]} rows={rows.map((r) => [
+        r.products?.title ?? "Deleted listing", r.reason, <Badge variant="outline">{r.status}</Badge>,
+        <span className="flex flex-wrap gap-2"><Button size="sm" disabled={r.status === "resolved"} onClick={() => void resolve(r.id)}>Resolve</Button><Button size="sm" variant="outline" onClick={() => void delListing(r.product_id)}>Delete listing</Button><Button size="sm" variant="ghost" onClick={() => void delReport(r.id)}>Dismiss</Button></span>,
+      ])} />
+      {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No reports yet.</p>}
     </AdminShell>
   );
 }
 
 export function AdminPayments() {
-  const rows = [
-    ["VRM-10241", "Prestige Motors KE", "Silver package", 3500, "M-Pesa", "Successful"],
-    ["VRM-10242", "Gadget Grid", "VIP 7 days", 950, "Card", "Failed"],
-    ["VRM-10243", "Nairobi Living", "Gold package", 24000, "M-Pesa", "Successful"],
-  ] as const;
+  const [rows, setRows] = useState<Array<{ id: string; user_id: string; amount_ksh: number; method: string; status: string; purpose: string | null; reference: string | null; created_at: string }>>([]);
+  const n = useNotice();
+  const load = () => supabase.from("payments").select("*").order("created_at", { ascending: false }).then(({ data }) => setRows(data ?? []));
+  useEffect(() => { void load(); }, []);
+  const setStatus = async (id: string, status: string) => { const { error } = await supabase.from("payments").update({ status }).eq("id", id); n.show(error, `Payment marked ${status}.`); if (!error) void load(); };
+  const del = async (id: string) => { if (!confirmDo("Delete this payment record?")) return; const { error } = await supabase.from("payments").delete().eq("id", id); n.show(error, "Payment deleted."); if (!error) void load(); };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Finance" title="Simulated payments" copy="Stage 1 transactions are simulated only." />
-      <Table
-        head={["Reference", "Seller", "Item", "Amount", "Method", "Status"]}
-        rows={rows.map((r) => [r[0], r[1], r[2], formatKsh(r[3] as number), r[4], <Badge className={r[5] === "Failed" ? "bg-destructive text-destructive-foreground" : ""}>{r[5]}</Badge>])}
-      />
+      <PageTitle eyebrow="Finance" title="Payments" copy="Simulated payment records stored in the database." />
+      {n.el}
+      <Table head={["Reference", "Purpose", "Amount", "Method", "Status", "Actions"]} rows={rows.map((r) => [
+        r.reference ?? r.id.slice(0, 8), r.purpose ?? "—", formatKsh(r.amount_ksh), r.method, <Badge variant="outline">{r.status}</Badge>,
+        <span className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => void setStatus(r.id, "success")}>Success</Button><Button size="sm" variant="outline" onClick={() => void setStatus(r.id, "failed")}>Failed</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => void del(r.id)}>Delete</Button></span>,
+      ])} />
+      {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No payments recorded yet.</p>}
     </AdminShell>
   );
 }
 
 export function AdminAnalytics() {
+  const [byCat, setByCat] = useState<Array<[string, number]>>([]);
+  const [totals, setTotals] = useState({ views: 0, active: 0, favs: 0 });
+  useEffect(() => {
+    void (async () => {
+      const [{ data: p }, { count }] = await Promise.all([supabase.from("products").select("category_slug,views,status"), supabase.from("favorites").select("product_id", { count: "exact", head: true })]);
+      const m = new Map<string, number>();
+      (p ?? []).forEach((x) => m.set(x.category_slug, (m.get(x.category_slug) ?? 0) + 1));
+      setByCat([...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8));
+      setTotals({ views: (p ?? []).reduce((a, b) => a + b.views, 0), active: (p ?? []).filter((x) => x.status === "active").length, favs: count ?? 0 });
+    })();
+  }, []);
+  const max = Math.max(1, ...byCat.map((x) => x[1]));
   return (
     <AdminShell>
-      <PageTitle eyebrow="Insights" title="Platform analytics" copy="Traffic, conversion and category performance." />
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Monthly visitors" value="412K" />
-        <Stat label="Listing conversion" value="6.8%" />
-        <Stat label="Avg. session" value="4m 12s" />
-      </div>
+      <PageTitle eyebrow="Insights" title="Platform analytics" copy="Calculated live from the database." />
+      <div className="grid gap-4 sm:grid-cols-3"><Stat label="Listing views" value={String(totals.views)} /><Stat label="Live listings" value={String(totals.active)} /><Stat label="Favorites saved" value={String(totals.favs)} /></div>
       <div className="mt-8 rounded-card border border-border bg-card p-6">
-        <h2 className="font-display text-xl font-bold">Top categories</h2>
-        <div className="mt-5 grid gap-3">
-          {categories.slice(0, 6).map((c, i) => (
-            <div key={c.slug}>
-              <div className="flex justify-between text-sm">
-                <span>{c.name}</span>
-                <span className="text-muted-foreground">{90 - i * 12}%</span>
-              </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-primary" style={{ width: `${90 - i * 12}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
+        <h2 className="font-display text-xl font-bold">Listings by category</h2>
+        <div className="mt-5 grid gap-3">{byCat.length ? byCat.map(([slug, c]) => (
+          <div key={slug}><div className="flex justify-between text-sm"><span>{categories.find((x) => x.slug === slug)?.name ?? slug}</span><span className="text-muted-foreground">{c}</span></div><div className="mt-1 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${(c / max) * 100}%` }} /></div></div>
+        )) : <p className="text-sm text-muted-foreground">No listings yet.</p>}</div>
       </div>
     </AdminShell>
   );
 }
 
 export function AdminAudit() {
-  const rows = [
-    ["Today 09:14", "admin@vroomever.com", "Approved listing", "Toyota Land Cruiser V8"],
-    ["Today 08:52", "admin@vroomever.com", "Suspended user", "Brian Otieno"],
-    ["Yesterday 17:30", "ops@vroomever.com", "Updated package price", "Silver package"],
-  ];
+  const [rows, setRows] = useState<Array<{ id: string; created_at: string; actor_email: string | null; action: string; target_table: string | null; details: unknown }>>([]);
+  useEffect(() => { void supabase.from("audit_logs").select("id,created_at,actor_email,action,target_table,details").order("created_at", { ascending: false }).limit(200).then(({ data }) => setRows(data ?? [])); }, []);
+  const label = (d: unknown) => { const o = (d ?? {}) as Record<string, string | null>; return o["title"] || o["name"] || o["email"] || o["role"] || o["status"] || "—"; };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Accountability" title="Audit log" copy="Every administrative action is recorded." />
-      <Table head={["When", "Actor", "Action", "Target"]} rows={rows} />
+      <PageTitle eyebrow="Accountability" title="Audit log" copy="Every administrator change is recorded automatically." />
+      <Table head={["When", "Admin", "Action", "Area", "Target"]} rows={rows.map((r) => [new Date(r.created_at).toLocaleString(), r.actor_email ?? "—", r.action, r.target_table ?? "—", label(r.details)])} />
+      {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No admin actions recorded yet.</p>}
     </AdminShell>
   );
 }
@@ -489,27 +572,12 @@ export function AdminAudit() {
 export function AdminSettings() {
   return (
     <AdminShell>
-      <PageTitle eyebrow="Configuration" title="Platform settings" copy="Global marketplace controls." />
-      <div className="grid gap-5 rounded-card border border-border bg-card p-6 md:grid-cols-2">
-        <label className="text-sm font-semibold">
-          Platform name
-          <Input className="mt-2" defaultValue="Vroomever" />
-        </label>
-        <label className="text-sm font-semibold">
-          Support email
-          <Input className="mt-2" defaultValue="support@vroomever.com" />
-        </label>
-        <label className="text-sm font-semibold">
-          Max photos per listing
-          <Input className="mt-2" type="number" defaultValue={5} />
-        </label>
-        <label className="text-sm font-semibold">
-          Max videos per listing
-          <Input className="mt-2" type="number" defaultValue={1} />
-        </label>
-        <div className="md:col-span-2">
-          <Button>Save settings</Button>
-        </div>
+      <PageTitle eyebrow="Configuration" title="Platform settings" copy="Marketplace rules currently enforced." />
+      <div className="grid gap-4 md:grid-cols-2">
+        <Stat label="Max photos per listing" value="5" />
+        <Stat label="Max videos per listing" value="1" />
+        <Stat label="New listings start as" value="Pending review" />
+        <Stat label="Add another administrator" value="Users → set role to admin" />
       </div>
     </AdminShell>
   );
