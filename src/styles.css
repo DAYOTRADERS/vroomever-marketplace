@@ -179,3 +179,24 @@
   background-image: radial-gradient(color-mix(in oklab, var(--primary) 18%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* 3D depth + hover effects */
+@utility card-3d {
+  transform-style: preserve-3d;
+  transition: transform 350ms cubic-bezier(.2,.8,.2,1), box-shadow 350ms ease, border-color 350ms ease;
+  &:hover {
+    transform: perspective(900px) translateY(-6px) rotateX(4deg) rotateY(-3deg);
+    box-shadow: 0 24px 50px -18px color-mix(in oklab, var(--primary) 45%, transparent), 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+  @media (prefers-reduced-motion: reduce) { &:hover { transform: translateY(-2px); } }
+}
+@utility glow-ring {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent), 0 18px 40px -16px color-mix(in oklab, var(--primary) 55%, transparent);
+}
+@utility dock-glass {
+  background: color-mix(in oklab, var(--surface-strong) 88%, transparent);
+  color: var(--surface-foreground);
+  backdrop-filter: blur(22px) saturate(160%);
+  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
+  box-shadow: 0 20px 50px -15px color-mix(in oklab, var(--primary) 50%, transparent);
+}
