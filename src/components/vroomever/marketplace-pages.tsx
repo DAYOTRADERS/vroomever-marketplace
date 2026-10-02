@@ -84,7 +84,27 @@ export function DashboardPage() {
 
 export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; const filtered=products.filter(p=>p.category===cat.slug); return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><div className="flex items-center gap-4"><span className="grid size-14 place-items-center rounded-card bg-secondary text-primary"><cat.icon/></span><PageTitle eyebrow="Category" title={cat.name} copy={`Approved listings across Kenya`} /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div><LiveGrid category={cat.slug}/></div></div></div></SiteShell> }
 
-export function ProductPage({ id }: { id: string }) { const p=products.find(x=>x.id===id) ?? products[0]!; const [liked,setLiked]=useState(false); return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/> Back to marketplace</Link><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={p.image} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">1 / 5 photos</span></div><div className="mt-3 grid grid-cols-5 gap-3">{[0,1,2,3,4].map(i=><div key={i} className="aspect-[4/3] overflow-hidden rounded-md border border-border bg-muted"><img src={p.image} alt="" width={1200} height={900} loading="lazy" className="h-full w-full object-cover opacity-80"/></div>)}</div><div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 leading-relaxed text-muted-foreground">Exceptionally clean and well maintained. Fully inspected, paperwork ready, and available for viewing. Serious buyers are welcome to contact the verified seller directly.</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Verified seller</small></span></Link></div><Button className="w-full" size="lg"><MessageCircle/> WhatsApp seller</Button><Button variant="outline" size="lg" className="mt-3 w-full">Show phone number</Button><Button variant="ghost" className="mt-3 w-full" onClick={()=>setLiked(!liked)}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button><p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell> }
+export function ProductPage({ id }: { id: string }) {
+ const sample=products.find(x=>x.id===id);
+ const [p,setP]=useState<null|{title:string;price:number;location:string|null;condition:string|null;vip:boolean;description:string;seller:string;sellerId:string|null;phone:string|null;photos:string[];video:string|null}>(sample?{title:sample.title,price:sample.price,location:sample.location,condition:sample.condition,vip:!!sample.vip,description:"Exceptionally clean and well maintained. Available for viewing. Serious buyers are welcome to contact the seller directly.",seller:sample.seller,sellerId:null,phone:null,photos:[sample.image],video:null}:null);
+ const [missing,setMissing]=useState(false);
+ const [active,setActive]=useState(0);
+ const [liked,setLiked]=useState(false);
+ useEffect(()=>{if(sample)return;(async()=>{
+  const {data}=await supabase.from("products").select("*").eq("id",id).maybeSingle();
+  if(!data){setMissing(true);return;}
+  const [{data:prof},photos,vid]=await Promise.all([supabase.from("profiles").select("full_name,phone").eq("id",data.seller_id).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
+  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"Vroomever seller",sellerId:data.seller_id,phone:prof?.phone??null,photos,video:vid[0]??null});
+  const {data:{session}}=await supabase.auth.getSession();
+  if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
+ })();},[id,sample]);
+ const toggleFav=async()=>{const {data:{session}}=await supabase.auth.getSession(); if(!session){window.location.href="/auth?role=buyer&mode=login";return;} if(sample){setLiked(!liked);return;} if(liked){await supabase.from("favorites").delete().eq("user_id",session.user.id).eq("product_id",id);setLiked(false);}else{await supabase.from("favorites").insert({user_id:session.user.id,product_id:id});setLiked(true);}};
+ if(missing)return <SiteShell><div className="mx-auto max-w-3xl px-5 py-20 text-center"><h1 className="font-display text-3xl font-bold">Listing not available</h1><p className="mt-3 text-muted-foreground">It may be awaiting approval or was removed.</p><Button asChild className="mt-6"><Link to="/dashboard">Back to marketplace</Link></Button></div></SiteShell>;
+ if(!p)return <SiteShell><div className="mx-auto max-w-7xl px-5 py-20 text-sm text-muted-foreground">Loading listing…</div></SiteShell>;
+ const photos=p.photos.length?p.photos:["/placeholder.svg"];
+ const wa=p.phone?`https://wa.me/${p.phone.replace(/\D/g,"").replace(/^0/,"254")}?text=${encodeURIComponent("Hi, I'm interested in "+p.title+" on Vroomever")}`:null;
+ return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/> Back to marketplace</Link><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={photos[active]} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">{active+1} / {photos.length} photos</span></div>{photos.length>1&&<div className="mt-3 grid grid-cols-5 gap-3">{photos.map((src,i)=><button type="button" onClick={()=>setActive(i)} key={i} className={`aspect-[4/3] overflow-hidden rounded-md border-2 bg-muted ${i===active?"border-primary":"border-border"}`}><img src={src} alt={`${p.title} photo ${i+1}`} loading="lazy" className="h-full w-full object-cover"/></button>)}</div>}{p.video&&<video src={p.video} controls className="mt-4 w-full rounded-card bg-muted"/>}<div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">{p.description||"No description provided."}</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:p.sellerId??"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Seller</small></span></Link></div>{wa?<Button asChild className="w-full" size="lg"><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> WhatsApp seller</a></Button>:<Button className="w-full" size="lg" disabled><MessageCircle/> WhatsApp seller</Button>}{p.phone&&<Button asChild variant="outline" size="lg" className="mt-3 w-full"><a href={`tel:${p.phone}`}>Call {p.phone}</a></Button>}<Button variant="ghost" className="mt-3 w-full" onClick={()=>void toggleFav()}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button><p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell>;
+}
 
 export function SellerPage() { return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><div className="rounded-card border border-border bg-card p-7 shadow-card md:flex md:items-center md:justify-between"><div className="flex items-center gap-5"><div className="grid size-20 place-items-center rounded-full bg-secondary text-primary"><Store className="size-9"/></div><div><p className="flex items-center gap-1 text-sm text-primary"><BadgeCheck className="size-4"/> Verified business</p><h1 className="font-display text-3xl font-bold">Prestige Motors KE</h1><p className="mt-1 text-sm text-muted-foreground">Karen, Nairobi · Member since 2022</p></div></div><Button className="mt-5 md:mt-0"><MessageCircle/> Contact seller</Button></div><div className="py-10"><PageTitle title="Seller listings" copy="18 active listings · Usually responds within 10 minutes"/><ProductGrid/></div></div></SiteShell> }
 
@@ -98,7 +118,8 @@ export function FavoritesPage() {
     .from("favorites")
     .select("product_id, products(id,title,price_ksh,location,condition,seller_id,images)")
     .eq("user_id",session.user.id);
-  const mapped:CardProduct[]=(data??[]).map((row:any)=>{
+  const imgs=await mediaUrls((data??[]).map((row:any)=>row.products?.images?.[0]??"/placeholder.svg"));
+  const mapped:CardProduct[]=(data??[]).map((row:any,idx:number)=>{
     const prod=row.products;
     return {
       id: prod?.id ?? "",
@@ -106,7 +127,7 @@ export function FavoritesPage() {
       price: Number(prod?.price_ksh ?? 0),
       location: prod?.location ?? null,
       condition: prod?.condition ?? null,
-      image: "/placeholder.svg",
+      image: imgs[idx] ?? "/placeholder.svg",
       seller: "VroomEver seller",
     };
   });
@@ -198,7 +219,7 @@ export function AuthPage({
 
         const session = data.session;
         if (!session) {
-          setInfo("Account created. Please confirm your email, then sign in.");
+          setInfo(`Your ${signupRole.toUpperCase()} account was created. Check your email to confirm it, then sign in using the ${signupRole === "seller" ? "Seller" : "Buyer"} login form.`);
           return;
         }
 
@@ -208,9 +229,23 @@ export function AuthPage({
         return;
       }
 
-      // Login path
+      // Login path — each form only accepts its own account type
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
+      const { data: roleRow } = await getMyRoleRow();
+      const actual = roleRow?.role ?? "buyer";
+      const expected = lockedRole ?? role;
+      if (actual === "admin") {
+        await supabase.auth.signOut();
+        throw new Error("This is an administrator account. Please sign in through the Master Admin login at /masteradmin/login.");
+      }
+      if (actual !== expected) {
+        await supabase.auth.signOut();
+        setRole(actual);
+        throw new Error(actual === "seller"
+          ? "This email is registered as a SELLER account. Please use the Seller login form below."
+          : "This email is registered as a BUYER account. Please use the Buyer login form below.");
+      }
       await routeByRole(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please try again.");
@@ -248,7 +283,7 @@ export function AuthPage({
           </div>
           <p className="mt-10 text-sm text-primary">{signup ? "Join Vrumever" : "Welcome back"}</p>
           <h1 className="mt-2 font-display text-4xl font-bold">
-            {signup ? "Create your account" : "Sign in to continue"}
+            {signup ? "Create your account" : role === "seller" ? "Seller sign in" : "Buyer sign in"}
           </h1>
           <p className="mt-2 text-sm text-surface-muted">
             {signup
@@ -256,6 +291,15 @@ export function AuthPage({
               : "Your saved items and conversations await."}
           </p>
 
+          {!signup && (
+            <div className="mt-7 grid grid-cols-2 gap-2 rounded-card border border-white/10 bg-white/5 p-1">
+              {(["buyer","seller"] as const).map((r) => (
+                <button key={r} type="button" onClick={() => { setRole(r); setError(""); }} className={`rounded-lg py-2.5 text-sm font-semibold transition ${role === r ? "bg-primary text-primary-foreground" : "text-surface-muted"}`}>
+                  {r === "buyer" ? "Buyer login" : "Seller login"}
+                </button>
+              ))}
+            </div>
+          )}
           {signup && (
             <>
               <div className="mt-7 grid grid-cols-2 gap-3">
@@ -338,7 +382,7 @@ export function AuthPage({
             {signup ? "Already a member? " : "New to Vrumever? "}
             <Link
               to="/auth"
-              search={{ role: signupRole, mode: signup ? "login" : "signup" }}
+              search={{ role: signup ? signupRole : role, mode: signup ? "login" : "signup" }}
               className="font-semibold text-primary"
             >
               {signup ? "Sign in" : "Create an account"}
