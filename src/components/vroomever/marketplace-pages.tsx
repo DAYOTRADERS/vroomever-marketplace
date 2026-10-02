@@ -94,13 +94,15 @@ export function ProductPage({ id }: { id: string }) {
  const sample=undefined as undefined|{title:string;price:number;location:string;condition:string;vip?:boolean;seller:string;image:string};
  const [p,setP]=useState<null|{title:string;price:number;location:string|null;condition:string|null;vip:boolean;description:string;seller:string;sellerId:string|null;phone:string|null;photos:string[];video:string|null}>(sample?{title:sample.title,price:sample.price,location:sample.location,condition:sample.condition,vip:!!sample.vip,description:"Exceptionally clean and well maintained. Available for viewing. Serious buyers are welcome to contact the seller directly.",seller:sample.seller,sellerId:null,phone:null,photos:[sample.image],video:null}:null);
  const [missing,setMissing]=useState(false);
- const [active,setActive]=useState(0);
+  const [active,setActive]=useState(0);
+  const touchX=useRef(0);
  const [liked,setLiked]=useState(false);
  useEffect(()=>{if(sample)return;(async()=>{
   const {data}=await supabase.from("products").select("*").eq("id",id).eq("status","active").maybeSingle();
   if(!data){setMissing(true);return;}
   const [{data:prof},photos,vid]=await Promise.all([supabase.rpc("get_public_profile",{_id:data.seller_id}).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
   setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"VRUMEVER seller",sellerId:data.seller_id,phone:toIntl((data as {contact_phone?:string|null}).contact_phone)??toIntl(prof?.phone),photos,video:vid[0]??null});
+   setActive(0);
   const {data:{session}}=await supabase.auth.getSession();
   if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
  })();},[id,sample]);
