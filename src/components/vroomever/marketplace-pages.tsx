@@ -415,6 +415,7 @@ export function AuthPage({
             />
           </label>
 
+          {!forgot && (
           <label className="mt-5 block text-sm">
             Password
             <Input
@@ -426,6 +427,7 @@ export function AuthPage({
               autoComplete={signup ? "new-password" : "current-password"}
             />
           </label>
+          )}
 
           {signup && (
             <label className="mt-5 flex gap-3 text-sm text-surface-muted">
