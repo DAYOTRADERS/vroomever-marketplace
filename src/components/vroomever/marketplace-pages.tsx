@@ -227,6 +227,9 @@ export function AuthPage({
           options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
         });
         if (signUpError) throw signUpError;
+        if (data.user && (data.user.identities?.length ?? 0) === 0) {
+          throw new Error("This email is already used. Please log in or use another email.");
+        }
 
         const session = data.session;
         if (!session) {
