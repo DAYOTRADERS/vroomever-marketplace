@@ -123,7 +123,7 @@ export function SupportPage() {
                   <div className="mt-3 grid gap-2">
                     {replies.filter((r) => r.message_id === t.id).map((r) => (
                       <div key={r.id} className={`max-w-[90%] rounded-lg p-3 text-sm ${r.is_admin ? "border border-primary/30 bg-primary/10" : "ml-auto bg-secondary"}`}>
-                        <strong className="block text-xs">{r.is_admin ? "Vroomever Support" : "You"} · {new Date(r.created_at).toLocaleString()}</strong>
+                        <strong className="block text-xs">{r.is_admin ? "VRUMEVER Support" : "You"} · {new Date(r.created_at).toLocaleString()}</strong>
                         <span className="whitespace-pre-line">{r.body}</span>
                       </div>
                     ))}

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/auth/confirm")({ component: AuthConfirmPa
 function AuthConfirmPage() {
   const nav = useNavigate();
   const [state, setState] = useState<"loading" | "success" | "error">("loading");
-  const [message, setMessage] = useState("Verifying your Vroomever email…");
+  const [message, setMessage] = useState("Verifying your VRUMEVER email…");
 
   useEffect(() => {
     let alive = true;
@@ -33,7 +33,7 @@ function AuthConfirmPage() {
             setState("error");
             setMessage(
               error.message.includes("expired")
-                ? "This link has expired. Please request a new Vroomever email."
+                ? "This link has expired. Please request a new VRUMEVER email."
                 : error.message,
             );
           }
@@ -44,7 +44,7 @@ function AuthConfirmPage() {
           setState("error");
           setMessage(
             errorCode === "otp_expired"
-              ? "This link is expired or was already opened. Please request a new Vroomever email."
+              ? "This link is expired or was already opened. Please request a new VRUMEVER email."
               : errorDescription || "We could not verify this email link.",
           );
         }
@@ -56,7 +56,7 @@ function AuthConfirmPage() {
       if (!id) {
         if (alive) {
           setState("error");
-          setMessage("This link did not create a Vroomever session. Please request a new email.");
+          setMessage("This link did not create a VRUMEVER session. Please request a new email.");
         }
         return;
       }
@@ -66,7 +66,7 @@ function AuthConfirmPage() {
       if (!profile?.role) {
         if (alive) {
           setState("error");
-          setMessage("Your email was verified, but your Vroomever profile is missing.");
+          setMessage("Your email was verified, but your VRUMEVER profile is missing.");
         }
         return;
       }
@@ -123,7 +123,7 @@ function AuthConfirmPage() {
         <p className="mt-3 text-sm text-surface-muted">{message}</p>
         {state === "success" ? (
           <Button className="mt-7 w-full" onClick={() => void continueToAccount()}>
-            Continue to Vroomever
+            Continue to VRUMEVER
           </Button>
         ) : (
           <Button className="mt-7 w-full" asChild>

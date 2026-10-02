@@ -9,10 +9,10 @@ import { Brand } from "@/components/vroomever/brand";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Reset your password — Vroomever" },
-      { name: "description", content: "Set a new password for your Vroomever buyer or seller account." },
-      { property: "og:title", content: "Reset your password — Vroomever" },
-      { property: "og:description", content: "Set a new password for your Vroomever buyer or seller account." },
+      { title: "Reset your password — VRUMEVER" },
+      { name: "description", content: "Set a new password for your VRUMEVER buyer or seller account." },
+      { property: "og:title", content: "Reset your password — VRUMEVER" },
+      { property: "og:description", content: "Set a new password for your VRUMEVER buyer or seller account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

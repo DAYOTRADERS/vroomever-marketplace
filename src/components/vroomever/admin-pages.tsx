@@ -147,7 +147,7 @@ export function AdminLoginPage() {
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
-        <p className="mt-2 text-sm text-surface-muted">Sign in to the VroomEver administration panel.</p>
+        <p className="mt-2 text-sm text-surface-muted">Sign in to the VRUMEVER administration panel.</p>
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <label className="mt-6 block text-sm">
           Admin email
@@ -282,7 +282,7 @@ export function AdminOverview() {
   }, []);
   return (
     <AdminShell>
-      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the Vroomever database." />
+      <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the VRUMEVER database." />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Total users" value={String(s.users)} />
         <Stat label="Sellers" value={String(s.sellers)} />
@@ -773,7 +773,7 @@ export function AdminDatabasePage() {
         </div>
       </header>
       <main className="mx-auto max-w-7xl space-y-8 p-5 lg:p-8">
-        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VroomEver Supabase database." />
+        <PageTitle eyebrow="Administration" title="Users & products" copy="Live records from the VRUMEVER Supabase database." />
         {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <div className="grid gap-4 sm:grid-cols-2">
           <Stat label="Users" value={String(users.length)} />

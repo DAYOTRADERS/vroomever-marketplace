@@ -28,9 +28,9 @@ export const analyzeSupportMessage = createServerFn({ method: "POST" })
         {
           role: "system",
           content:
-            `You triage support messages for Vroomever, a Kenyan online marketplace. Reply with ONLY a JSON object, no markdown: ` +
+            `You triage support messages for VRUMEVER, a Kenyan online marketplace. Reply with ONLY a JSON object, no markdown: ` +
             `{"summary": one or two plain sentences, "topic": one of ${JSON.stringify(TOPICS)}, "urgency": one of ${JSON.stringify(URGENCY)}, ` +
-            `"suggested_reply": a polite, helpful reply of 40-120 words an admin could send, addressed to the user by first name, signed "Vroomever Support"}. ` +
+            `"suggested_reply": a polite, helpful reply of 40-120 words an admin could send, addressed to the user by first name, signed "VRUMEVER Support"}. ` +
             `Urgency: urgent = fraud, threats, money lost or account takeover; high = cannot use the service; medium = problem with a workaround; low = questions or feedback. Never promise refunds.`,
         },
         { role: "user", content: `Name: ${msg.name}\nUser-selected topic: ${msg.topic}\nMessage:\n${msg.message}` },
