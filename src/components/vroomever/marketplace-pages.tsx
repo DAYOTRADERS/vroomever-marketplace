@@ -2,11 +2,11 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
  ArrowLeft, ArrowRight, BadgeCheck, BarChart3, Bell, Camera, Check, CheckCircle2, ChevronLeft, ChevronRight,
  CircleDollarSign, Clock3, Eye, FileVideo, Filter, Heart, ImagePlus, ListChecks, MapPin, MessageCircle,
- PackageCheck, Phone, Plus, Search, ShieldCheck, Sparkles, Star, Store, UploadCloud, UserRound, UsersRound,
+ PackageCheck, Phone, Play, Plus, Search, ShieldCheck, Sparkles, Star, Store, UploadCloud, UserRound, UsersRound,
  WalletCards, WandSparkles, X, Zap,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
