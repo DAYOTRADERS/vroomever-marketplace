@@ -3,7 +3,6 @@ import { ShieldCheck, CheckCircle2, Loader2, MailCheck } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
-import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brand } from "@/components/vroomever/brand";
