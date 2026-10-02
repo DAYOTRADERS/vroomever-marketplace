@@ -648,17 +648,3 @@ export function LegalPage({type}:{type:"terms"|"privacy"|"seller"|"buyer"}) {
  return <SiteShell><article className="mx-auto max-w-3xl px-5 py-14"><PageTitle eyebrow="VroomEver legal" title={content.title} copy="Effective September 2026 · VroomEver marketplace terms"/>{content.sections.map(([s,p],i)=><section key={s} className="border-t border-border py-6"><h2 className="font-display text-xl font-bold">{i+1}. {s}</h2><p className="mt-3 leading-7 text-muted-foreground">{p}</p></section>)}</article></SiteShell>
 }
 
-export function SupportPage(){
- const [name,setName]=useState("");const [email,setEmail]=useState("");const [topic,setTopic]=useState("help");const [message,setMessage]=useState("");
- const [uid,setUid]=useState<string|null>(null);const [busy,setBusy]=useState(false);const [msg,setMsg]=useState<{ok:boolean;text:string}|null>(null);
- useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const u=data.session?.user;if(!u)return;setUid(u.id);setEmail(u.email??"");const {data:pr}=await supabase.from("profiles").select("full_name").eq("id",u.id).maybeSingle();setName(pr?.full_name??"");});},[]);
- const send=async(e:FormEvent)=>{e.preventDefault();setMsg(null);
-  const n=name.trim(),em=email.trim(),m=message.trim();
-  if(!n||n.length>100)return setMsg({ok:false,text:"Enter your name (up to 100 characters)."});
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)||em.length>255)return setMsg({ok:false,text:"Enter a valid email so we can reply."});
-  if(m.length<5||m.length>2000)return setMsg({ok:false,text:"Write a message between 5 and 2000 characters."});
-  setBusy(true);const {error}=await supabase.from("support_messages").insert({name:n,email:em,topic,message:m,user_id:uid});setBusy(false);
-  if(error)return setMsg({ok:false,text:"Could not send right now. Please try again."});
-  setMessage("");setMsg({ok:true,text:"Thanks — your message reached our support team. We will reply by email."});};
- return <SiteShell><div className="mx-auto max-w-2xl px-4 py-8 sm:px-5 sm:py-10"><PageTitle eyebrow="Help centre" title="Contact support" copy="Report a problem, a suspicious user or ask for help. Our team reads every message."/><form onSubmit={send} className="glass-panel grid gap-4 rounded-card p-5 sm:p-6"><label className="text-sm font-semibold">Name<Input className="mt-2" value={name} onChange={e=>setName(e.target.value)} maxLength={100}/></label><label className="text-sm font-semibold">Email<Input className="mt-2" type="email" value={email} onChange={e=>setEmail(e.target.value)} maxLength={255}/></label><label className="text-sm font-semibold">Topic<select value={topic} onChange={e=>setTopic(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3"><option value="help">I need help</option><option value="report">Report a problem or user</option><option value="account">Account or login</option><option value="payment">Packages and payments</option><option value="other">Other</option></select></label><label className="text-sm font-semibold">Message<Textarea className="mt-2 min-h-36" value={message} onChange={e=>setMessage(e.target.value)} maxLength={2000}/></label>{msg&&<p className={`rounded-lg p-3 text-sm ${msg.ok?"bg-secondary text-primary":"bg-destructive/10 text-destructive"}`}>{msg.text}</p>}<Button type="submit" disabled={busy}>{busy?"Sending…":"Send message"}</Button></form></div></SiteShell>;
-}
