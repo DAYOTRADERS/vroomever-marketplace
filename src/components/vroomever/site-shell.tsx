@@ -51,7 +51,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground" placeholder="Search marketplace" />
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {([["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard], ...(canSell ? [["/seller/listings", "Listings", Store]] : [])] as const).map(([to, label, Icon]) => (
+          {([["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard], ...(canSell ? [["/seller/listings", "Listings", Store]] : [])] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
             <Link key={label} to={to} className={`grid place-items-center gap-1.5 rounded-2xl border p-3 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5"}`}><Icon className="size-5" />{label}</Link>
           ))}
           <button onClick={() => setDark(!dark)} className="grid place-items-center gap-1.5 rounded-2xl border border-white/10 bg-white/5 p-3 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-primary/60">{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</button>
