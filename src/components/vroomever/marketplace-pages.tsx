@@ -20,6 +20,27 @@ import { SiteShell } from "./site-shell";
 import { categories, formatKsh, packages, products, vipOptions } from "@/data/marketplace";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
+import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
+import { generateListingDescription } from "@/lib/describe.functions";
+import { useServerFn } from "@tanstack/react-start";
+
+type DbProduct = { id:string; title:string; price_ksh:number; location:string|null; condition:string|null; images:string[]; is_vip:boolean; category_slug:string; seller_id:string; views:number; description?:string|null; subcategory?:string|null; video_url?:string|null };
+async function toCards(rows: DbProduct[]): Promise<CardProduct[]> {
+ const firsts=await mediaUrls(rows.map(r=>r.images?.[0]??""));
+ let i=0; const urls=rows.map(r=>r.images?.[0]?firsts[i++]:undefined);
+ return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"Vroomever seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
+}
+function useLiveProducts(category?: string) {
+ const [items,setItems]=useState<CardProduct[]|null>(null);
+ useEffect(()=>{let alive=true;(async()=>{let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active").order("is_vip",{ascending:false}).order("created_at",{ascending:false}).limit(24); if(category)q=q.eq("category_slug",category); const {data}=await q; const cards=await toCards((data??[]) as DbProduct[]); if(alive)setItems(cards);})();return()=>{alive=false};},[category]);
+ return items;
+}
+function LiveGrid({ category }: { category?: string }) {
+ const live=useLiveProducts(category);
+ const sample=category?(products.filter(p=>p.category===category) as unknown as CardProduct[]):(products as unknown as CardProduct[]);
+ if(live===null)return <p className="text-sm text-muted-foreground">Loading listings…</p>;
+ return <ProductGrid items={[...live,...sample]}/>;
+}
 
 export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; title: string; copy?: string; action?: React.ReactNode }) {
  return <div className="mb-8 flex flex-wrap items-end justify-between gap-4"><div>{eyebrow && <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">{eyebrow}</p>}<h1 className="font-display text-3xl font-bold md:text-4xl">{title}</h1>{copy && <p className="mt-2 max-w-2xl text-muted-foreground">{copy}</p>}</div>{action}</div>;
@@ -35,12 +56,12 @@ export function HomePage() { return <SiteShell>
    <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary"><Sparkles className="size-3.5" /> Kenya’s marketplace, reimagined</span>
    <h1 className="mt-7 font-display text-5xl font-bold leading-[1.05] md:text-7xl">Find remarkable.<br/><span className="text-primary">Trade confidently.</span></h1>
    <p className="mt-6 max-w-xl text-lg leading-relaxed text-surface-muted">Discover trusted sellers, standout products and better deals from every corner of Kenya.</p>
-   <div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><Link to="/auth" search={{ role: "buyer" }}>Explore marketplace <ArrowRight /></Link></Button><Button asChild size="lg" variant="glass"><Link to="/auth" search={{ role: "seller" }}><Plus /> Start selling</Link></Button></div>
+   <div className="mt-8 flex flex-wrap gap-3"><Button asChild size="lg"><Link to="/auth" search={{ role: "buyer", mode: "login" }}>Explore marketplace <ArrowRight /></Link></Button><Button asChild size="lg" variant="glass"><Link to="/auth" search={{ role: "seller", mode: "login" }}><Plus /> Start selling</Link></Button></div>
    <div className="mt-10 flex flex-wrap gap-8 text-sm"><span><strong className="block font-display text-2xl">24K+</strong><span className="text-surface-muted">live listings</span></span><span><strong className="block font-display text-2xl">8.2K</strong><span className="text-surface-muted">verified sellers</span></span><span><strong className="block font-display text-2xl">47</strong><span className="text-surface-muted">counties reached</span></span></div>
   </div></div>
  </section>
  <section className="mx-auto max-w-7xl px-5 py-16"><PageTitle eyebrow="Explore" title="Everything you need, one marketplace" copy="Browse curated categories from trusted sellers near you."/><CategoryGrid /></section>
- <section className="border-y border-border bg-muted/45"><div className="mx-auto max-w-7xl px-5 py-16"><PageTitle eyebrow="VIP spotlight" title="Extraordinary finds, front and centre" action={<Button asChild variant="outline"><Link to="/dashboard">View all <ArrowRight /></Link></Button>}/><ProductGrid items={products} /></div></section>
+ <section className="border-y border-border bg-muted/45"><div className="mx-auto max-w-7xl px-5 py-16"><PageTitle eyebrow="VIP spotlight" title="Extraordinary finds, front and centre" action={<Button asChild variant="outline"><Link to="/dashboard">View all <ArrowRight /></Link></Button>}/><LiveGrid /></div></section>
  <section className="mx-auto max-w-7xl px-5 py-16"><div className="grid gap-6 md:grid-cols-3">{([[ShieldCheck,"Trade with confidence","Verified seller profiles and transparent listing details."],[MessageCircle,"Connect directly","Reach sellers instantly by call or WhatsApp."],[Zap,"Sell without friction","Create polished listings and reach buyers across Kenya."]] as [LucideIcon,string,string][]).map(([Icon,t,c])=><div className="rounded-card border border-border bg-card p-7 shadow-card" key={t as string}><Icon className="size-8 text-primary"/><h3 className="mt-5 font-display text-xl font-bold">{t as string}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c as string}</p></div>)}</div></section>
  </SiteShell>;
 }
@@ -57,13 +78,33 @@ export function DashboardPage() {
  return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10">
  <div className="relative overflow-hidden rounded-card bg-surface-strong p-7 text-surface-foreground md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><div className="mt-7 flex rounded-card bg-background p-2"><Search className="m-3 size-5 text-muted-foreground"/><Input className="h-11 border-0 shadow-none" placeholder="Search the marketplace"/><Button>Search</Button></div></div></div>
  <div className="py-10"><PageTitle title="Browse categories"/><CategoryGrid/></div>
- <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<Button variant="outline"><Filter/> Filters</Button>}/><ProductGrid/></div><div className="pb-12 flex justify-end"><Button variant="outline" onClick={signOut}>Sign Out</Button></div>
+ <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<Button variant="outline"><Filter/> Filters</Button>}/><LiveGrid/></div><div className="pb-12 flex justify-end"><Button variant="outline" onClick={signOut}>Sign Out</Button></div>
  </div></SiteShell>;
 }
 
-export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; const filtered=products.filter(p=>p.category===cat.slug); return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><div className="flex items-center gap-4"><span className="grid size-14 place-items-center rounded-card bg-secondary text-primary"><cat.icon/></span><PageTitle eyebrow="Category" title={cat.name} copy={`${filtered.length || 248} listings available across Kenya`} /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div>{filtered.length ? <ProductGrid items={filtered as unknown as CardProduct[]}/> : <><p className="mb-5 text-sm text-muted-foreground">Popular picks in {cat.name}</p><ProductGrid/></>}</div></div></div></SiteShell> }
+export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; const filtered=products.filter(p=>p.category===cat.slug); return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><div className="flex items-center gap-4"><span className="grid size-14 place-items-center rounded-card bg-secondary text-primary"><cat.icon/></span><PageTitle eyebrow="Category" title={cat.name} copy={`Approved listings across Kenya`} /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div><LiveGrid category={cat.slug}/></div></div></div></SiteShell> }
 
-export function ProductPage({ id }: { id: string }) { const p=products.find(x=>x.id===id) ?? products[0]!; const [liked,setLiked]=useState(false); return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/> Back to marketplace</Link><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={p.image} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">1 / 5 photos</span></div><div className="mt-3 grid grid-cols-5 gap-3">{[0,1,2,3,4].map(i=><div key={i} className="aspect-[4/3] overflow-hidden rounded-md border border-border bg-muted"><img src={p.image} alt="" width={1200} height={900} loading="lazy" className="h-full w-full object-cover opacity-80"/></div>)}</div><div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 leading-relaxed text-muted-foreground">Exceptionally clean and well maintained. Fully inspected, paperwork ready, and available for viewing. Serious buyers are welcome to contact the verified seller directly.</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Verified seller</small></span></Link></div><Button className="w-full" size="lg"><MessageCircle/> WhatsApp seller</Button><Button variant="outline" size="lg" className="mt-3 w-full">Show phone number</Button><Button variant="ghost" className="mt-3 w-full" onClick={()=>setLiked(!liked)}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button><p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell> }
+export function ProductPage({ id }: { id: string }) {
+ const sample=products.find(x=>x.id===id);
+ const [p,setP]=useState<null|{title:string;price:number;location:string|null;condition:string|null;vip:boolean;description:string;seller:string;sellerId:string|null;phone:string|null;photos:string[];video:string|null}>(sample?{title:sample.title,price:sample.price,location:sample.location,condition:sample.condition,vip:!!sample.vip,description:"Exceptionally clean and well maintained. Available for viewing. Serious buyers are welcome to contact the seller directly.",seller:sample.seller,sellerId:null,phone:null,photos:[sample.image],video:null}:null);
+ const [missing,setMissing]=useState(false);
+ const [active,setActive]=useState(0);
+ const [liked,setLiked]=useState(false);
+ useEffect(()=>{if(sample)return;(async()=>{
+  const {data}=await supabase.from("products").select("*").eq("id",id).maybeSingle();
+  if(!data){setMissing(true);return;}
+  const [{data:prof},photos,vid]=await Promise.all([supabase.from("profiles").select("full_name,phone").eq("id",data.seller_id).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
+  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"Vroomever seller",sellerId:data.seller_id,phone:prof?.phone??null,photos,video:vid[0]??null});
+  const {data:{session}}=await supabase.auth.getSession();
+  if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
+ })();},[id,sample]);
+ const toggleFav=async()=>{const {data:{session}}=await supabase.auth.getSession(); if(!session){window.location.href="/auth?role=buyer&mode=login";return;} if(sample){setLiked(!liked);return;} if(liked){await supabase.from("favorites").delete().eq("user_id",session.user.id).eq("product_id",id);setLiked(false);}else{await supabase.from("favorites").insert({user_id:session.user.id,product_id:id});setLiked(true);}};
+ if(missing)return <SiteShell><div className="mx-auto max-w-3xl px-5 py-20 text-center"><h1 className="font-display text-3xl font-bold">Listing not available</h1><p className="mt-3 text-muted-foreground">It may be awaiting approval or was removed.</p><Button asChild className="mt-6"><Link to="/dashboard">Back to marketplace</Link></Button></div></SiteShell>;
+ if(!p)return <SiteShell><div className="mx-auto max-w-7xl px-5 py-20 text-sm text-muted-foreground">Loading listing…</div></SiteShell>;
+ const photos=p.photos.length?p.photos:["/placeholder.svg"];
+ const wa=p.phone?`https://wa.me/${p.phone.replace(/\D/g,"").replace(/^0/,"254")}?text=${encodeURIComponent("Hi, I'm interested in "+p.title+" on Vroomever")}`:null;
+ return <SiteShell><div className="mx-auto max-w-7xl px-5 py-8"><Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="size-4"/> Back to marketplace</Link><div className="grid gap-8 lg:grid-cols-[1.35fr_.65fr]"><div><div className="relative overflow-hidden rounded-card bg-muted"><img src={photos[active]} alt={p.title} width={1200} height={900} className="aspect-[4/3] w-full object-cover"/><span className="absolute bottom-4 right-4 rounded-full bg-surface-strong/80 px-3 py-1.5 text-xs text-surface-foreground">{active+1} / {photos.length} photos</span></div>{photos.length>1&&<div className="mt-3 grid grid-cols-5 gap-3">{photos.map((src,i)=><button type="button" onClick={()=>setActive(i)} key={i} className={`aspect-[4/3] overflow-hidden rounded-md border-2 bg-muted ${i===active?"border-primary":"border-border"}`}><img src={src} alt={`${p.title} photo ${i+1}`} loading="lazy" className="h-full w-full object-cover"/></button>)}</div>}{p.video&&<video src={p.video} controls className="mt-4 w-full rounded-card bg-muted"/>}<div className="mt-8"><h2 className="font-display text-2xl font-bold">Description</h2><p className="mt-4 whitespace-pre-line leading-relaxed text-muted-foreground">{p.description||"No description provided."}</p></div></div><aside><div className="sticky top-24 rounded-card border border-border bg-card p-6 shadow-elevated">{p.vip&&<Badge className="bg-vip text-vip-foreground"><Sparkles/> VIP listing</Badge>}<p className="mt-4 text-sm text-primary">{p.condition}</p><h1 className="mt-2 font-display text-3xl font-bold">{p.title}</h1><p className="mt-4 font-display text-3xl font-bold text-primary">{formatKsh(p.price)}</p><p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="size-4"/>{p.location}</p><div className="my-6 border-y border-border py-5"><p className="text-xs text-muted-foreground">SELLER</p><Link to="/seller/$id" params={{id:p.sellerId??"prestige-motors"}} className="mt-2 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-full bg-secondary"><Store/></span><span><strong className="block">{p.seller}</strong><small className="flex items-center gap-1 text-primary"><BadgeCheck className="size-3"/> Seller</small></span></Link></div>{wa?<Button asChild className="w-full" size="lg"><a href={wa} target="_blank" rel="noreferrer"><MessageCircle/> WhatsApp seller</a></Button>:<Button className="w-full" size="lg" disabled><MessageCircle/> WhatsApp seller</Button>}{p.phone&&<Button asChild variant="outline" size="lg" className="mt-3 w-full"><a href={`tel:${p.phone}`}>Call {p.phone}</a></Button>}<Button variant="ghost" className="mt-3 w-full" onClick={()=>void toggleFav()}><Heart className={liked?"fill-current text-destructive":""}/> {liked?"Saved":"Save to favorites"}</Button><p className="mt-5 text-center text-xs text-muted-foreground"><ShieldCheck className="mr-1 inline size-3"/>Never pay in advance. Meet in a safe place.</p></div></aside></div></div></SiteShell>;
+}
 
 export function SellerPage() { return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><div className="rounded-card border border-border bg-card p-7 shadow-card md:flex md:items-center md:justify-between"><div className="flex items-center gap-5"><div className="grid size-20 place-items-center rounded-full bg-secondary text-primary"><Store className="size-9"/></div><div><p className="flex items-center gap-1 text-sm text-primary"><BadgeCheck className="size-4"/> Verified business</p><h1 className="font-display text-3xl font-bold">Prestige Motors KE</h1><p className="mt-1 text-sm text-muted-foreground">Karen, Nairobi · Member since 2022</p></div></div><Button className="mt-5 md:mt-0"><MessageCircle/> Contact seller</Button></div><div className="py-10"><PageTitle title="Seller listings" copy="18 active listings · Usually responds within 10 minutes"/><ProductGrid/></div></div></SiteShell> }
 
@@ -77,7 +118,8 @@ export function FavoritesPage() {
     .from("favorites")
     .select("product_id, products(id,title,price_ksh,location,condition,seller_id,images)")
     .eq("user_id",session.user.id);
-  const mapped:CardProduct[]=(data??[]).map((row:any)=>{
+  const imgs=await mediaUrls((data??[]).map((row:any)=>row.products?.images?.[0]??"/placeholder.svg"));
+  const mapped:CardProduct[]=(data??[]).map((row:any,idx:number)=>{
     const prod=row.products;
     return {
       id: prod?.id ?? "",
@@ -85,7 +127,7 @@ export function FavoritesPage() {
       price: Number(prod?.price_ksh ?? 0),
       location: prod?.location ?? null,
       condition: prod?.condition ?? null,
-      image: "/placeholder.svg",
+      image: imgs[idx] ?? "/placeholder.svg",
       seller: "VroomEver seller",
     };
   });
@@ -171,13 +213,13 @@ export function AuthPage({
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName, role: signupRole } },
+          options: { data: { full_name: fullName, role: signupRole }, emailRedirectTo: `${window.location.origin}/auth/confirm` },
         });
         if (signUpError) throw signUpError;
 
         const session = data.session;
         if (!session) {
-          setInfo("Account created. Please confirm your email, then sign in.");
+          setInfo(`Your ${signupRole.toUpperCase()} account was created. Check your email to confirm it, then sign in using the ${signupRole === "seller" ? "Seller" : "Buyer"} login form.`);
           return;
         }
 
@@ -187,9 +229,23 @@ export function AuthPage({
         return;
       }
 
-      // Login path
+      // Login path — each form only accepts its own account type
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
+      const { data: roleRow } = await getMyRoleRow();
+      const actual = roleRow?.role ?? "buyer";
+      const expected = role;
+      if (actual === "admin") {
+        await supabase.auth.signOut();
+        throw new Error("This is an administrator account. Please sign in through the Master Admin login at /masteradmin/login.");
+      }
+      if (actual !== expected) {
+        await supabase.auth.signOut();
+        setRole(actual);
+        throw new Error(actual === "seller"
+          ? "This email is registered as a SELLER account. Please use the Seller login form below."
+          : "This email is registered as a BUYER account. Please use the Buyer login form below.");
+      }
       await routeByRole(data.session);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed. Please try again.");
@@ -227,7 +283,7 @@ export function AuthPage({
           </div>
           <p className="mt-10 text-sm text-primary">{signup ? "Join Vrumever" : "Welcome back"}</p>
           <h1 className="mt-2 font-display text-4xl font-bold">
-            {signup ? "Create your account" : "Sign in to continue"}
+            {signup ? "Create your account" : role === "seller" ? "Seller sign in" : "Buyer sign in"}
           </h1>
           <p className="mt-2 text-sm text-surface-muted">
             {signup
@@ -235,6 +291,15 @@ export function AuthPage({
               : "Your saved items and conversations await."}
           </p>
 
+          {!signup && (
+            <div className="mt-7 grid grid-cols-2 gap-2 rounded-card border border-white/10 bg-white/5 p-1">
+              {(["buyer","seller"] as const).map((r) => (
+                <button key={r} type="button" onClick={() => { setRole(r); setError(""); }} className={`rounded-lg py-2.5 text-sm font-semibold transition ${role === r ? "bg-primary text-primary-foreground" : "text-surface-muted"}`}>
+                  {r === "buyer" ? "Buyer login" : "Seller login"}
+                </button>
+              ))}
+            </div>
+          )}
           {signup && (
             <>
               <div className="mt-7 grid grid-cols-2 gap-3">
@@ -317,7 +382,7 @@ export function AuthPage({
             {signup ? "Already a member? " : "New to Vrumever? "}
             <Link
               to="/auth"
-              search={{ role: signupRole, mode: signup ? "login" : "signup" }}
+              search={{ role: signup ? signupRole : role, mode: signup ? "login" : "signup" }}
               className="font-semibold text-primary"
             >
               {signup ? "Sign in" : "Create an account"}
@@ -340,8 +405,9 @@ export function SellPage() {
   const [location,setLocation]=useState("");
   const [description,setDescription]=useState("");
   const [condition,setCondition]=useState("Brand New");
-  const [photos,setPhotos]=useState<string[]>([]);
-  const [video,setVideo]=useState(false);
+  const [subcategory,setSubcategory]=useState("");
+  const [photos,setPhotos]=useState<File[]>([]);
+  const [video,setVideo]=useState<File|null>(null);
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState("");
   useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"seller",mode:"login"},replace:true});return;} const {data:profile}=await getMyRoleRow(); const sellerProfile=null as null|{user_id:string}; if(profile?.role!=="seller" && !sellerProfile){nav({to:"/auth",search:{role:"seller",mode:"login"},replace:true});return;} if(profile?.role!=="seller" && sellerProfile){await supabase.rpc("become_seller");} setAuthorized(true);});},[nav]);
@@ -350,28 +416,37 @@ export function SellPage() {
     const sellerId=sessionData.session?.user.id;
     if(!sellerId){nav({to:"/auth",search:{role:"seller",mode:"login"}});return;}
     if(!title.trim()||!price||Number(price)<0){setError("Add a valid title and price before publishing.");return;}
+    if(!photos.length){setError("Add at least one photo before publishing.");return;}
     setSaving(true);setError("");
+    let imagePaths:string[]=[]; let videoPath:string|null=null;
+    try{ imagePaths=await uploadListingMedia(sellerId,photos.slice(0,5)); if(video){videoPath=(await uploadListingMedia(sellerId,[video]))[0]??null;} }catch(e){setError(e instanceof Error?e.message:"Photo upload failed.");setSaving(false);return;}
     const {data:category}=await supabase.from("categories").select("slug").eq("slug",categorySlug).maybeSingle();
     if(!category){setError("Category is not available in the database. Apply the latest schema first.");setSaving(false);return;}
     const {error:insertError}=await supabase.from("products").insert({
       seller_id:sellerId,category_slug:category.slug,title:title.trim(),description:description.trim(),
-      price_ksh:Number(price),location:location.trim(),condition,status:"pending"
+      price_ksh:Number(price),location:location.trim(),condition,status:"pending",subcategory:subcategory||null,images:imagePaths,video_url:videoPath
     });
     if(insertError){setError(insertError.message);setSaving(false);return;}
     setStep(7);setSaving(false);
   };
   const next=()=>{setError("");setStep(Math.min(7,step+1));};
   if(!authorized)return null;
-  return <SiteShell><div className="mx-auto max-w-5xl px-5 py-10"><PageTitle eyebrow="Seller studio" title="Create a new listing" copy="Build a clear, trustworthy listing buyers will love."/><div className="mb-8 overflow-x-auto"><div className="flex min-w-[720px] items-center">{steps.map((s,i)=><div key={s} className="flex flex-1 items-center"><span className={`grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold ${i<=step?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground"}`}>{i<step?<Check className="size-4"/>:i+1}</span><span className="ml-2 text-xs font-medium">{s}</span>{i<steps.length-1&&<div className="mx-3 h-px flex-1 bg-border"/>}</div>)}</div></div><div className="rounded-card border border-border bg-card p-6 shadow-card md:p-9"><SellStep step={step} categorySlug={categorySlug} setCategorySlug={setCategorySlug} title={title} setTitle={setTitle} price={price} setPrice={setPrice} location={location} setLocation={setLocation} description={description} setDescription={setDescription} condition={condition} setCondition={setCondition} photos={photos} setPhotos={setPhotos} video={video} setVideo={setVideo}/>{error&&<p className="mt-5 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}<div className="mt-8 flex justify-between"><Button variant="outline" disabled={step===0||saving} onClick={()=>setStep(step-1)}><ArrowLeft/>Back</Button>{step<6?<Button onClick={next}>Continue<ArrowRight/></Button>:step===6?<Button onClick={publish} disabled={saving}>{saving?"Saving to database…":"Publish listing"}<Check/></Button>:<Button asChild><Link to="/seller/listings">View my listings</Link></Button>}</div></div></div></SiteShell>
+  return <SiteShell><div className="mx-auto max-w-5xl px-5 py-10"><PageTitle eyebrow="Seller studio" title="Create a new listing" copy="Build a clear, trustworthy listing buyers will love."/><div className="mb-8 overflow-x-auto"><div className="flex min-w-[720px] items-center">{steps.map((s,i)=><div key={s} className="flex flex-1 items-center"><span className={`grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold ${i<=step?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground"}`}>{i<step?<Check className="size-4"/>:i+1}</span><span className="ml-2 text-xs font-medium">{s}</span>{i<steps.length-1&&<div className="mx-3 h-px flex-1 bg-border"/>}</div>)}</div></div><div className="rounded-card border border-border bg-card p-6 shadow-card md:p-9"><SellStep step={step} categorySlug={categorySlug} setCategorySlug={setCategorySlug} title={title} setTitle={setTitle} price={price} setPrice={setPrice} location={location} setLocation={setLocation} description={description} setDescription={setDescription} condition={condition} setCondition={setCondition} photos={photos} setPhotos={setPhotos} video={video} setVideo={setVideo} subcategory={subcategory} setSubcategory={setSubcategory}/>{error&&<p className="mt-5 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}<div className="mt-8 flex justify-between"><Button variant="outline" disabled={step===0||saving} onClick={()=>setStep(step-1)}><ArrowLeft/>Back</Button>{step<6?<Button onClick={next}>Continue<ArrowRight/></Button>:step===6?<Button onClick={publish} disabled={saving}>{saving?"Saving to database…":"Publish listing"}<Check/></Button>:<Button asChild><Link to="/seller/listings">View my listings</Link></Button>}</div></div></div></SiteShell>
 }
 
-function SellStep({step,categorySlug,setCategorySlug,title,setTitle,price,setPrice,location,setLocation,description,setDescription,condition,setCondition,photos,setPhotos,video,setVideo}:{step:number;categorySlug:string;setCategorySlug:(x:string)=>void;title:string;setTitle:(x:string)=>void;price:string;setPrice:(x:string)=>void;location:string;setLocation:(x:string)=>void;description:string;setDescription:(x:string)=>void;condition:string;setCondition:(x:string)=>void;photos:string[];setPhotos:(x:string[])=>void;video:boolean;setVideo:(x:boolean)=>void}) {
+function SellStep({step,categorySlug,setCategorySlug,title,setTitle,price,setPrice,location,setLocation,description,setDescription,condition,setCondition,photos,setPhotos,video,setVideo,subcategory,setSubcategory}:{step:number;categorySlug:string;setCategorySlug:(x:string)=>void;title:string;setTitle:(x:string)=>void;price:string;setPrice:(x:string)=>void;location:string;setLocation:(x:string)=>void;description:string;setDescription:(x:string)=>void;condition:string;setCondition:(x:string)=>void;photos:File[];setPhotos:(x:File[])=>void;video:File|null;setVideo:(x:File|null)=>void;subcategory:string;setSubcategory:(x:string)=>void}) {
  const cat=categories.find(c=>c.slug===categorySlug)??categories[0]!;
+ const previews=useMemo(()=>photos.map(f=>URL.createObjectURL(f)),[photos]);
+ useEffect(()=>()=>previews.forEach(u=>URL.revokeObjectURL(u)),[previews]);
+ const describe=useServerFn(generateListingDescription);
+ const [aiBusy,setAiBusy]=useState(false); const [aiErr,setAiErr]=useState("");
+ const writeWithAi=async()=>{ if(title.trim().length<2){setAiErr("Add a title first so the AI knows what you're selling.");return;} setAiBusy(true);setAiErr(""); try{ const imgs=await Promise.all(photos.slice(0,3).map(f=>imageToDataUrl(f))); const r=await describe({data:{title,category:cat.name,subcategory,condition,price,location,notes:description,photos:imgs}}); setDescription(r.description);}catch(e){setAiErr(e instanceof Error?e.message:"AI description failed.");} finally{setAiBusy(false);} };
+ const addPhotos=(list:FileList|null)=>{ if(!list)return; const imgs=Array.from(list).filter(f=>f.type.startsWith("image/")); setPhotos([...photos,...imgs].slice(0,5)); };
  if(step===0)return <><h2 className="font-display text-2xl font-bold">What are you selling?</h2><div className="mt-6 flex gap-4 overflow-x-auto pb-3 snap-x">{categories.map(c=><button type="button" key={c.slug} onClick={()=>setCategorySlug(c.slug)} className={`min-w-[155px] snap-start rounded-card border p-4 text-left backdrop-blur-xl transition ${categorySlug===c.slug?"border-primary bg-primary/10":"border-border bg-white/50 hover:border-primary/60"}`}><c.icon className="mb-4 text-primary"/><strong className="text-sm">{c.name}</strong></button>)}</div></>;
- if(step===1)return <><h2 className="font-display text-2xl font-bold">Choose a subcategory</h2><div className="mt-6 flex gap-3 overflow-x-auto pb-3">{cat.subcategories.map(x=><button type="button" key={x} className="shrink-0 rounded-card border border-border bg-white/50 px-5 py-4 text-left backdrop-blur-xl hover:border-primary">{x}<ChevronRight className="ml-3 inline size-4"/></button>)}</div></>;
- if(step===2)return <><h2 className="font-display text-2xl font-bold">Describe your item</h2><div className="mt-6 grid gap-5 md:grid-cols-2"><label className="text-sm font-semibold md:col-span-2">Title<Input value={title} onChange={e=>setTitle(e.target.value)} className="mt-2" placeholder="e.g. Toyota Land Cruiser V8, 2018"/></label><label className="text-sm font-semibold">Price (KSh)<Input value={price} onChange={e=>setPrice(e.target.value)} className="mt-2" type="number" min="0" placeholder="0"/></label><label className="text-sm font-semibold">Location<Input value={location} onChange={e=>setLocation(e.target.value)} className="mt-2" placeholder="Area, county"/></label><label className="text-sm font-semibold">Condition<select value={condition} onChange={e=>setCondition(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3"><option>Brand New</option><option>Used</option><option>Foreign Used</option><option>Refurbished</option><option>Service Available</option></select></label><label className="text-sm font-semibold md:col-span-2">Description<Textarea value={description} onChange={e=>setDescription(e.target.value)} className="mt-2 min-h-32" placeholder="Condition, features and reason for selling..."/></label></div></>;
- if(step===3)return <><h2 className="font-display text-2xl font-bold">Add photos and video</h2><p className="mt-2 text-sm text-muted-foreground">Up to 5 photos and 1 video. Media upload storage can be connected separately without changing your listing data.</p><div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">{photos.map((_,i)=><div className="relative grid aspect-square place-items-center rounded-card bg-secondary" key={i}><Camera/><button type="button" onClick={()=>setPhotos(photos.filter((_,x)=>x!==i))} className="absolute right-2 top-2"><X className="size-4"/></button></div>)}{photos.length<5&&<button type="button" onClick={()=>setPhotos([...photos,`${photos.length}`])} className="grid aspect-square place-items-center rounded-card border border-dashed border-primary text-center text-primary"><span><ImagePlus className="mx-auto"/><small className="mt-2 block">Add photo</small></span></button>}</div><button type="button" disabled={video} onClick={()=>setVideo(true)} className="mt-5 flex w-full items-center justify-center gap-3 rounded-card border border-dashed border-border p-6 disabled:bg-secondary"><FileVideo/>{video?"Video added (1/1)":"Add one video"}</button></>;
- if(step===4)return <><h2 className="font-display text-2xl font-bold">Review your listing</h2><div className="mt-6 grid gap-5 rounded-card bg-muted p-5 md:grid-cols-[180px_1fr]"><div className="grid aspect-[4/3] place-items-center rounded-card bg-secondary"><Camera/></div><div><Badge>Pending review</Badge><h3 className="mt-3 font-display text-xl font-bold">{title||"Your listing title"}</h3><p className="mt-2 text-muted-foreground">{cat.name} · {location||"Kenya"} · Photos {photos.length}/5 · Video {video?1:0}/1</p><p className="mt-4 font-display text-2xl font-bold text-primary">KSh {Number(price||0).toLocaleString("en-KE")}</p></div></div></>;
+ if(step===1)return <><h2 className="font-display text-2xl font-bold">Choose a subcategory</h2><div className="mt-6 flex gap-3 overflow-x-auto pb-3">{cat.subcategories.map(x=><button type="button" key={x} onClick={()=>setSubcategory(x)} className={`shrink-0 rounded-card border px-5 py-4 text-left backdrop-blur-xl hover:border-primary ${subcategory===x?"border-primary bg-primary/10":"border-border bg-white/50"}`}>{x}<ChevronRight className="ml-3 inline size-4"/></button>)}</div></>;
+ if(step===2)return <><h2 className="font-display text-2xl font-bold">Describe your item</h2><div className="mt-6 grid gap-5 md:grid-cols-2"><label className="text-sm font-semibold md:col-span-2">Title<Input value={title} onChange={e=>setTitle(e.target.value)} className="mt-2" placeholder="e.g. Toyota Land Cruiser V8, 2018"/></label><label className="text-sm font-semibold">Price (KSh)<Input value={price} onChange={e=>setPrice(e.target.value)} className="mt-2" type="number" min="0" placeholder="0"/></label><label className="text-sm font-semibold">Location<Input value={location} onChange={e=>setLocation(e.target.value)} className="mt-2" placeholder="Area, county"/></label><label className="text-sm font-semibold">Condition<select value={condition} onChange={e=>setCondition(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-border bg-background px-3"><option>Brand New</option><option>Used</option><option>Foreign Used</option><option>Refurbished</option><option>Service Available</option></select></label><div className="md:col-span-2"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-semibold">Description</span><Button type="button" size="sm" variant="outline" onClick={()=>void writeWithAi()} disabled={aiBusy}><WandSparkles/>{aiBusy?"Writing…":description?"Improve with AI":"Write with AI"}</Button></div><Textarea value={description} onChange={e=>setDescription(e.target.value)} className="mt-2 min-h-40" placeholder="Jot down key facts (year, size, defects…) then tap “Write with AI” — tip: add photos first in the next step for a richer description."/>{aiErr&&<p className="mt-2 text-sm text-destructive">{aiErr}</p>}<p className="mt-1 text-xs text-muted-foreground">AI-powered. Always check the text is accurate before publishing.</p></div></div></>;
+ if(step===3)return <><h2 className="font-display text-2xl font-bold">Add photos and video</h2><p className="mt-2 text-sm text-muted-foreground">Up to 5 photos ({photos.length}/5) and 1 video. The first photo is your cover.</p><div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">{previews.map((src,i)=><div className="relative aspect-square overflow-hidden rounded-card bg-secondary" key={src}><img src={src} alt={`Photo ${i+1}`} className="h-full w-full object-cover"/>{i===0&&<span className="absolute left-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">Cover</span>}<button type="button" aria-label="Remove photo" onClick={()=>setPhotos(photos.filter((_,x)=>x!==i))} className="absolute right-2 top-2 rounded-full bg-background/90 p-1"><X className="size-4"/></button></div>)}{photos.length<5&&<label className="grid aspect-square cursor-pointer place-items-center rounded-card border border-dashed border-primary text-center text-primary"><input type="file" accept="image/*" multiple className="hidden" onChange={e=>{addPhotos(e.target.files);e.target.value="";}}/><span><ImagePlus className="mx-auto"/><small className="mt-2 block">Add photo</small></span></label>}</div>{video?<div className="mt-5 flex items-center justify-between rounded-card border border-border p-4"><span className="flex items-center gap-3 text-sm"><FileVideo/>{video.name} (1/1)</span><button type="button" aria-label="Remove video" onClick={()=>setVideo(null)}><X className="size-4"/></button></div>:<label className="mt-5 flex w-full cursor-pointer items-center justify-center gap-3 rounded-card border border-dashed border-border p-6"><input type="file" accept="video/*" className="hidden" onChange={e=>{const f=e.target.files?.[0]; if(f){ if(f.size>50*1024*1024){alert("Video must be under 50MB");} else setVideo(f);} e.target.value="";}}/><FileVideo/>Add one video</label>}</>;
+ if(step===4)return <><h2 className="font-display text-2xl font-bold">Review your listing</h2><div className="mt-6 grid gap-5 rounded-card bg-muted p-5 md:grid-cols-[180px_1fr]"><div className="grid aspect-[4/3] place-items-center overflow-hidden rounded-card bg-secondary">{previews[0]?<img src={previews[0]} alt="Cover" className="h-full w-full object-cover"/>:<Camera/>}</div><div><Badge>Pending review</Badge><h3 className="mt-3 font-display text-xl font-bold">{title||"Your listing title"}</h3><p className="mt-2 text-muted-foreground">{cat.name} · {location||"Kenya"} · Photos {photos.length}/5 · Video {video?1:0}/1</p>{description&&<p className="mt-3 line-clamp-4 whitespace-pre-line text-sm text-muted-foreground">{description}</p>}<p className="mt-4 font-display text-2xl font-bold text-primary">KSh {Number(price||0).toLocaleString("en-KE")}</p></div></div></>;
  if(step===5)return <><h2 className="font-display text-2xl font-bold">Choose a seller package</h2><div className="mt-6 grid gap-4 md:grid-cols-3">{packages.map(p=><PackageCard key={p.name} p={p}/>)}</div></>;
  if(step===6)return <PaymentPanel/>;
  return <div className="py-12 text-center"><span className="mx-auto grid size-20 place-items-center rounded-full bg-secondary text-primary"><CheckCircle2 className="size-10"/></span><h2 className="mt-6 font-display text-3xl font-bold">Saved to VroomEver</h2><p className="mx-auto mt-3 max-w-md text-muted-foreground">Your listing is now stored in the marketplace database with pending moderation status.</p></div>;

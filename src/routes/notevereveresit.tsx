@@ -177,16 +177,18 @@ function BootstrapAdminPage() {
     const password = String(form.get("password") ?? "");
     const fullName = String(form.get("fullName") ?? "").trim();
 
-    const { data: created, error: createError } = await supabase.functions.invoke("create-account", {
-      body: { email, password, fullName, role: "buyer" },
+    const { data: created, error: createError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName, role: "buyer" }, emailRedirectTo: window.location.origin + "/notevereveresit" },
     });
     if (createError) {
-      setError(createError.message || "Account creation failed.");
+      setError(createError.message);
       setBusy(false);
       return;
     }
-    if (created?.error) {
-      setError(String(created.error));
+    if (!created.session) {
+      setInfo("Account created. Confirm your email, then return here and sign in to finish.");
       setBusy(false);
       return;
     }
