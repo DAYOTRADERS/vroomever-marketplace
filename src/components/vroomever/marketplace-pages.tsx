@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
  ArrowLeft, ArrowRight, BadgeCheck, BarChart3, Bell, Camera, Check, CheckCircle2, ChevronLeft, ChevronRight,
  CircleDollarSign, Clock3, Eye, FileVideo, Filter, Heart, ImagePlus, ListChecks, MapPin, MessageCircle,
- PackageCheck, Plus, Search, ShieldCheck, Sparkles, Star, Store, UploadCloud, UserRound, UsersRound,
+ PackageCheck, Phone, Plus, Search, ShieldCheck, Sparkles, Star, Store, UploadCloud, UserRound, UsersRound,
  WalletCards, WandSparkles, X, Zap,
   type LucideIcon,
 } from "lucide-react";
