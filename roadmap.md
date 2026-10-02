@@ -9,13 +9,13 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
-- [ ] Vercel (vrumever.vercel.app) database connection explained/fixed
-- [ ] Email links (confirm, reset) go to correct buyer/seller paths on the live domain
-- [ ] Google + Apple sign-in on buyer/seller login
-- [ ] AI support triage: summary, topic, urgency, suggested reply for admins
-- [ ] Support conversations: users see admin replies and status timeline
-- [ ] Hide dashboard menu links when no user is signed in
-- [ ] Back button on every page that lacks one
-- [ ] Rename Vroomever -> VRUMEVER everywhere (incl. terms)
-- [ ] Terms checkbox links open the terms
-- [ ] Branded Google/Apple buttons with logos
+- [x] Vercel (vrumever.vercel.app) database connection explained/fixed
+- [x] Email links (confirm, reset) go to correct buyer/seller paths on the live domain
+- [x] Google + Apple sign-in on buyer/seller login
+- [x] AI support triage: summary, topic, urgency, suggested reply for admins
+- [x] Support conversations: users see admin replies and status timeline
+- [x] Hide dashboard menu links when no user is signed in
+- [x] Back button on every page that lacks one
+- [x] Rename Vroomever -> VRUMEVER everywhere (incl. terms)
+- [x] Terms checkbox links open the terms
+- [x] Branded Google/Apple buttons with logos
