@@ -50,13 +50,13 @@ export function AccountMenu() {
   const initials = account.name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)} aria-label="Account menu" className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 text-sm hover:border-primary">
+    <div className="relative min-w-0">
+      <Button variant="outline" onClick={() => setOpen(!open)} aria-label="Account menu" className="max-w-full justify-start rounded-full py-1 pl-1 pr-3 text-sm">
         <span className="grid size-8 place-items-center rounded-full bg-primary font-bold text-primary-foreground">{initials}</span>
-        <span className="max-w-28 truncate font-medium">{account.name.split(" ")[0]}</span>
-      </button>
+        <span className="min-w-0 max-w-28 truncate font-medium">{account.name.split(" ")[0]}</span>
+      </Button>
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-72 rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-card">
+        <div className="absolute left-0 right-auto z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-card sm:left-auto sm:right-0">
           <strong className="block truncate">{account.name}</strong>
           <span className="block truncate text-sm text-muted-foreground">{account.email}</span>
           <span className="mt-2 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold uppercase text-primary">{account.role}</span>

@@ -6,3 +6,4 @@
 - [ ] Stage 1: Master admin control center and moderation pages
 - [ ] Stage 1: Legal pages, metadata, responsive verification, and preview QA
 - [ ] Stage 2: Backend-ready models, services, authentication, storage, permissions, and RLS architecture
+- [ ] Responsive polish: buyer, seller, admin, authentication, and all public pages
