@@ -1,7 +1,7 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
-  Settings, ShieldCheck, Sparkles, Tags, UsersRound, type LucideIcon,
+  Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
@@ -32,6 +32,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -57,17 +58,19 @@ export function AdminShell({ children }: { children: ReactNode }) {
     );
 
   return (
-    <div className="min-h-screen bg-muted/40 lg:grid lg:grid-cols-[260px_1fr]">
-      <aside className="border-r border-border bg-surface-strong text-surface-foreground lg:min-h-screen">
-        <div className="flex items-center justify-between p-5">
+    <div className="min-h-screen min-w-0 bg-muted/40 lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
+      <aside className="sticky top-0 z-50 border-b border-border bg-surface-strong text-surface-foreground lg:static lg:min-h-screen lg:border-b-0 lg:border-r">
+        <div className="grid min-h-18 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 p-4 lg:flex lg:justify-between lg:p-5">
           <Brand inverted />
           <Badge className="bg-primary/20 text-primary">Admin</Badge>
+          <Button variant="ghost" size="icon" className="text-surface-foreground lg:hidden" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? "Close admin menu" : "Open admin menu"}>{menuOpen ? <X /> : <Menu />}</Button>
         </div>
-        <nav className="grid gap-1 p-3">
+        <nav className={`${menuOpen ? "grid" : "hidden"} max-h-[calc(100dvh-4.5rem)] gap-1 overflow-y-auto border-t border-white/10 p-3 lg:grid lg:max-h-none lg:border-0`}>
           {adminNav.map((item) => (
             <Link
               key={item.to}
               to={item.to}
+              onClick={() => setMenuOpen(false)}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}
             >
               <item.icon className="size-4" /> {item.label}
@@ -85,7 +88,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </button>
         </nav>
       </aside>
-      <main className="p-5 lg:p-8">{children}</main>
+      <main className="min-w-0 p-4 sm:p-5 lg:p-8">{children}</main>
     </div>
   );
 }
@@ -163,8 +166,8 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
-    <div className="overflow-x-auto rounded-card border border-border bg-card">
-      <table className="w-full min-w-[640px] text-sm">
+    <div className="rounded-card border border-border bg-card">
+      <table className="hidden w-full min-w-[640px] text-sm md:table">
         <thead>
           <tr className="border-b border-border bg-muted/50 text-left text-xs font-bold uppercase text-muted-foreground">
             {head.map((h) => (
@@ -186,6 +189,18 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
           ))}
         </tbody>
       </table>
+      <div className="divide-y divide-border md:hidden">
+        {rows.length ? rows.map((row, rowIndex) => (
+          <div key={rowIndex} className="grid gap-3 p-4">
+            {row.map((cell, cellIndex) => (
+              <div key={cellIndex} className="grid min-w-0 grid-cols-[5.75rem_minmax(0,1fr)] items-start gap-3 text-sm">
+                <span className="pt-0.5 text-[0.68rem] font-bold uppercase text-muted-foreground">{head[cellIndex]}</span>
+                <div className="min-w-0 break-words">{cell}</div>
+              </div>
+            ))}
+          </div>
+        )) : <p className="p-5 text-sm text-muted-foreground">No records yet.</p>}
+      </div>
     </div>
   );
 }

@@ -75,11 +75,11 @@ export function ProductCard({ product }: { product: CardProduct }) {
         </Button>
       </div>
       <div className="p-4">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-medium text-primary">{product.condition ?? ""}</span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <span className="truncate text-xs font-medium text-primary">{product.condition ?? ""}</span>
+          <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3" />
-            {product.location ?? ""}
+            <span className="max-w-32 truncate">{product.location ?? ""}</span>
           </span>
         </div>
         <Link
@@ -89,11 +89,11 @@ export function ProductCard({ product }: { product: CardProduct }) {
         >
           {product.title}
         </Link>
-        <div className="mt-3 flex items-end justify-between">
-          <strong className="font-display text-lg">{formatKsh(product.price)}</strong>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <BadgeCheck className="size-4 text-primary" />
-            {product.seller}
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+          <strong className="min-w-0 truncate font-display text-lg">{formatKsh(product.price)}</strong>
+          <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+            <BadgeCheck className="size-4 shrink-0 text-primary" />
+            <span className="max-w-28 truncate">{product.seller}</span>
           </span>
         </div>
       </div>
