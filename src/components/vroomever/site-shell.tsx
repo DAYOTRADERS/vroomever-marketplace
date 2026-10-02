@@ -57,7 +57,7 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <div className="mb-4 flex items-center justify-between"><strong className="font-display text-lg">Menu</strong><Button variant="ghost" size="icon" className="text-surface-foreground" onClick={() => setMenu(false)} aria-label="Close menu"><X /></Button></div>
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-surface-muted" />
-          <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground" placeholder="Search marketplace" />
+          <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground caret-primary placeholder:text-surface-muted" placeholder="Search marketplace" />
         </div>
         <div className="grid gap-2">
           {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ...(role ? [["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard]] : []), ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
