@@ -33,6 +33,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openSupport, setOpenSupport] = useState(0);
+  useEffect(() => {
+    if (!ready) return;
+    const count = () => supabase.from("support_messages").select("id", { count: "exact", head: true }).eq("status", "open").then(({ count: c }) => setOpenSupport(c ?? 0));
+    void count();
+    const ch = supabase.channel("support-notify").on("postgres_changes", { event: "*", schema: "public", table: "support_messages" }, () => void count()).subscribe();
+    const t = setInterval(count, 30000);
+    return () => { clearInterval(t); void supabase.removeChannel(ch); };
+  }, [ready, path]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -62,7 +71,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       <aside className="sticky top-0 z-50 border-b border-border bg-surface-strong text-surface-foreground lg:static lg:min-h-screen lg:border-b-0 lg:border-r">
         <div className="grid min-h-18 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 p-4 lg:flex lg:justify-between lg:p-5">
           <Brand inverted />
-          <Badge className="bg-primary/20 text-primary">Admin</Badge>
+          <span className="flex items-center gap-2"><Badge className="bg-primary/20 text-primary">Admin</Badge>{openSupport > 0 && <Link to="/masteradmin/reports" className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">{openSupport} new</Link>}</span>
           <Button variant="ghost" size="icon" className="text-surface-foreground lg:hidden" onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? "Close admin menu" : "Open admin menu"}>{menuOpen ? <X /> : <Menu />}</Button>
         </div>
         <nav className={`${menuOpen ? "grid" : "hidden"} max-h-[calc(100dvh-4.5rem)] gap-1 overflow-y-auto border-t border-white/10 p-3 lg:grid lg:max-h-none lg:border-0`}>
@@ -73,7 +82,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               onClick={() => setMenuOpen(false)}
               className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium ${path === item.to ? "bg-primary text-primary-foreground" : "text-surface-muted hover:bg-white/5"}`}
             >
-              <item.icon className="size-4" /> {item.label}
+              <item.icon className="size-4" /> {item.label}{item.to === "/masteradmin/reports" && openSupport > 0 && <span className="ml-auto rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground" aria-label={`${openSupport} new support messages`}>{openSupport}</span>}
             </Link>
           ))}
           <button
@@ -521,6 +530,7 @@ export function AdminReports() {
         <span className="flex flex-wrap gap-2"><Button size="sm" disabled={r.status === "resolved"} onClick={() => void resolve(r.id)}>Resolve</Button><Button size="sm" variant="outline" onClick={() => void delListing(r.product_id)}>Delete listing</Button><Button size="sm" variant="ghost" onClick={() => void delReport(r.id)}>Dismiss</Button></span>,
       ])} />
       {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No reports yet.</p>}
+      <SupportInbox />
     </AdminShell>
   );
 }
@@ -797,5 +807,30 @@ export function AdminDatabasePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+function SupportInbox() {
+  const [rows, setRows] = useState<Array<{ id: string; name: string; email: string; topic: string; message: string; status: string; created_at: string }>>([]);
+  const n = useNotice();
+  const load = () => supabase.from("support_messages").select("id,name,email,topic,message,status,created_at").order("created_at", { ascending: false }).then(({ data }) => setRows(data ?? []));
+  useEffect(() => { void load(); }, []);
+  const mark = async (id: string, status: string) => { const { error } = await supabase.from("support_messages").update({ status }).eq("id", id); n.show(error, `Message marked ${status}.`); if (!error) void load(); };
+  const del = async (id: string) => { if (!confirmDo("Delete this support message?")) return; const { error } = await supabase.from("support_messages").delete().eq("id", id); n.show(error, "Message deleted."); if (!error) void load(); };
+  const open = rows.filter((r) => r.status === "open").length;
+  return (
+    <section className="mt-10">
+      <h2 className="flex items-center gap-2 font-display text-xl font-bold">Support messages {open > 0 && <Badge className="bg-destructive text-destructive-foreground">{open} new</Badge>}</h2>
+      <p className="mt-1 text-sm text-muted-foreground">Help requests and reports sent from the Contact support page.</p>
+      {n.el}
+      <div className="mt-4">
+        <Table head={["From", "Topic", "Message", "Status", "Actions"]} rows={rows.map((r) => [
+          <span className="grid"><strong>{r.name}</strong><a className="text-xs text-primary" href={`mailto:${r.email}`}>{r.email}</a><small className="text-muted-foreground">{new Date(r.created_at).toLocaleString()}</small></span>,
+          r.topic, <span className="whitespace-pre-line">{r.message}</span>, <Badge variant={r.status === "open" ? "default" : "outline"}>{r.status}</Badge>,
+          <span className="flex flex-wrap gap-2"><Button size="sm" disabled={r.status === "resolved"} onClick={() => void mark(r.id, "resolved")}>Resolve</Button>{r.status !== "open" && <Button size="sm" variant="outline" onClick={() => void mark(r.id, "open")}>Reopen</Button>}<Button size="sm" variant="ghost" onClick={() => void del(r.id)}>Delete</Button></span>,
+        ])} />
+      </div>
+      {!rows.length && <p className="mt-3 text-sm text-muted-foreground">No support messages yet.</p>}
+    </section>
   );
 }
