@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
+import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,7 +52,7 @@ export function DashboardPage() {
  const [sessionReady,setSessionReady]=useState(false);
  const [firstName,setFirstName]=useState("");
  const signOut=async()=>{await supabase.auth.signOut(); sessionStorage.clear(); try{await indexedDB.deleteDatabase("vrumever");}catch{} try{const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k)));}catch{} window.location.href="/";};
- useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"buyer"},replace:true});return;} const {data:profile}=await supabase.from("profiles").select("role,full_name").eq("id",data.session.user.id).maybeSingle(); if(profile?.role==="seller"){nav({to:"/seller/dashboard",replace:true});return;} const name=(profile?.full_name||"").trim().split(/\s+/)[0] || data.session.user.email?.split("@")[0] || "there"; setFirstName(name); setSessionReady(true);});},[nav]);
+ useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"buyer",mode:"login"},replace:true});return;} const {data:roleRow}=await getMyRoleRow(); const {data:prof}=await supabase.from("profiles").select("full_name").eq("id",data.session.user.id).maybeSingle(); const profile={role:roleRow?.role,full_name:prof?.full_name}; if(profile?.role==="seller"){nav({to:"/seller/dashboard",replace:true});return;} const name=(profile?.full_name||"").trim().split(/\s+/)[0] || data.session.user.email?.split("@")[0] || "there"; setFirstName(name); setSessionReady(true);});},[nav]);
  if(!sessionReady)return null;
  return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10">
  <div className="relative overflow-hidden rounded-card bg-surface-strong p-7 text-surface-foreground md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><div className="mt-7 flex rounded-card bg-background p-2"><Search className="m-3 size-5 text-muted-foreground"/><Input className="h-11 border-0 shadow-none" placeholder="Search the marketplace"/><Button>Search</Button></div></div></div>
@@ -74,18 +75,18 @@ export function FavoritesPage() {
   if(!session){setLoading(false);return;}
   const {data}=await supabase
     .from("favorites")
-    .select("product_id, products(id,title,price,location,condition,seller_id,profiles(full_name))")
+    .select("product_id, products(id,title,price_ksh,location,condition,seller_id,images)")
     .eq("user_id",session.user.id);
   const mapped:CardProduct[]=(data??[]).map((row:any)=>{
     const prod=row.products;
     return {
       id: prod?.id ?? "",
       title: prod?.title ?? "",
-      price: Number(prod?.price ?? 0),
+      price: Number(prod?.price_ksh ?? 0),
       location: prod?.location ?? null,
       condition: prod?.condition ?? null,
       image: "/placeholder.svg",
-      seller: prod?.profiles?.full_name ?? "VroomEver seller",
+      seller: "VroomEver seller",
     };
   });
   setRows(mapped);setLoading(false);
@@ -139,11 +140,7 @@ export function AuthPage({
       nav({ to: "/auth", search: { role: signupRole, mode: "login" } });
       return;
     }
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", session.user.id)
-      .maybeSingle();
+    const { data: profile, error: profileError } = await getMyRoleRow();
     if (profileError) throw profileError;
     const actualRole =
       profile?.role === "admin" ? "admin" : profile?.role === "seller" ? "seller" : "buyer";
@@ -347,18 +344,18 @@ export function SellPage() {
   const [video,setVideo]=useState(false);
   const [saving,setSaving]=useState(false);
   const [error,setError]=useState("");
-  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"seller"},replace:true});return;} const {data:profile}=await supabase.from("profiles").select("role").eq("id",data.session.user.id).maybeSingle(); const {data:sellerProfile}=await supabase.from("seller_profiles").select("user_id").eq("user_id",data.session.user.id).maybeSingle(); if(profile?.role!=="seller" && !sellerProfile){nav({to:"/auth",search:{role:"seller"},replace:true});return;} if(profile?.role!=="seller" && sellerProfile){await supabase.rpc("sync_my_seller_role");} setAuthorized(true);});},[nav]);
+  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"seller",mode:"login"},replace:true});return;} const {data:profile}=await getMyRoleRow(); const sellerProfile=null as null|{user_id:string}; if(profile?.role!=="seller" && !sellerProfile){nav({to:"/auth",search:{role:"seller",mode:"login"},replace:true});return;} if(profile?.role!=="seller" && sellerProfile){await supabase.rpc("become_seller");} setAuthorized(true);});},[nav]);
   const publish=async()=>{
     const {data:sessionData}=await supabase.auth.getSession();
     const sellerId=sessionData.session?.user.id;
-    if(!sellerId){nav({to:"/auth",search:{role:"seller"}});return;}
+    if(!sellerId){nav({to:"/auth",search:{role:"seller",mode:"login"}});return;}
     if(!title.trim()||!price||Number(price)<0){setError("Add a valid title and price before publishing.");return;}
     setSaving(true);setError("");
-    const {data:category}=await supabase.from("categories").select("id").eq("slug",categorySlug).maybeSingle();
+    const {data:category}=await supabase.from("categories").select("slug").eq("slug",categorySlug).maybeSingle();
     if(!category){setError("Category is not available in the database. Apply the latest schema first.");setSaving(false);return;}
     const {error:insertError}=await supabase.from("products").insert({
-      seller_id:sellerId,category_id:category.id,title:title.trim(),description:description.trim(),
-      price:Number(price),location:location.trim(),condition,status:"pending"
+      seller_id:sellerId,category_slug:category.slug,title:title.trim(),description:description.trim(),
+      price_ksh:Number(price),location:location.trim(),condition,status:"pending"
     });
     if(insertError){setError(insertError.message);setSaving(false);return;}
     setStep(7);setSaving(false);
@@ -386,11 +383,11 @@ function PaymentPanel() { const [state,setState]=useState<"idle"|"loading"|"succ
 export function PaymentPage() { return <SiteShell><div className="mx-auto max-w-4xl px-5 py-12"><PageTitle eyebrow="Secure checkout" title="Activate your seller package"/><div className="rounded-card border border-border bg-card p-7 shadow-card"><PaymentPanel/></div></div></SiteShell> }
 export function VipPage() { return <SiteShell><div className="mx-auto max-w-6xl px-5 py-12"><PageTitle eyebrow="VIP promotion" title="Put your best listings in the spotlight" copy="VIP listings appear in featured positions across the marketplace."/><div className="grid gap-4 md:grid-cols-4">{vipOptions.map((o,i)=><div key={o.duration} className={`rounded-card border p-6 ${i===1?"border-vip bg-accent":"border-border bg-card"}`}><Sparkles className="text-vip"/><h3 className="mt-5 font-display text-xl font-bold">{o.duration}</h3><p className="mt-2 text-sm text-muted-foreground">Featured dashboard placement and VIP badge.</p><p className="mt-6 font-display text-2xl font-bold">{formatKsh(o.price)}</p><Button variant="vip" className="mt-5 w-full">Promote listing</Button></div>)}</div></div></SiteShell> }
 
-export function SellerDashboardPage() { const [authorized,setAuthorized]=useState(false); const signOut=async()=>{await supabase.auth.signOut(); sessionStorage.clear(); try{await indexedDB.deleteDatabase("vrumever");}catch{} try{const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k)));}catch{} window.location.href="/";}; useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){window.location.href="/auth?role=seller";return;} const {data:profile}=await supabase.from("profiles").select("role").eq("id",data.session.user.id).maybeSingle(); const {data:sellerProfile}=await supabase.from("seller_profiles").select("user_id").eq("user_id",data.session.user.id).maybeSingle(); if(profile?.role!=="seller" && !sellerProfile){window.location.href="/auth?role=seller";return;} if(profile?.role!=="seller" && sellerProfile){await supabase.rpc("sync_my_seller_role");} setAuthorized(true);});},[]); if(!authorized)return null; const stats=[[Eye,"6,824","Listing views"],[MessageCircle,"148","Enquiries"],[Heart,"391","Favorites"],[PackageCheck,"12 / 50","Active listings"]] as const; return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><PageTitle eyebrow="Seller workspace" title="Grow your storefront" copy="Performance and listing health at a glance." action={<Button asChild><Link to="/sell"><Plus/>New listing</Link></Button>}/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{stats.map(([Icon,n,l])=><div className="rounded-card border border-border bg-card p-5 shadow-card" key={l}><Icon className="text-primary"/><strong className="mt-4 block font-display text-3xl">{n}</strong><span className="text-sm text-muted-foreground">{l}</span></div>)}</div><div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.6fr]"><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Listing performance</h2><div className="mt-8 flex h-56 items-end gap-3">{[45,72,50,86,66,94,78,103,88,120,104,135].map((h,i)=><div key={i} className="flex-1 rounded-t bg-primary/70" style={{height:h}}/>)}</div></div><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Plan usage</h2><p className="mt-2 text-sm text-muted-foreground">Silver · renews in 18 days</p><div className="mt-6 h-3 overflow-hidden rounded-full bg-muted"><div className="h-full w-1/4 bg-primary"/></div><p className="mt-2 text-xs">12 of 50 listings used</p><Button asChild variant="outline" className="mt-6 w-full"><Link to="/subscriptions">Manage plan</Link></Button></div></div></div></SiteShell> }
+export function SellerDashboardPage() { const [authorized,setAuthorized]=useState(false); const signOut=async()=>{await supabase.auth.signOut(); sessionStorage.clear(); try{await indexedDB.deleteDatabase("vrumever");}catch{} try{const keys=await caches.keys(); await Promise.all(keys.map(k=>caches.delete(k)));}catch{} window.location.href="/";}; useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){window.location.href="/auth?role=seller";return;} const {data:profile}=await getMyRoleRow(); const sellerProfile=null as null|{user_id:string}; if(profile?.role!=="seller" && !sellerProfile){window.location.href="/auth?role=seller";return;} if(profile?.role!=="seller" && sellerProfile){await supabase.rpc("become_seller");} setAuthorized(true);});},[]); if(!authorized)return null; const stats=[[Eye,"6,824","Listing views"],[MessageCircle,"148","Enquiries"],[Heart,"391","Favorites"],[PackageCheck,"12 / 50","Active listings"]] as const; return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><PageTitle eyebrow="Seller workspace" title="Grow your storefront" copy="Performance and listing health at a glance." action={<Button asChild><Link to="/sell"><Plus/>New listing</Link></Button>}/><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{stats.map(([Icon,n,l])=><div className="rounded-card border border-border bg-card p-5 shadow-card" key={l}><Icon className="text-primary"/><strong className="mt-4 block font-display text-3xl">{n}</strong><span className="text-sm text-muted-foreground">{l}</span></div>)}</div><div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.6fr]"><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Listing performance</h2><div className="mt-8 flex h-56 items-end gap-3">{[45,72,50,86,66,94,78,103,88,120,104,135].map((h,i)=><div key={i} className="flex-1 rounded-t bg-primary/70" style={{height:h}}/>)}</div></div><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Plan usage</h2><p className="mt-2 text-sm text-muted-foreground">Silver · renews in 18 days</p><div className="mt-6 h-3 overflow-hidden rounded-full bg-muted"><div className="h-full w-1/4 bg-primary"/></div><p className="mt-2 text-xs">12 of 50 listings used</p><Button asChild variant="outline" className="mt-6 w-full"><Link to="/subscriptions">Manage plan</Link></Button></div></div></div></SiteShell> }
 export function SellerListingsPage() {
  const [rows,setRows]=useState<Array<{id:string;title:string;price:number;status:string;created_at:string}>>([]);
  const [loading,setLoading]=useState(true);
- useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const sellerId=data.session?.user.id;if(!sellerId){window.location.href="/auth?role=seller";return;}const {data:items}=await supabase.from("products").select("id,title,price,status,created_at").eq("seller_id",sellerId).order("created_at",{ascending:false});setRows((items??[]).map(x=>({...x,price:Number(x.price)})));setLoading(false);});},[]);
+ useEffect(()=>{supabase.auth.getSession().then(async({data})=>{const sellerId=data.session?.user.id;if(!sellerId){window.location.href="/auth?role=seller";return;}const {data:items}=await supabase.from("products").select("id,title,price_ksh,status,created_at").eq("seller_id",sellerId).order("created_at",{ascending:false});setRows((items??[]).map(x=>({...x,price:Number(x.price_ksh)})));setLoading(false);});},[]);
  return <SiteShell><div className="mx-auto max-w-7xl px-5 py-10"><PageTitle eyebrow="Seller workspace" title="Your listings" copy="Live listings stored in the VroomEver database." action={<Button asChild><Link to="/sell"><Plus/>Add listing</Link></Button>}/>{loading?<p className="text-sm text-muted-foreground">Loading your listings…</p>:<div className="overflow-hidden rounded-card border border-border bg-card"><div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-bold uppercase text-muted-foreground"><span>Listing</span><span>Status</span><span>Price</span></div>{rows.length?rows.map(p=><div key={p.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-4 last:border-0"><div className="min-w-0"><strong className="block truncate">{p.title}</strong><small className="text-muted-foreground">{new Date(p.created_at).toLocaleString()}</small></div><Badge variant="outline">{p.status}</Badge><span className="font-semibold">{formatKsh(p.price)}</span></div>):<div className="p-8 text-center text-sm text-muted-foreground">No database listings yet. Create your first listing.</div>}</div>}</div></SiteShell>
 }
 
