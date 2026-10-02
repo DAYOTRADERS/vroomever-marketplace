@@ -97,7 +97,7 @@ export function ProductPage({ id }: { id: string }) {
  useEffect(()=>{if(sample)return;(async()=>{
   const {data}=await supabase.from("products").select("*").eq("id",id).eq("status","active").maybeSingle();
   if(!data){setMissing(true);return;}
-  const [{data:prof},photos,vid]=await Promise.all([supabase.from("profiles").select("full_name,phone").eq("id",data.seller_id).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
+  const [{data:prof},photos,vid]=await Promise.all([supabase.rpc("get_public_profile",{_id:data.seller_id}).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
   setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"VRUMEVER seller",sellerId:data.seller_id,phone:toIntl((data as {contact_phone?:string|null}).contact_phone)??toIntl(prof?.phone),photos,video:vid[0]??null});
   const {data:{session}}=await supabase.auth.getSession();
   if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
@@ -116,7 +116,7 @@ export function ProductPage({ id }: { id: string }) {
 export function SellerPage({ id }: { id: string }) {
  const [prof,setProf]=useState<null|{full_name:string|null;location:string|null;id_verified:boolean;created_at:string}>(null);
  const [count,setCount]=useState<number|null>(null);
- useEffect(()=>{void supabase.from("profiles").select("full_name,location,id_verified,created_at").eq("id",id).maybeSingle().then(({data})=>setProf(data)); void supabase.from("products").select("id",{count:"exact",head:true}).eq("seller_id",id).eq("status","active").then(({count})=>setCount(count??0));},[id]);
+ useEffect(()=>{void supabase.rpc("get_public_profile",{_id:id}).maybeSingle().then(({data})=>setProf(data)); void supabase.from("products").select("id",{count:"exact",head:true}).eq("seller_id",id).eq("status","active").then(({count})=>setCount(count??0));},[id]);
  return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><div className="rounded-card border border-border bg-card p-5 shadow-card sm:p-7"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-4 sm:gap-5"><div className="grid size-16 shrink-0 place-items-center rounded-full bg-secondary text-primary sm:size-20"><Store className="size-8 sm:size-9"/></div><div className="min-w-0">{prof?.id_verified&&<p className="flex items-center gap-1 text-sm text-primary"><BadgeCheck className="size-4"/> Verified seller</p>}<h1 className="font-display text-2xl font-bold sm:text-3xl">{prof?.full_name||"VRUMEVER seller"}</h1><p className="mt-1 text-sm text-muted-foreground">{[prof?.location,prof?`Member since ${new Date(prof.created_at).getFullYear()}`:null].filter(Boolean).join(" · ")}</p></div></div></div><div className="py-10"><PageTitle title="Seller listings" copy={count===null?"Loading…":`${count} active listing${count===1?"":"s"}`}/><LiveGrid sellerId={id}/></div></div></SiteShell>;
 }
 
