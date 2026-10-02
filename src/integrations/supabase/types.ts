@@ -127,6 +127,41 @@ export type Database = {
         }
         Relationships: []
       }
+      product_enquiries: {
+        Row: {
+          buyer_id: string | null
+          channel: string
+          created_at: string
+          id: string
+          product_id: string
+          seller_id: string
+        }
+        Insert: {
+          buyer_id?: string | null
+          channel: string
+          created_at?: string
+          id?: string
+          product_id: string
+          seller_id: string
+        }
+        Update: {
+          buyer_id?: string | null
+          channel?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_enquiries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_slug: string
@@ -139,6 +174,7 @@ export type Database = {
           is_vip: boolean
           location: string | null
           price_ksh: number
+          rejection_reason: string | null
           seller_id: string
           status: Database["public"]["Enums"]["product_status"]
           subcategory: string | null
@@ -159,6 +195,7 @@ export type Database = {
           is_vip?: boolean
           location?: string | null
           price_ksh?: number
+          rejection_reason?: string | null
           seller_id: string
           status?: Database["public"]["Enums"]["product_status"]
           subcategory?: string | null
@@ -179,6 +216,7 @@ export type Database = {
           is_vip?: boolean
           location?: string | null
           price_ksh?: number
+          rejection_reason?: string | null
           seller_id?: string
           status?: Database["public"]["Enums"]["product_status"]
           subcategory?: string | null
@@ -487,6 +525,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      record_product_view: { Args: { _product_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "seller" | "buyer"
