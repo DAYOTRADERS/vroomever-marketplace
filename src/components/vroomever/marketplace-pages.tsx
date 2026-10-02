@@ -176,7 +176,17 @@ export function AuthPage({
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
-  const signupRole = lockedRole ?? role;
+  const signupRole = role;
+  const friendly = (msg: string) => {
+    const m = msg.toLowerCase();
+    if (m.includes("weak") || m.includes("pwned") || m.includes("easy to guess")) return "That password is too common. Use at least 8 characters mixing words, numbers and symbols (e.g. Nairobi!Market72).";
+    if (m.includes("invalid login")) return "Wrong email or password. Please check and try again.";
+    if (m.includes("email not confirmed")) return "Please confirm your email first — open the link we sent you, then sign in.";
+    if (m.includes("already registered") || m.includes("already been registered")) return "This email already has an account. Please sign in instead.";
+    if (m.includes("rate limit")) return "Too many attempts. Please wait a few minutes and try again.";
+    if (m.includes("password should be")) return "Password must be at least 6 characters.";
+    return msg;
+  };
 
   const routeByRole = async (session: { user: { id: string } } | null) => {
     if (!session) {
@@ -249,7 +259,7 @@ export function AuthPage({
       }
       await routeByRole(data.session);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Authentication failed. Please try again.");
+      setError(err instanceof Error ? friendly(err.message) : "Authentication failed. Please try again.");
     } finally {
       setLoading(false);
     }
