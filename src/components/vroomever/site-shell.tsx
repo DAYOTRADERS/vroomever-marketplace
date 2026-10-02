@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Heart, LayoutDashboard, Menu, Moon, Plus, Search, Sun, UserRound, X } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { Brand } from "./brand";
+import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -23,7 +24,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <Button asChild variant="ghost"><Link to="/dashboard" className={active("/dashboard") ? "text-primary" : ""}>Marketplace</Link></Button>
           <Button asChild variant="ghost" size="icon"><Link to="/favorites" aria-label="Favorites"><Heart /></Link></Button>
           <Button variant="ghost" size="icon" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun /> : <Moon />}</Button>
-          <Button asChild variant="outline"><Link to="/login"><UserRound /> Sign in</Link></Button>
+          <AccountMenu />
           <Button asChild><Link to="/sell"><Plus /> Sell</Link></Button>
         </nav>
         <Button variant="ghost" size="icon" className="ml-auto lg:hidden" onClick={() => setMenu(!menu)} aria-label="Menu">{menu ? <X /> : <Menu />}</Button>
@@ -32,6 +33,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
         <Button asChild variant="ghost" className="justify-start"><Link to="/dashboard"><LayoutDashboard /> Marketplace</Link></Button>
         <Button asChild variant="ghost" className="justify-start"><Link to="/favorites"><Heart /> Favorites</Link></Button>
         <Button asChild variant="ghost" className="justify-start"><Link to="/profile"><UserRound /> Profile</Link></Button>
+        <AccountMenu />
         <Button asChild><Link to="/sell"><Plus /> Sell an item</Link></Button>
       </nav>}
     </header>
