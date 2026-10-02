@@ -37,9 +37,10 @@ function useLiveProducts(category?: string) {
 }
 function LiveGrid({ category }: { category?: string }) {
  const live=useLiveProducts(category);
- const sample=category?(products.filter(p=>p.category===category) as unknown as CardProduct[]):(products as unknown as CardProduct[]);
  if(live===null)return <p className="text-sm text-muted-foreground">Loading listings…</p>;
- return <ProductGrid items={[...live,...sample]}/>;
+ const strict=category?live.filter(p=>p.category===category):live;
+ if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings here yet.</p>;
+ return <ProductGrid items={strict}/>;
 }
 
 export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; title: string; copy?: string; action?: React.ReactNode }) {
@@ -66,7 +67,7 @@ export function HomePage() { return <SiteShell>
  </SiteShell>;
 }
 function CategoryGrid() { return <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-32 min-w-[145px] snap-start flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-4 text-center shadow-sm backdrop-blur-xl transition hover:-translate-y-1 hover:border-primary/40 hover:bg-white/75 hover:shadow-card"><span className="grid size-12 place-items-center rounded-2xl border border-white/70 bg-white/70 text-primary shadow-sm"><cat.icon className="size-5"/></span><span className="mt-3 text-xs font-semibold leading-tight">{cat.name}</span></Link>)}</div> }
-function ProductGrid({ items }: { items?: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{(items ?? products).map(p=><ProductCard key={p.id} product={p as CardProduct}/>)}</div> }
+function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
 export function DashboardPage() {
  const nav=useNavigate();
@@ -85,7 +86,7 @@ export function DashboardPage() {
 export function CategoryPage({ slug }: { slug: string }) { const cat=categories.find(c=>c.slug===slug) ?? categories[0]!; return <SiteShell><div className="mx-auto max-w-7xl px-4 py-7 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary"><cat.icon/></span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div><div className="mb-8 flex gap-2 overflow-x-auto pb-2">{cat.subcategories.map(s=><Button key={s} variant="outline" className="shrink-0">{s}</Button>)}</div><div className="grid gap-8 lg:grid-cols-[240px_1fr]"><aside className="h-fit rounded-card border border-border bg-card p-5"><h3 className="font-semibold">Filters</h3>{["Location","Price range","Condition","Verified sellers"].map(x=><div key={x} className="border-b border-border py-4 text-sm font-medium">{x}<ChevronRight className="float-right size-4 text-muted-foreground"/></div>)}</aside><div><LiveGrid category={cat.slug}/></div></div></div></SiteShell> }
 
 export function ProductPage({ id }: { id: string }) {
- const sample=products.find(x=>x.id===id);
+ const sample=undefined as undefined|{title:string;price:number;location:string;condition:string;vip?:boolean;seller:string;image:string};
  const [p,setP]=useState<null|{title:string;price:number;location:string|null;condition:string|null;vip:boolean;description:string;seller:string;sellerId:string|null;phone:string|null;photos:string[];video:string|null}>(sample?{title:sample.title,price:sample.price,location:sample.location,condition:sample.condition,vip:!!sample.vip,description:"Exceptionally clean and well maintained. Available for viewing. Serious buyers are welcome to contact the seller directly.",seller:sample.seller,sellerId:null,phone:null,photos:[sample.image],video:null}:null);
  const [missing,setMissing]=useState(false);
  const [active,setActive]=useState(0);
