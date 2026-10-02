@@ -58,9 +58,9 @@ export function SiteShell({ children, dashboardMode }: { children: ReactNode; da
         </div>
         <div className={dashboardMode ? "grid gap-2" : "grid grid-cols-3 gap-2"}>
           {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard], ...(canSell ? [["/seller/listings", "Listings", Store]] : [])] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
-            <Link key={label} to={to} className={`${dashboardMode ? "flex min-h-14 items-center gap-4 px-4 text-base" : "grid place-items-center gap-1.5 p-3 text-xs"} rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5"}`}><Icon className="size-5" />{label}</Link>
+            <Link key={label} to={to} className={`${dashboardMode ? "flex min-h-14 items-center gap-4 px-4 text-base" : "grid place-items-center gap-1.5 p-3 text-xs"} rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5 text-surface-foreground"}`}><Icon className="size-5" />{label}</Link>
           ))}
-          <Button variant="ghost" onClick={() => setDark(!dark)} className={`${dashboardMode ? "min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base" : "h-auto rounded-2xl border border-white/10 bg-white/5 p-3 text-xs"}`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
+          <Button variant="ghost" onClick={() => setDark(!dark)} className={`${dashboardMode ? "min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base" : "h-auto rounded-2xl border border-white/10 bg-white/5 p-3 text-xs"} text-surface-foreground hover:bg-white/10 hover:text-surface-foreground`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
         </div>
         {!dashboardMode && canSell && <Button asChild className="mt-4 w-full glow-ring"><Link to="/sell"><Plus /> Sell an item</Link></Button>}
       </nav>
