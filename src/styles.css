@@ -200,3 +200,46 @@
   border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
   box-shadow: 0 20px 50px -15px color-mix(in oklab, var(--primary) 50%, transparent);
 }
+
+@keyframes home-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -12px, 0); }
+}
+
+@keyframes home-grid-drift {
+  from { background-position: 0 0; }
+  to { background-position: 64px 64px; }
+}
+
+@utility home-space {
+  background-image:
+    radial-gradient(circle at 76% 42%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 34%),
+    linear-gradient(145deg, var(--surface-strong), color-mix(in oklab, var(--surface-strong) 86%, var(--primary)));
+}
+
+@utility home-orbit-grid {
+  opacity: .34;
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+  animation: home-grid-drift 16s linear infinite;
+}
+
+@utility home-shine {
+  color: var(--primary);
+  text-shadow: 0 0 34px color-mix(in oklab, var(--primary) 42%, transparent);
+}
+
+@utility home-float-card {
+  animation: home-float 4.8s ease-in-out infinite;
+}
+
+@utility home-float-delay {
+  animation-delay: -2.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-orbit-grid, .home-float-card { animation: none; }
+}

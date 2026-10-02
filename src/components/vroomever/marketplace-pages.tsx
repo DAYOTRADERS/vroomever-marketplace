@@ -20,7 +20,6 @@ import { SiteShell } from "./site-shell";
 import { categories, formatKsh, packages, vipOptions } from "@/data/marketplace";
 import { categoryImages } from "@/data/category-images";
 import type { CardProduct } from "@/types/marketplace";
-import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -53,21 +52,6 @@ export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; 
 }
 export const Seo = (title: string, description: string) => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] });
 
-export function HomePage() { return <SiteShell>
- <section className="relative isolate min-h-[660px] overflow-hidden bg-surface-strong text-surface-foreground">
-  <img src={hero} alt="Shop and sell across Kenya with VRUMEVER" width={1600} height={1000} className="absolute inset-0 h-full w-full object-cover object-center" />
-  <div className="absolute inset-0 bg-gradient-to-r from-surface-strong via-surface-strong/82 to-transparent" />
-  <div className="dot-grid absolute inset-0 opacity-20" />
-  <div className="relative mx-auto flex min-h-[calc(100svh-4.5rem)] max-w-7xl items-center px-4 py-16 sm:min-h-[660px] sm:px-5 sm:py-24"><div className="max-w-2xl">
-   <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary"><Sparkles className="size-3.5" /> Kenya’s marketplace, reimagined</span>
-   <h1 className="mt-7 font-display text-5xl font-bold leading-[1.05] md:text-7xl">Find remarkable.<br/><span className="text-primary">Trade confidently.</span></h1>
-   <p className="mt-6 max-w-xl text-lg leading-relaxed text-surface-muted">Discover trusted sellers, standout products and better deals from every corner of Kenya.</p>
-   <div className="mt-8 grid max-w-sm gap-3 sm:flex sm:max-w-none sm:flex-wrap"><Button asChild size="lg"><Link to="/auth" search={{ role: "buyer", mode: "login" }}>Explore marketplace <ArrowRight /></Link></Button><Button asChild size="lg" variant="glass"><Link to="/auth" search={{ role: "seller", mode: "login" }}><Plus /> Start selling</Link></Button></div>
-  </div></div>
- </section>
- <section className="mx-auto max-w-7xl px-5 py-16"><div className="grid gap-6 md:grid-cols-3">{([[ShieldCheck,"Trade with confidence","Verified seller profiles and transparent listing details."],[MessageCircle,"Connect directly","Reach sellers instantly by call or WhatsApp."],[Zap,"Sell without friction","Create polished listings and reach buyers across Kenya."]] as [LucideIcon,string,string][]).map(([Icon,t,c])=><div className="rounded-card border border-border bg-card p-7 shadow-card" key={t as string}><Icon className="size-8 text-primary"/><h3 className="mt-5 font-display text-xl font-bold">{t as string}</h3><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c as string}</p></div>)}</div></section>
- </SiteShell>;
-}
 function CategoryGrid() { return <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-32 min-w-[145px] snap-start flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-4 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75"><span className="grid size-16 place-items-center">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-16 object-contain drop-shadow-lg transition group-hover:scale-110"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-3 text-xs font-semibold leading-tight">{cat.name}</span></Link>)}</div> }
 function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
