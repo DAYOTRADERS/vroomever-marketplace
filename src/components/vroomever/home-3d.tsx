@@ -17,7 +17,7 @@ const signals = [
   { label: "Made for Kenya", copy: "Local discovery, familiar payments and nationwide reach.", icon: ShieldCheck },
 ];
 
-const SUN_POSITION: [number, number, number] = [5.4, 1.9, -2.8];
+const SUN_POSITION: [number, number, number] = [3.4, 2.2, 3.2];
 
 function Sun() {
   const pulse = useRef<Group>(null);
@@ -26,21 +26,21 @@ function Sun() {
   });
   return <group position={SUN_POSITION}>
     <mesh>
-      <sphereGeometry args={[0.78, 48, 48]} />
+      <sphereGeometry args={[0.92, 48, 48]} />
       <meshBasicMaterial color="#ffc46b" toneMapped={false} />
     </mesh>
     <group ref={pulse}>
       <mesh>
-        <sphereGeometry args={[1.15, 32, 32]} />
-        <meshBasicMaterial color="#ff9d3a" transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[1.35, 32, 32]} />
+        <meshBasicMaterial color="#ff9d3a" transparent opacity={0.32} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
       <mesh>
-        <sphereGeometry args={[1.9, 32, 32]} />
-        <meshBasicMaterial color="#ff8a24" transparent opacity={0.14} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[2.2, 32, 32]} />
+        <meshBasicMaterial color="#ff8a24" transparent opacity={0.15} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
       <mesh>
-        <sphereGeometry args={[2.9, 32, 32]} />
-        <meshBasicMaterial color="#ff7a1f" transparent opacity={0.06} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[3.3, 32, 32]} />
+        <meshBasicMaterial color="#ff7a1f" transparent opacity={0.07} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
     </group>
     <pointLight intensity={45} distance={40} decay={2} color="#ffd9a0" />
@@ -115,8 +115,8 @@ function SolarSystem() {
 
 function HeroScene() {
   return <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 8], fov: 42 }} gl={{ antialias: true, alpha: true }}>
-    <ambientLight intensity={0.55} />
-    <directionalLight position={SUN_POSITION} intensity={3.2} color="#ffe6bf" />
+    <ambientLight intensity={0.75} />
+    <directionalLight position={SUN_POSITION} intensity={2.6} color="#ffe6bf" />
     <pointLight position={[-6, -3, 4]} intensity={12} color="#1bbf83" />
     <Suspense fallback={null}>
       <SolarSystem />
