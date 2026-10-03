@@ -48,7 +48,7 @@ function Sun() {
 }
 
 function Earth() {
-  const [day, clouds, normal] = useTexture([earthDayUrl, earthCloudsUrl, earthNormalUrl]);
+  const [day, clouds, normal] = useTexture([earthDayUrl, earthCloudsUrl, earthNormalUrl]) as [THREE.Texture, THREE.Texture, THREE.Texture];
   day.colorSpace = THREE.SRGBColorSpace;
   clouds.colorSpace = THREE.SRGBColorSpace;
   const surface = useRef<Mesh>(null);
