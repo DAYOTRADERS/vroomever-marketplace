@@ -17,32 +17,36 @@ const signals = [
   { label: "Made for Kenya", copy: "Local discovery, familiar payments and nationwide reach.", icon: ShieldCheck },
 ];
 
-const SUN_POSITION: [number, number, number] = [2.7, 1.75, 2.2];
+const SUN_POSITION: [number, number, number] = [2.4, 1.6, 2.0];
+
+function makeGlowTexture() {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, "rgba(255, 214, 150, 1)");
+  gradient.addColorStop(0.22, "rgba(255, 176, 90, 0.55)");
+  gradient.addColorStop(0.5, "rgba(255, 138, 36, 0.18)");
+  gradient.addColorStop(1, "rgba(255, 122, 31, 0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
 
 function Sun() {
-  const pulse = useRef<Group>(null);
-  useFrame(({ clock }) => {
-    pulse.current?.scale.setScalar(1 + Math.sin(clock.elapsedTime * 1.3) * 0.035);
-  });
+  const glow = useMemo(makeGlowTexture, []);
   return <group position={SUN_POSITION}>
     <mesh>
-      <sphereGeometry args={[0.78, 48, 48]} />
-      <meshBasicMaterial color="#ffc46b" toneMapped={false} />
+      <sphereGeometry args={[0.7, 48, 48]} />
+      <meshBasicMaterial color="#fff3d0" toneMapped={false} />
     </mesh>
-    <group ref={pulse}>
-      <mesh>
-        <sphereGeometry args={[1.0, 32, 32]} />
-        <meshBasicMaterial color="#ff9d3a" transparent opacity={0.34} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[1.35, 32, 32]} />
-        <meshBasicMaterial color="#ff8a24" transparent opacity={0.16} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[1.8, 32, 32]} />
-        <meshBasicMaterial color="#ff7a1f" transparent opacity={0.08} blending={THREE.AdditiveBlending} depthWrite={false} />
-      </mesh>
-    </group>
+    <sprite scale={[5.2, 5.2, 1]}>
+      <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} opacity={0.85} />
+    </sprite>
     <pointLight intensity={42} distance={40} decay={2} color="#ffd9a0" />
   </group>;
 }
@@ -80,11 +84,11 @@ function MoonOrbit() {
   const moon = useRef<Group>(null);
   useFrame(({ clock }) => {
     const angle = clock.elapsedTime * 0.4;
-    moon.current?.position.set(Math.cos(angle) * 3.1, Math.sin(angle * 0.8) * 0.4, Math.sin(angle) * 3.1);
+    moon.current?.position.set(Math.cos(angle) * 2.65, Math.sin(angle * 0.8) * 0.4, Math.sin(angle) * 2.65);
   });
   return <>
     <mesh rotation={[Math.PI / 2 - 0.25, 0.2, 0]}>
-      <torusGeometry args={[3.1, 0.014, 10, 160]} />
+      <torusGeometry args={[2.65, 0.014, 10, 160]} />
       <meshBasicMaterial color="#5ce3a3" transparent opacity={0.4} />
     </mesh>
     <group ref={moon}>
