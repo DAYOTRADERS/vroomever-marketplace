@@ -1,11 +1,15 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Environment, Float, Lightformer, MeshTransmissionMaterial } from "@react-three/drei";
+import { Environment, Float, Lightformer, useTexture } from "@react-three/drei";
 import { ArrowRight, BadgeCheck, MessageCircle, Plus, ShieldCheck, Sparkles, Store, Zap } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
-import type { Group } from "three";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
+import type { Group, Mesh } from "three";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "./site-shell";
+import earthDayUrl from "@/assets/earth_atmos_2048.jpg";
+import earthCloudsUrl from "@/assets/earth_clouds_1024.png";
+import earthNormalUrl from "@/assets/earth_normal_2048.jpg";
 
 const signals = [
   { label: "Verified sellers", copy: "Clear profiles and transparent listing details.", icon: BadgeCheck },
@@ -13,48 +17,115 @@ const signals = [
   { label: "Made for Kenya", copy: "Local discovery, familiar payments and nationwide reach.", icon: ShieldCheck },
 ];
 
-function MarketplaceObject() {
+const SUN_POSITION: [number, number, number] = [2.15, 1.4, 2.0];
+
+function makeGlowTexture() {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d")!;
+  const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  gradient.addColorStop(0, "rgba(255, 214, 150, 1)");
+  gradient.addColorStop(0.22, "rgba(255, 176, 90, 0.55)");
+  gradient.addColorStop(0.5, "rgba(255, 138, 36, 0.18)");
+  gradient.addColorStop(1, "rgba(255, 122, 31, 0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function Sun() {
+  const glow = useMemo(makeGlowTexture, []);
+  return <group position={SUN_POSITION}>
+    <mesh>
+      <sphereGeometry args={[0.7, 48, 48]} />
+      <meshBasicMaterial color="#fff3d0" toneMapped={false} />
+    </mesh>
+    <sprite scale={[4.0, 4.0, 1]}>
+      <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} opacity={0.75} />
+    </sprite>
+    <pointLight intensity={42} distance={40} decay={2} color="#ffd9a0" />
+  </group>;
+}
+
+function Earth() {
+  const [day, clouds, normal] = useTexture([earthDayUrl, earthCloudsUrl, earthNormalUrl]) as [THREE.Texture, THREE.Texture, THREE.Texture];
+  day.colorSpace = THREE.SRGBColorSpace;
+  clouds.colorSpace = THREE.SRGBColorSpace;
+  const surface = useRef<Mesh>(null);
+  const cloudLayer = useRef<Mesh>(null);
+  useFrame((_, rawDelta) => {
+    const delta = Math.min(rawDelta, 0.05);
+    if (surface.current) surface.current.rotation.y += delta * 0.1;
+    if (cloudLayer.current) cloudLayer.current.rotation.y += delta * 0.135;
+  });
+  return <Float speed={1.1} rotationIntensity={0.12} floatIntensity={0.45}>
+    <group>
+      <mesh ref={surface}>
+        <sphereGeometry args={[1.75, 64, 64]} />
+        <meshStandardMaterial map={day} normalMap={normal} normalScale={[0.9, 0.9]} metalness={0.05} roughness={0.8} />
+      </mesh>
+      <mesh ref={cloudLayer} scale={1.015}>
+        <sphereGeometry args={[1.75, 48, 48]} />
+        <meshStandardMaterial map={clouds} transparent opacity={0.5} depthWrite={false} roughness={1} />
+      </mesh>
+      <mesh scale={1.14}>
+        <sphereGeometry args={[1.75, 48, 48]} />
+        <meshBasicMaterial color="#7fe3c9" transparent opacity={0.09} blending={THREE.AdditiveBlending} side={THREE.BackSide} depthWrite={false} />
+      </mesh>
+    </group>
+  </Float>;
+}
+
+function MoonOrbit() {
+  const moon = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    const angle = clock.elapsedTime * 0.4;
+    moon.current?.position.set(Math.cos(angle) * 2.65, Math.sin(angle * 0.8) * 0.4, Math.sin(angle) * 2.65);
+  });
+  return <>
+    <mesh rotation={[Math.PI / 2 - 0.25, 0.2, 0]}>
+      <torusGeometry args={[2.65, 0.014, 10, 160]} />
+      <meshBasicMaterial color="#5ce3a3" transparent opacity={0.4} />
+    </mesh>
+    <group ref={moon}>
+      <mesh>
+        <sphereGeometry args={[0.24, 32, 32]} />
+        <meshStandardMaterial color="#d7dde2" roughness={0.95} metalness={0} />
+      </mesh>
+    </group>
+  </>;
+}
+
+function SolarSystem() {
   const group = useRef<Group>(null);
   const { pointer } = useThree();
   useFrame((_, rawDelta) => {
     const delta = Math.min(rawDelta, 0.05);
     if (!group.current) return;
-    group.current.rotation.y += delta * 0.16;
+    group.current.rotation.y += delta * 0.06;
     group.current.rotation.x += (pointer.y * 0.16 - group.current.rotation.x) * (1 - Math.exp(-3 * delta));
     group.current.rotation.z += (-pointer.x * 0.1 - group.current.rotation.z) * (1 - Math.exp(-3 * delta));
   });
-  return <group ref={group} rotation={[0.18, -0.4, 0]}>
-    <Float speed={1.5} rotationIntensity={0.35} floatIntensity={0.8}>
-      <mesh castShadow>
-        <torusKnotGeometry args={[1.45, 0.34, 180, 24, 2, 3]} />
-        <MeshTransmissionMaterial color="#54f6ad" thickness={0.8} roughness={0.12} transmission={0.95} chromaticAberration={0.08} ior={1.35} />
-      </mesh>
-    </Float>
-    <Float speed={2.1} rotationIntensity={0.6} floatIntensity={1.2}>
-      <mesh position={[-2.45, 1.45, -0.8]} castShadow>
-        <icosahedronGeometry args={[0.48, 1]} />
-        <meshStandardMaterial color="#ffc75f" metalness={0.82} roughness={0.2} />
-      </mesh>
-    </Float>
-    <Float speed={1.8} rotationIntensity={0.5} floatIntensity={1}>
-      <mesh position={[2.25, -1.15, 0.2]} castShadow>
-        <octahedronGeometry args={[0.62, 0]} />
-        <meshStandardMaterial color="#f2f7f4" metalness={0.7} roughness={0.16} />
-      </mesh>
-    </Float>
-    <mesh rotation-x={Math.PI / 2}>
-      <torusGeometry args={[2.75, 0.018, 10, 160]} />
-      <meshBasicMaterial color="#5ce3a3" transparent opacity={0.48} />
-    </mesh>
+  return <group ref={group} rotation={[0.14, -0.35, 0]}>
+    <Sun />
+    <Earth />
+    <MoonOrbit />
   </group>;
 }
 
 function HeroScene() {
   return <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 8], fov: 42 }} gl={{ antialias: true, alpha: true }}>
-    <ambientLight intensity={0.8} />
-    <directionalLight position={[4, 6, 5]} intensity={3} />
-    <pointLight position={[-4, -2, 4]} intensity={16} color="#1bbf83" />
-    <MarketplaceObject />
+    <ambientLight intensity={1.05} />
+    <directionalLight position={SUN_POSITION} intensity={2.8} color="#ffe6bf" />
+    <directionalLight position={[-4, 1, 6]} intensity={0.7} color="#9fd9c2" />
+    <pointLight position={[-6, -3, 4]} intensity={12} color="#1bbf83" />
+    <Suspense fallback={null}>
+      <SolarSystem />
+    </Suspense>
     <Environment resolution={128}>
       <Lightformer intensity={3} position={[0, 5, 2]} scale={[8, 3, 1]} />
       <Lightformer intensity={2} color="#52d99b" position={[-5, 0, 1]} rotation-y={Math.PI / 2} scale={[8, 2, 1]} />
