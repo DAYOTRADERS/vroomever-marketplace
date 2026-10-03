@@ -2,7 +2,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Float, Lightformer, useTexture } from "@react-three/drei";
 import { ArrowRight, BadgeCheck, MessageCircle, Plus, ShieldCheck, Sparkles, Store, Zap } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import type { Group, Mesh } from "three";
 import { Button } from "@/components/ui/button";
