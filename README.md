@@ -1,6 +1,6 @@
-# Vrumever Marketplace
+# Vrumex Marketplace
 
-Build Vrumever.com in two stages. STAGE 1 FIRST: complete and preview the entire frontend before implementing backend functionality.
+Build Vrumex.com in two stages. STAGE 1 FIRST: complete and preview the entire frontend before implementing backend functionality.
 
 STAGE 1 — FRONTEND
 
@@ -72,12 +72,12 @@ Build all frontend pages and routing:
 
 BRAND/UI
 
-Create an original Vrumever logo and favicon using a futuristic marketplace symbol/lettermark. Generate the logo asset and use it consistently in the navbar, login/signup, dashboard, admin panel, browser favicon and loading screen. Do not copy Jiji/Jumia branding.
+Create an original Vrumex logo and favicon using a futuristic marketplace symbol/lettermark. Generate the logo asset and use it consistently in the navbar, login/signup, dashboard, admin panel, browser favicon and loading screen. Do not copy Jiji/Jumia branding.
 
-Use premium glassmorphism, futuristic gradients, subtle glow, shadows, rounded cards, animated backgrounds, realistic category icons, smooth hover effects, light/dark themes, responsive mobile/desktop layouts, professional typography and subtle Vrumever watermarks.
+Use premium glassmorphism, futuristic gradients, subtle glow, shadows, rounded cards, animated backgrounds, realistic category icons, smooth hover effects, light/dark themes, responsive mobile/desktop layouts, professional typography and subtle Vrumex watermarks.
 
 Brand:
-VRUMEVER
+VRUMEX
 Discover • Connect • Trade
 
 AUTH + ROLES
