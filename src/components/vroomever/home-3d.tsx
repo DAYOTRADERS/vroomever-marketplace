@@ -17,7 +17,7 @@ const signals = [
   { label: "Made for Kenya", copy: "Local discovery, familiar payments and nationwide reach.", icon: ShieldCheck },
 ];
 
-const SUN_POSITION: [number, number, number] = [2.4, 1.6, 2.0];
+const SUN_POSITION: [number, number, number] = [2.15, 1.4, 2.0];
 
 function makeGlowTexture() {
   const size = 256;
@@ -44,8 +44,8 @@ function Sun() {
       <sphereGeometry args={[0.7, 48, 48]} />
       <meshBasicMaterial color="#fff3d0" toneMapped={false} />
     </mesh>
-    <sprite scale={[5.2, 5.2, 1]}>
-      <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} opacity={0.85} />
+    <sprite scale={[4.0, 4.0, 1]}>
+      <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} opacity={0.75} />
     </sprite>
     <pointLight intensity={42} distance={40} decay={2} color="#ffd9a0" />
   </group>;
