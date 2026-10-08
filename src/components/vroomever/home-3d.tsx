@@ -7,6 +7,7 @@ import * as THREE from "three";
 import type { Group, Mesh } from "three";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "./site-shell";
+import { LiveGrid } from "./marketplace-pages";
 import earthDayUrl from "@/assets/earth_atmos_2048.jpg";
 import earthCloudsUrl from "@/assets/earth_clouds_1024.png";
 import earthNormalUrl from "@/assets/earth_normal_2048.jpg";
@@ -152,7 +153,7 @@ export function Home3D() {
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary backdrop-blur-xl"><Sparkles className="size-3.5" /> The marketplace in motion</span>
           <h1 className="mt-6 max-w-3xl font-display text-5xl font-bold leading-[1.02] sm:text-6xl lg:text-7xl">Discover more.<br/><span className="home-shine">Trade beyond.</span></h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-surface-muted sm:text-lg">VRUMEX brings buyers and sellers together through trusted listings, direct conversations and effortless local discovery.</p>
-          <div className="mt-8 grid max-w-md gap-3 sm:flex sm:max-w-none sm:flex-wrap"><Button asChild size="lg"><Link to="/auth" search={{ role: "buyer", mode: "login" }}>Explore marketplace <ArrowRight /></Link></Button><Button asChild size="lg" variant="glass"><Link to="/auth" search={{ role: "seller", mode: "login" }}><Plus /> Start selling</Link></Button></div>
+           <div className="mt-8 grid max-w-md gap-3 sm:flex sm:max-w-none sm:flex-wrap"><Button asChild size="lg"><Link to="/auth" search={{ role: "buyer", mode: "login" }}>Buyers Market <ArrowRight /></Link></Button><Button asChild size="lg" variant="glass"><Link to="/auth" search={{ role: "seller", mode: "login" }}><Plus /> Start selling</Link></Button></div>
           <div className="mt-10 flex items-center gap-4" aria-live="polite">
             <span className="grid size-11 shrink-0 place-items-center rounded-full border border-primary/30 bg-primary/15 text-primary"><ActiveIcon className="size-5" /></span>
             <div key={active.label} className="animate-fade-in"><p className="font-display font-bold">{active.label}</p><p className="text-sm text-surface-muted">{active.copy}</p></div>
@@ -174,5 +175,11 @@ export function Home3D() {
         </div>
       </div>
     </section>
-  </SiteShell>;
+     <section className="bg-background px-4 py-12 text-foreground sm:px-6 sm:py-16" aria-labelledby="landing-listings-title">
+       <div className="mx-auto max-w-7xl">
+         <h2 id="landing-listings-title" className="mb-7 font-display text-3xl font-bold">Marketplace listings</h2>
+         <LiveGrid all />
+       </div>
+     </section>
+   </SiteShell>;
 }

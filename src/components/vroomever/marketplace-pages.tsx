@@ -34,14 +34,14 @@ async function toCards(rows: DbProduct[]): Promise<CardProduct[]> {
  return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"VRUMEX seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
 }
 const liveCache=new Map<string,CardProduct[]>();
-function useLiveProducts(category?: string, sellerId?: string, subcategory?: string) {
- const key=`${category??""}|${sellerId??""}|${subcategory??""}`;
+function useLiveProducts(category?: string, sellerId?: string, subcategory?: string, all = false) {
+ const key=`${category??""}|${sellerId??""}|${subcategory??""}${all?"|all":""}`;
  const [items,setItems]=useState<CardProduct[]|null>(()=>liveCache.get(key)??null);
- useEffect(()=>{let alive=true;(async()=>{let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active").order("is_vip",{ascending:false}).order("created_at",{ascending:false}).limit(24); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const {data}=await q; const cards=await toCards((data??[]) as DbProduct[]); liveCache.set(key,cards); if(alive)setItems(cards);})();return()=>{alive=false};},[category,sellerId,subcategory,key]);
+ useEffect(()=>{let alive=true;(async()=>{const rows:DbProduct[]=[]; const pageSize=all?100:24; let offset=0; do {let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active").order("is_vip",{ascending:false}).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+pageSize-1); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const {data}=await q; const batch=(data??[]) as DbProduct[]; rows.push(...batch); offset+=pageSize; const cards=await toCards(rows); liveCache.set(key,cards); if(alive)setItems(cards); if(!all||batch.length<pageSize)break;}while(alive);})();return()=>{alive=false};},[category,sellerId,subcategory,key,all]);
  return items;
 }
-function LiveGrid({ category, sellerId, subcategory }: { category?: string; sellerId?: string; subcategory?: string }) {
- const live=useLiveProducts(category,sellerId,subcategory);
+export function LiveGrid({ category, sellerId, subcategory, all = false }: { category?: string; sellerId?: string; subcategory?: string; all?: boolean }) {
+ const live=useLiveProducts(category,sellerId,subcategory,all);
  if(live===null)return <p className="text-sm text-muted-foreground">Loading listings…</p>;
  const strict=category?live.filter(p=>p.category===category):live;
  if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings here yet.</p>;
