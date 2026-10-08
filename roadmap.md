@@ -9,6 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [x] Restore all approved listings below the unchanged 3D landing; rename buyer button to Buyers Market
 - [x] Vercel (vrumever.vercel.app) database connection explained/fixed
 - [x] Email links (confirm, reset) go to correct buyer/seller paths on the live domain
 - [x] Google + Apple sign-in on buyer/seller login
