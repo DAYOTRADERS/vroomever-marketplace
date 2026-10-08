@@ -7,7 +7,7 @@ import * as THREE from "three";
 import type { Group, Mesh } from "three";
 import { Button } from "@/components/ui/button";
 import { SiteShell } from "./site-shell";
-import { LiveGrid } from "./marketplace-pages";
+import { CategoryGrid, LiveGrid } from "./marketplace-pages";
 import earthDayUrl from "@/assets/earth_atmos_2048.jpg";
 import earthCloudsUrl from "@/assets/earth_clouds_1024.png";
 import earthNormalUrl from "@/assets/earth_normal_2048.jpg";
@@ -136,6 +136,20 @@ function HeroScene() {
 
 export function Home3D() {
   const [signal, setSignal] = useState(0);
+  const marketplace = useRef<HTMLElement>(null);
+  const [marketplaceVisible, setMarketplaceVisible] = useState(false);
+  useEffect(() => {
+    const section = marketplace.current;
+    if (!section) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        setMarketplaceVisible(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.05 });
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     const timer = window.setInterval(() => setSignal((value) => (value + 1) % signals.length), 3400);
     return () => window.clearInterval(timer);
@@ -175,8 +189,12 @@ export function Home3D() {
         </div>
       </div>
     </section>
-     <section className="bg-background px-4 py-12 text-foreground sm:px-6 sm:py-16" aria-labelledby="landing-listings-title">
-       <div className="mx-auto max-w-7xl">
+     <section ref={marketplace} className="bg-background px-4 py-12 text-foreground sm:px-6 sm:py-16" aria-labelledby="landing-listings-title">
+       <div className={`mx-auto max-w-7xl transition duration-500 ease-out motion-reduce:transform-none motion-reduce:opacity-100 motion-reduce:transition-none ${marketplaceVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"}`}>
+         <div className="mb-10 min-w-0 [&>div]:scroll-smooth motion-reduce:[&>div]:scroll-auto">
+           <h2 className="mb-7 font-display text-3xl font-bold">Browse categories</h2>
+           <CategoryGrid />
+         </div>
          <h2 id="landing-listings-title" className="mb-7 font-display text-3xl font-bold">Marketplace listings</h2>
          <LiveGrid all />
        </div>
