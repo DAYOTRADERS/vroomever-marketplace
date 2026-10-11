@@ -1,4 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { ListingMedia } from "./listing-media";
+import { refreshCategories } from "@/lib/use-categories";
 import {
   BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
@@ -353,11 +355,11 @@ export function AdminUsers() {
 }
 
 export function AdminProducts() {
-  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string; rejection_reason: string | null }>>([]);
+  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string; rejection_reason: string | null; images: string[] | null; video_url: string | null; description: string | null }>>([]);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [filter, setFilter] = useState<"all" | ProductStatus>("all");
   const n = useNotice();
-  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at,rejection_reason").order("created_at", { ascending: false })
+  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at,rejection_reason,images,video_url,description").order("created_at", { ascending: false })
     .then(({ data, error }) => { if (error) n.show(error, ""); setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))); });
   useEffect(() => { void load(); }, []);
   const setStatus = async (id: string, status: ProductStatus) => {
@@ -383,7 +385,7 @@ export function AdminProducts() {
       <Table
         head={["Listing", "Price", "Status", "Actions"]}
         rows={shown.map((p) => [
-          <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{p.category_slug} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small></div>,
+          <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{p.category_slug} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small><div className="mt-2 max-w-sm"><ListingMedia images={p.images} video={p.video_url} /></div>{p.description && <p className="mt-2 max-w-sm whitespace-pre-line text-xs text-muted-foreground">{p.description}</p>}</div>,
           formatKsh(p.price),
           <div><Badge variant="outline">{p.status}</Badge>{p.status === "rejected" && p.rejection_reason && <small className="mt-1 block max-w-48 text-muted-foreground">Reason: {p.rejection_reason}</small>}</div>,
           <span className="flex flex-wrap gap-2">
@@ -406,9 +408,11 @@ export function AdminCategories() {
   const load = () => supabase.from("categories").select("*").order("position").then(({ data }) => setRows(data ?? []));
   useEffect(() => { void load(); }, []);
   const save = async (slug: string, name: string, subs: string) => {
-    const { error } = await supabase.from("categories").update({ name, subcategories: subs.split(",").map((s) => s.trim()).filter(Boolean) }).eq("slug", slug);
-    n.show(error, `${name} saved.`);
-    if (!error) void load();
+    const clean = name.trim();
+    if (!clean) { n.show({ message: "Category name cannot be empty." }, ""); return; }
+    const { data, error } = await supabase.from("categories").update({ name: clean, subcategories: subs.split(",").map((s) => s.trim()).filter(Boolean) }).eq("slug", slug).select("slug");
+    n.show(error ?? (data?.length ? null : { message: "Not saved — sign in again as an administrator." }), `${clean} saved.`);
+    if (!error && data?.length) { void load(); void refreshCategories(); }
   };
   const add = async (e: FormEvent) => {
     e.preventDefault();
@@ -416,13 +420,13 @@ export function AdminCategories() {
     if (!slug) return;
     const { error } = await supabase.from("categories").insert({ slug, name: draft.name.trim(), subcategories: draft.subs.split(",").map((s) => s.trim()).filter(Boolean), position: rows.length + 1 });
     n.show(error, `${draft.name} added.`);
-    if (!error) { setDraft({ name: "", subs: "" }); void load(); }
+    if (!error) { setDraft({ name: "", subs: "" }); void load(); void refreshCategories(); }
   };
   const remove = async (slug: string, name: string) => {
     if (!confirmDo(`Delete category "${name}"? Categories that still have listings cannot be deleted.`)) return;
     const { error } = await supabase.from("categories").delete().eq("slug", slug);
     n.show(error ? { message: error.message.includes("foreign key") ? "This category still has listings. Move or delete them first." : error.message } : null, `${name} deleted.`);
-    if (!error) void load();
+    if (!error) { void load(); void refreshCategories(); }
   };
   return (
     <AdminShell>
