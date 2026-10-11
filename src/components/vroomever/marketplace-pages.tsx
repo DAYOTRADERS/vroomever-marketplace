@@ -17,7 +17,8 @@ import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
 import { ProductCard } from "./product-card";
 import { SiteShell } from "./site-shell";
-import { categories, formatKsh, packages, vipOptions } from "@/data/marketplace";
+import { useCategories } from "@/lib/use-categories";
+import { formatKsh, packages, vipOptions } from "@/data/marketplace";
 import { categoryImages } from "@/data/category-images";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
@@ -53,7 +54,7 @@ export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; 
 }
 export const Seo = (title: string, description: string) => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] });
 
-export function CategoryGrid() { return <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-32 min-w-[145px] snap-start flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-4 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75"><span className="grid size-16 place-items-center">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-16 object-contain drop-shadow-lg transition group-hover:scale-110"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-3 text-xs font-semibold leading-tight">{cat.name}</span></Link>)}</div> }
+export function CategoryGrid() { const categories=useCategories(); return <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-32 min-w-[145px] snap-start flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-4 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75"><span className="grid size-16 place-items-center">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-16 object-contain drop-shadow-lg transition group-hover:scale-110"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-3 text-xs font-semibold leading-tight">{cat.name}</span></Link>)}</div> }
 function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
 export function DashboardPage() {
@@ -71,6 +72,7 @@ export function DashboardPage() {
 
 
 export function CategoryPage({ slug }: { slug: string }) {
+ const categories=useCategories();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
  const [subcategory,setSubcategory]=useState("");
  return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div><div className="relative mb-6 flex justify-end"><details className="group relative"><summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold shadow-sm hover:bg-muted"><Filter className="size-4"/> Filters{subcategory&&<Badge variant="secondary">1</Badge>}<ChevronRight className="size-4 transition group-open:rotate-90"/></summary><div className="absolute right-0 z-30 mt-2 w-[min(19rem,calc(100vw-2rem))] rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-elevated"><label className="text-sm font-semibold" htmlFor="subcategory-filter">Subcategory</label><select id="subcategory-filter" value={subcategory} onChange={e=>setSubcategory(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"><option value="">All {cat.name}</option>{cat.subcategories.map(s=><option key={s} value={s}>{s}</option>)}</select>{subcategory&&<Button type="button" variant="ghost" size="sm" className="mt-3 w-full" onClick={()=>setSubcategory("")}>Clear filter</Button>}</div></details></div>{subcategory?<LiveGrid category={cat.slug} subcategory={subcategory}/>:<LiveGrid category={cat.slug}/>}</div></SiteShell>
@@ -546,7 +548,7 @@ export function SellPage() {
   const nav=useNavigate();
   const [authorized,setAuthorized]=useState(false);
   const [step,setStep]=useState(0);
-  const [categorySlug,setCategorySlug]=useState(categories[0]!.slug);
+  const [categorySlug,setCategorySlug]=useState(useCategories()[0]!.slug);
   const [title,setTitle]=useState("");
   const [price,setPrice]=useState("");
   const [location,setLocation]=useState("");
@@ -586,6 +588,7 @@ export function SellPage() {
 }
 
 function SellStep({step,categorySlug,setCategorySlug,title,setTitle,price,setPrice,location,setLocation,description,setDescription,condition,setCondition,photos,setPhotos,video,setVideo,subcategory,setSubcategory,phoneCode,setPhoneCode,phoneNum,setPhoneNum}:{step:number;categorySlug:string;setCategorySlug:(x:string)=>void;title:string;setTitle:(x:string)=>void;price:string;setPrice:(x:string)=>void;location:string;setLocation:(x:string)=>void;description:string;setDescription:(x:string)=>void;condition:string;setCondition:(x:string)=>void;photos:File[];setPhotos:(x:File[])=>void;video:File|null;setVideo:(x:File|null)=>void;subcategory:string;setSubcategory:(x:string)=>void;phoneCode:string;setPhoneCode:(x:string)=>void;phoneNum:string;setPhoneNum:(x:string)=>void}) {
+ const categories=useCategories();
  const cat=categories.find(c=>c.slug===categorySlug)??categories[0]!;
  const previews=useMemo(()=>photos.map(f=>URL.createObjectURL(f)),[photos]);
  useEffect(()=>()=>previews.forEach(u=>URL.revokeObjectURL(u)),[previews]);
