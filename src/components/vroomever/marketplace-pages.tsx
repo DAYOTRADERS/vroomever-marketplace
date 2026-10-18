@@ -21,6 +21,10 @@ import { ListingMedia } from "./listing-media";
 import { useCategories } from "@/lib/use-categories";
 import { formatKsh, packages, vipOptions } from "@/data/marketplace";
 import { categoryImages } from "@/data/category-images";
+import { subcategoryIcon } from "@/data/subcategory-icons";
+import { carMakes } from "@/data/car-makes";
+import { useMarketFilters, setMarketFilters, activeFilterCount, type MarketFilters } from "@/lib/market-filters";
+import { LayoutGrid } from "lucide-react";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
@@ -36,18 +40,41 @@ async function toCards(rows: DbProduct[]): Promise<CardProduct[]> {
  return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"VRUMEX seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
 }
 const liveCache=new Map<string,CardProduct[]>();
-function useLiveProducts(category?: string, sellerId?: string, subcategory?: string, all = false) {
- const key=`${category??""}|${sellerId??""}|${subcategory??""}${all?"|all":""}`;
+function useLiveProducts(category?: string, sellerId?: string, subcategory?: string, all = false, make?: string) {
+ const f=useMarketFilters();
+ const fk=`${f.q}|${f.min}|${f.max}|${f.location}|${f.sort}|${make??""}`;
+ const key=`${category??""}|${sellerId??""}|${subcategory??""}${all?"|all":""}|${fk}`;
  const [items,setItems]=useState<CardProduct[]|null>(()=>liveCache.get(key)??null);
- useEffect(()=>{let alive=true;(async()=>{const rows:DbProduct[]=[]; const pageSize=all?100:24; let offset=0; do {let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active").order("is_vip",{ascending:false}).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+pageSize-1); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const {data}=await q; const batch=(data??[]) as DbProduct[]; rows.push(...batch); offset+=pageSize; const cards=await toCards(rows); liveCache.set(key,cards); if(alive)setItems(cards); if(!all||batch.length<pageSize)break;}while(alive);})();return()=>{alive=false};},[category,sellerId,subcategory,key,all]);
+ useEffect(()=>{let alive=true; setItems(liveCache.get(key)??null);(async()=>{const rows:DbProduct[]=[]; const pageSize=all?100:24; let offset=0; do {let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active"); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const term=f.q.trim().replace(/[%,()]/g," "); if(term)q=q.ilike("title",`%${term}%`); if(make)q=q.ilike("title",`%${make}%`); const loc=f.location.trim().replace(/[%,()]/g," "); if(loc)q=q.ilike("location",`%${loc}%`); if(f.min&&!isNaN(+f.min))q=q.gte("price_ksh",+f.min); if(f.max&&!isNaN(+f.max))q=q.lte("price_ksh",+f.max); const ordered=f.sort==="recent"?q.order("is_vip",{ascending:false}).order("created_at",{ascending:false}):q.order("price_ksh",{ascending:f.sort==="price_asc"}); const {data}=await ordered.order("id",{ascending:false}).range(offset,offset+pageSize-1); const batch=(data??[]) as DbProduct[]; rows.push(...batch); offset+=pageSize; const cards=await toCards(rows); liveCache.set(key,cards); if(alive)setItems(cards); if(!all||batch.length<pageSize)break;}while(alive);})();return()=>{alive=false};},[key]);// eslint-disable-line react-hooks/exhaustive-deps
  return items;
 }
-export function LiveGrid({ category, sellerId, subcategory, all = false }: { category?: string; sellerId?: string; subcategory?: string; all?: boolean }) {
- const live=useLiveProducts(category,sellerId,subcategory,all);
+export function LiveGrid({ category, sellerId, subcategory, all = false, make }: { category?: string; sellerId?: string; subcategory?: string; all?: boolean; make?: string }) {
+ const live=useLiveProducts(category,sellerId,subcategory,all,make);
  if(live===null)return <p className="text-sm text-muted-foreground">Loading listings…</p>;
  const strict=category?live.filter(p=>p.category===category):live;
- if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings here yet.</p>;
+ if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings match.</p>;
  return <ProductGrid items={strict}/>;
+}
+
+function MakeLogo({ name, src }: { name: string; src: string }) {
+ const [bad,setBad]=useState(false); const ref=useRef<HTMLImageElement>(null);
+ useEffect(()=>{const i=ref.current; if(i&&i.complete&&i.naturalWidth===0)setBad(true);},[]);
+ return bad?<span className="grid size-10 place-items-center rounded-full bg-secondary text-sm font-bold text-primary">{name.slice(0,2).toUpperCase()}</span>:<img ref={ref} src={src} alt="" width={40} height={40} className="size-9 object-contain sm:size-10" onError={()=>setBad(true)}/>;
+}
+export function FilterMenu() {
+ const f=useMarketFilters(); const n=activeFilterCount(f);
+ return <details className="group relative"><summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold shadow-sm hover:bg-muted"><Filter className="size-4"/> Filters{n>0&&<Badge variant="secondary">{n}</Badge>}<ChevronRight className="size-4 transition group-open:rotate-90"/></summary>
+ <div className="absolute right-0 z-30 mt-2 grid w-[min(19rem,calc(100vw-2rem))] gap-3 rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-elevated">
+  <div className="grid grid-cols-2 gap-2"><label className="text-xs font-semibold">Min price (KSh)<Input type="number" min="0" inputMode="numeric" value={f.min} onChange={e=>setMarketFilters({min:e.target.value})} className="mt-1 text-foreground" placeholder="0"/></label><label className="text-xs font-semibold">Max price (KSh)<Input type="number" min="0" inputMode="numeric" value={f.max} onChange={e=>setMarketFilters({max:e.target.value})} className="mt-1 text-foreground" placeholder="Any"/></label></div>
+  <label className="text-xs font-semibold">Location<Input value={f.location} onChange={e=>setMarketFilters({location:e.target.value})} className="mt-1 text-foreground" placeholder="e.g. Nairobi"/></label>
+  <label className="text-xs font-semibold">Sort by<select value={f.sort} onChange={e=>setMarketFilters({sort:e.target.value as MarketFilters["sort"]})} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"><option value="recent">Newest first</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
+  {n>0&&<Button type="button" variant="ghost" size="sm" onClick={()=>setMarketFilters({min:"",max:"",location:"",sort:"recent"})}>Clear filters</Button>}
+ </div></details>;
+}
+export function MarketSearch({ className="" }: { className?: string }) {
+ const f=useMarketFilters(); const [v,setV]=useState(f.q);
+ useEffect(()=>{const t=setTimeout(()=>setMarketFilters({q:v}),300);return()=>clearTimeout(t);},[v]);
+ return <form onSubmit={e=>{e.preventDefault();setMarketFilters({q:v});}} className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center rounded-card bg-background p-1.5 text-foreground ${className}`}><Search className="mx-3 size-5 text-muted-foreground"/><Input aria-label="Search the marketplace" value={v} onChange={e=>setV(e.target.value)} className="h-10 min-w-0 border-0 text-foreground caret-primary shadow-none" placeholder="Search the marketplace"/><Button type="submit">Search</Button></form>;
 }
 
 export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; title: string; copy?: string; action?: React.ReactNode }) {
@@ -55,7 +82,7 @@ export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; 
 }
 export const Seo = (title: string, description: string) => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] });
 
-export function CategoryGrid() { const categories=useCategories(); return <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-32 min-w-[145px] snap-start flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-4 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75"><span className="grid size-16 place-items-center">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-16 object-contain drop-shadow-lg transition group-hover:scale-110"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-3 text-xs font-semibold leading-tight">{cat.name}</span></Link>)}</div> }
+export function CategoryGrid() { const categories=useCategories(); return <div className="grid grid-cols-4 gap-2 pb-3 sm:flex sm:gap-4 sm:overflow-x-auto sm:snap-x sm:snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-24 min-w-0 flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-2 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75 sm:min-h-32 sm:min-w-[145px] sm:snap-start sm:p-4"><span className="grid size-11 place-items-center sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-11 object-contain drop-shadow-lg transition group-hover:scale-110 sm:size-16"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-2 text-[10px] font-semibold leading-tight sm:mt-3 sm:text-xs">{cat.name}</span></Link>)}</div> }
 function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
 export function DashboardPage() {
@@ -65,9 +92,9 @@ export function DashboardPage() {
  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){nav({to:"/auth",search:{role:"buyer",mode:"login"},replace:true});return;} const {data:roleRow}=await getMyRoleRow(); const {data:prof}=await supabase.from("profiles").select("full_name").eq("id",data.session.user.id).maybeSingle(); const profile={role:roleRow?.role,full_name:prof?.full_name}; if(profile?.role==="seller"){nav({to:"/seller/dashboard",replace:true});return;} const name=(profile?.full_name||"").trim().split(/\s+/)[0] || data.session.user.email?.split("@")[0] || "there"; setFirstName(name); setSessionReady(true);});},[nav]);
  if(!sessionReady)return null;
  return <SiteShell dashboardMode="buyer"><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10">
- <div className="relative overflow-hidden rounded-card bg-surface-strong p-5 text-surface-foreground sm:p-7 md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><div className="mt-7 grid grid-cols-[auto_minmax(0,1fr)] items-center rounded-card bg-background p-2 sm:grid-cols-[auto_minmax(0,1fr)_auto]"><Search className="m-3 size-5 text-muted-foreground"/><Input className="h-11 min-w-0 border-0 shadow-none" placeholder="Search the marketplace"/><Button className="col-span-2 mt-2 sm:col-span-1 sm:mt-0">Search</Button></div></div></div>
+ <div className="relative overflow-hidden rounded-card bg-surface-strong p-5 text-surface-foreground sm:p-7 md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><MarketSearch className="mt-7"/></div></div>
  <div className="py-10"><PageTitle title="Browse categories"/><CategoryGrid/></div>
- <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<Button variant="outline"><Filter/> Filters</Button>}/><LiveGrid/></div>
+ <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<FilterMenu/>}/><LiveGrid/></div>
  </div></SiteShell>;
 }
 
@@ -76,7 +103,17 @@ export function CategoryPage({ slug }: { slug: string }) {
  const categories=useCategories();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
  const [subcategory,setSubcategory]=useState("");
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div><div className="relative mb-6 flex justify-end"><details className="group relative"><summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold shadow-sm hover:bg-muted"><Filter className="size-4"/> Filters{subcategory&&<Badge variant="secondary">1</Badge>}<ChevronRight className="size-4 transition group-open:rotate-90"/></summary><div className="absolute right-0 z-30 mt-2 w-[min(19rem,calc(100vw-2rem))] rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-elevated"><label className="text-sm font-semibold" htmlFor="subcategory-filter">Subcategory</label><select id="subcategory-filter" value={subcategory} onChange={e=>setSubcategory(e.target.value)} className="mt-2 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"><option value="">All {cat.name}</option>{cat.subcategories.map(s=><option key={s} value={s}>{s}</option>)}</select>{subcategory&&<Button type="button" variant="ghost" size="sm" className="mt-3 w-full" onClick={()=>setSubcategory("")}>Clear filter</Button>}</div></details></div>{subcategory?<LiveGrid category={cat.slug} subcategory={subcategory}/>:<LiveGrid category={cat.slug}/>}</div></SiteShell>
+ const [make,setMake]=useState("");
+ const tile=(on:boolean)=>`group flex min-h-24 flex-col items-center justify-center gap-2 rounded-card border p-3 text-center text-xs font-semibold leading-tight transition card-3d ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
+ const choose=(s:string)=>{setSubcategory(s===subcategory?"":s); if(s!=="Cars")setMake("");};
+ return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div>
+ <section aria-label="Subcategories" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
+  <button type="button" onClick={()=>{setSubcategory("");setMake("");}} className={tile(!subcategory)}><LayoutGrid className="size-7 text-primary"/>All</button>
+  {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>choose(s)} className={tile(subcategory===s)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
+ </div></section>
+ {cat.slug==="cars"&&(!subcategory||subcategory==="Cars")&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{carMakes.map(m=><button key={m.name} type="button" onClick={()=>setMake(make===m.name?"":m.name)} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
+ <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
+ <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(make?{make}:{})}/></div></SiteShell>
 }
 
 export function ProductPage({ id }: { id: string }) {
