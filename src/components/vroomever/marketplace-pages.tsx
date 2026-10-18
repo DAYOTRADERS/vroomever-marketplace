@@ -56,6 +56,11 @@ export function LiveGrid({ category, sellerId, subcategory, all = false, make }:
  return <ProductGrid items={strict}/>;
 }
 
+function MakeLogo({ name, src }: { name: string; src: string }) {
+ const [bad,setBad]=useState(false); const ref=useRef<HTMLImageElement>(null);
+ useEffect(()=>{const i=ref.current; if(i&&i.complete&&i.naturalWidth===0)setBad(true);},[]);
+ return bad?<span className="grid size-10 place-items-center rounded-full bg-secondary text-sm font-bold text-primary">{name.slice(0,2).toUpperCase()}</span>:<img ref={ref} src={src} alt="" width={40} height={40} className="size-9 object-contain sm:size-10" onError={()=>setBad(true)}/>;
+}
 export function FilterMenu() {
  const f=useMarketFilters(); const n=activeFilterCount(f);
  return <details className="group relative"><summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold shadow-sm hover:bg-muted"><Filter className="size-4"/> Filters{n>0&&<Badge variant="secondary">{n}</Badge>}<ChevronRight className="size-4 transition group-open:rotate-90"/></summary>
@@ -106,7 +111,7 @@ export function CategoryPage({ slug }: { slug: string }) {
   <button type="button" onClick={()=>{setSubcategory("");setMake("");}} className={tile(!subcategory)}><LayoutGrid className="size-7 text-primary"/>All</button>
   {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>choose(s)} className={tile(subcategory===s)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
  </div></section>
- {cat.slug==="cars"&&(!subcategory||subcategory==="Cars")&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{carMakes.map(m=><button key={m.name} type="button" onClick={()=>setMake(make===m.name?"":m.name)} className={tile(make===m.name)}><img src={m.logo} alt="" width={40} height={40} loading="lazy" className="size-9 object-contain sm:size-10" onError={e=>{e.currentTarget.style.display="none";(e.currentTarget.nextElementSibling as HTMLElement).style.display="grid";}}/><span className="hidden size-10 place-items-center rounded-full bg-secondary text-sm font-bold text-primary">{m.name.slice(0,2).toUpperCase()}</span>{m.name}</button>)}</div></section>}
+ {cat.slug==="cars"&&(!subcategory||subcategory==="Cars")&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{carMakes.map(m=><button key={m.name} type="button" onClick={()=>setMake(make===m.name?"":m.name)} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
  <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
  <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(make?{make}:{})}/></div></SiteShell>
 }

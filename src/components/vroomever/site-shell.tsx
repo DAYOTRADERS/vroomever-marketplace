@@ -74,10 +74,10 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
       <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
-      <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Brand inverted />
-        <ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} />
-      </button>
+        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
+      </div>
       {footerOpen && <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 pt-4 sm:px-5 md:grid-cols-4 animate-fade-in">
         <div className="md:col-span-2"><p className="max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>
         <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/support">Contact support</Link></div></div>
