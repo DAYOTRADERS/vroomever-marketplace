@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
+import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
 import { useEffect, useState, type ReactNode } from "react";
@@ -12,6 +12,7 @@ type DashboardMode = "buyer" | "seller";
 
 export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
   const [menu, setMenu] = useState(false);
+  const [footerOpen, setFooterOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
@@ -36,10 +37,7 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />
-        <div className="relative hidden max-w-xl flex-1 md:block">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="h-11 rounded-full bg-muted/70 pl-10 shadow-none" placeholder="Search cars, phones, property..." />
-        </div>
+        <div className="hidden flex-1 md:block" />
         <nav className={`ml-auto items-center gap-1 ${dashboardMode ? "hidden" : "hidden lg:flex"}`}>
           <Button asChild variant="ghost"><Link to="/dashboard" className={active("/dashboard") ? "text-primary" : ""}>Marketplace</Link></Button>
           <Button asChild variant="ghost" size="icon"><Link to="/favorites" aria-label="Favorites"><Heart /></Link></Button>
@@ -75,12 +73,16 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
       </aside>
       <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
-    {!dashboardMode && <footer className="border-t border-border bg-surface-strong py-10 text-surface-foreground sm:py-12">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-5 md:grid-cols-4">
-        <div className="md:col-span-2"><Brand inverted /><p className="mt-4 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>
+    {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
+      <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
+        <Brand inverted />
+        <ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} />
+      </button>
+      {footerOpen && <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 pt-4 sm:px-5 md:grid-cols-4 animate-fade-in">
+        <div className="md:col-span-2"><p className="max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>
         <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/support">Contact support</Link></div></div>
         <div><strong className="text-sm">Legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
-      </div>
+      </div>}
     </footer>}
   </div>;
 }
