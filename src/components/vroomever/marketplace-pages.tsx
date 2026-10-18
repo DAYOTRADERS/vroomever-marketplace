@@ -36,18 +36,36 @@ async function toCards(rows: DbProduct[]): Promise<CardProduct[]> {
  return rows.map((r,k)=>({id:r.id,title:r.title,price:Number(r.price_ksh),location:r.location,condition:r.condition,image:urls[k]??"/placeholder.svg",seller:"VRUMEX seller",vip:r.is_vip,category:r.category_slug,views:r.views}));
 }
 const liveCache=new Map<string,CardProduct[]>();
-function useLiveProducts(category?: string, sellerId?: string, subcategory?: string, all = false) {
- const key=`${category??""}|${sellerId??""}|${subcategory??""}${all?"|all":""}`;
+function useLiveProducts(category?: string, sellerId?: string, subcategory?: string, all = false, make?: string) {
+ const f=useMarketFilters();
+ const fk=`${f.q}|${f.min}|${f.max}|${f.location}|${f.sort}|${make??""}`;
+ const key=`${category??""}|${sellerId??""}|${subcategory??""}${all?"|all":""}|${fk}`;
  const [items,setItems]=useState<CardProduct[]|null>(()=>liveCache.get(key)??null);
- useEffect(()=>{let alive=true;(async()=>{const rows:DbProduct[]=[]; const pageSize=all?100:24; let offset=0; do {let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active").order("is_vip",{ascending:false}).order("created_at",{ascending:false}).order("id",{ascending:false}).range(offset,offset+pageSize-1); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const {data}=await q; const batch=(data??[]) as DbProduct[]; rows.push(...batch); offset+=pageSize; const cards=await toCards(rows); liveCache.set(key,cards); if(alive)setItems(cards); if(!all||batch.length<pageSize)break;}while(alive);})();return()=>{alive=false};},[category,sellerId,subcategory,key,all]);
+ useEffect(()=>{let alive=true; setItems(liveCache.get(key)??null);(async()=>{const rows:DbProduct[]=[]; const pageSize=all?100:24; let offset=0; do {let q=supabase.from("products").select("id,title,price_ksh,location,condition,images,is_vip,category_slug,seller_id,views").eq("status","active"); if(category)q=q.eq("category_slug",category); if(sellerId)q=q.eq("seller_id",sellerId); if(subcategory)q=q.eq("subcategory",subcategory); const term=f.q.trim().replace(/[%,()]/g," "); if(term)q=q.ilike("title",`%${term}%`); if(make)q=q.ilike("title",`%${make}%`); const loc=f.location.trim().replace(/[%,()]/g," "); if(loc)q=q.ilike("location",`%${loc}%`); if(f.min&&!isNaN(+f.min))q=q.gte("price_ksh",+f.min); if(f.max&&!isNaN(+f.max))q=q.lte("price_ksh",+f.max); const ordered=f.sort==="recent"?q.order("is_vip",{ascending:false}).order("created_at",{ascending:false}):q.order("price_ksh",{ascending:f.sort==="price_asc"}); const {data}=await ordered.order("id",{ascending:false}).range(offset,offset+pageSize-1); const batch=(data??[]) as DbProduct[]; rows.push(...batch); offset+=pageSize; const cards=await toCards(rows); liveCache.set(key,cards); if(alive)setItems(cards); if(!all||batch.length<pageSize)break;}while(alive);})();return()=>{alive=false};},[key]);// eslint-disable-line react-hooks/exhaustive-deps
  return items;
 }
-export function LiveGrid({ category, sellerId, subcategory, all = false }: { category?: string; sellerId?: string; subcategory?: string; all?: boolean }) {
- const live=useLiveProducts(category,sellerId,subcategory,all);
+export function LiveGrid({ category, sellerId, subcategory, all = false, make }: { category?: string; sellerId?: string; subcategory?: string; all?: boolean; make?: string }) {
+ const live=useLiveProducts(category,sellerId,subcategory,all,make);
  if(live===null)return <p className="text-sm text-muted-foreground">Loading listings…</p>;
  const strict=category?live.filter(p=>p.category===category):live;
- if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings here yet.</p>;
+ if(strict.length===0)return <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No approved listings match.</p>;
  return <ProductGrid items={strict}/>;
+}
+
+export function FilterMenu() {
+ const f=useMarketFilters(); const n=activeFilterCount(f);
+ return <details className="group relative"><summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-md border border-border bg-card px-4 text-sm font-semibold shadow-sm hover:bg-muted"><Filter className="size-4"/> Filters{n>0&&<Badge variant="secondary">{n}</Badge>}<ChevronRight className="size-4 transition group-open:rotate-90"/></summary>
+ <div className="absolute right-0 z-30 mt-2 grid w-[min(19rem,calc(100vw-2rem))] gap-3 rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-elevated">
+  <div className="grid grid-cols-2 gap-2"><label className="text-xs font-semibold">Min price (KSh)<Input type="number" min="0" inputMode="numeric" value={f.min} onChange={e=>setMarketFilters({min:e.target.value})} className="mt-1 text-foreground" placeholder="0"/></label><label className="text-xs font-semibold">Max price (KSh)<Input type="number" min="0" inputMode="numeric" value={f.max} onChange={e=>setMarketFilters({max:e.target.value})} className="mt-1 text-foreground" placeholder="Any"/></label></div>
+  <label className="text-xs font-semibold">Location<Input value={f.location} onChange={e=>setMarketFilters({location:e.target.value})} className="mt-1 text-foreground" placeholder="e.g. Nairobi"/></label>
+  <label className="text-xs font-semibold">Sort by<select value={f.sort} onChange={e=>setMarketFilters({sort:e.target.value as MarketFilters["sort"]})} className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"><option value="recent">Newest first</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
+  {n>0&&<Button type="button" variant="ghost" size="sm" onClick={()=>setMarketFilters({min:"",max:"",location:"",sort:"recent"})}>Clear filters</Button>}
+ </div></details>;
+}
+export function MarketSearch({ className="" }: { className?: string }) {
+ const f=useMarketFilters(); const [v,setV]=useState(f.q);
+ useEffect(()=>{const t=setTimeout(()=>setMarketFilters({q:v}),300);return()=>clearTimeout(t);},[v]);
+ return <form onSubmit={e=>{e.preventDefault();setMarketFilters({q:v});}} className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center rounded-card bg-background p-1.5 text-foreground ${className}`}><Search className="mx-3 size-5 text-muted-foreground"/><Input aria-label="Search the marketplace" value={v} onChange={e=>setV(e.target.value)} className="h-10 min-w-0 border-0 text-foreground caret-primary shadow-none" placeholder="Search the marketplace"/><Button type="submit">Search</Button></form>;
 }
 
 export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; title: string; copy?: string; action?: React.ReactNode }) {
