@@ -102,39 +102,45 @@ export function DashboardPage() {
 const subcategorySlug = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const vehicleMakes: Record<string, { name: string; logo: string }[]> = {
  Cars: carMakes.filter((m) => !["Hino", "Isuzu"].includes(m.name)),
- Buses: [["Toyota","toyota"],["Isuzu","isuzu"],["Hino","hino"],["Nissan","nissan"],["Mitsubishi","mitsubishi"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Ashok Leyland","ashokleyland"],["Yutong","yutong"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
- Trucks: [["Isuzu","isuzu"],["Hino","hino"],["Mitsubishi Fuso","mitsubishi"],["Toyota","toyota"],["Nissan","nissan"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Foton","foton"],["DAF","daf"],["FAW","faw"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
- Motorcycles: [["Honda","honda"],["Yamaha","yamaha"],["Suzuki","suzuki"],["Kawasaki","kawasaki"],["TVS","tvs"],["Bajaj","bajaj"],["Hero","hero"],["KTM","ktm"],["BMW Motorrad","bmw"],["Harley-Davidson","harleydavidson"],["Royal Enfield","royalenfield"],["Boxer","boxer"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
+ Buses: [["Toyota","toyota"],["Isuzu","isuzu"],["Hino","hino"],["Nissan","nissan"],["Mitsubishi","mitsubishi"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Ashok Leyland","ashokleyland"],["Yutong","yutong"]].map(([name,slug])=>({name:name!,logo:"https://cdn.simpleicons.org/"+slug})),
+ Trucks: [["Isuzu","isuzu"],["Hino","hino"],["Mitsubishi Fuso","mitsubishi"],["Toyota","toyota"],["Nissan","nissan"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Foton","foton"],["DAF","daf"],["FAW","faw"]].map(([name,slug])=>({name:name!,logo:"https://cdn.simpleicons.org/"+slug})),
+ Motorcycles: [["Honda","honda"],["Yamaha","yamaha"],["Suzuki","suzuki"],["Kawasaki","kawasaki"],["TVS","tvs"],["Bajaj","bajaj"],["Hero","hero"],["KTM","ktm"],["BMW Motorrad","bmw"],["Harley-Davidson","harleydavidson"],["Royal Enfield","royalenfield"],["Boxer","boxer"]].map(([name,slug])=>({name:name!,logo:"https://cdn.simpleicons.org/"+slug})),
+ Bicycles: [["Giant","giant-bicycles"],["Trek","trek"],["Specialized","specialized"],["Cannondale","cannondale"],["Scott","scott"],["Merida","merida"],["Bianchi","bianchi"],["Polygon","polygon"],["Phoenix","phoenix"],["Trinx","trinx"]].map(([name,slug])=>({name:name!,logo:"https://cdn.simpleicons.org/"+slug})),
 };
 export function CategoryPage({ slug, subcategorySlug: routeSubcategory }: { slug: string; subcategorySlug?: string }) {
  const categories=useCategories();
+ const nav=useNavigate();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
  const subcategory=cat.subcategories.find((s)=>subcategorySlug(s)===routeSubcategory) ?? "";
  const [makeSelection,setMakeSelection]=useState({key:"",value:""});
  const [categoryImageFailed,setCategoryImageFailed]=useState(false);
- const selectionKey=`${slug}|${subcategory}`;
+ const selectionKey=slug+"|"+subcategory;
  const make=makeSelection.key===selectionKey?makeSelection.value:"";
- const tile=(on:boolean)=>`group flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-card border p-1.5 text-center text-[11px] font-semibold leading-tight transition card-3d sm:min-h-20 sm:gap-1.5 sm:p-2 sm:text-xs ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
+ const tile=(on:boolean)=>"group flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-card border p-1.5 text-center text-[11px] font-semibold leading-tight transition card-3d sm:min-h-20 sm:gap-1.5 sm:p-2 sm:text-xs "+(on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50");
  const makes=cat.slug==="cars" ? vehicleMakes[subcategory] : undefined;
  const SubcategoryHeadingIcon = subcategory ? subcategoryIcon(subcategory) : null;
- if (!routeSubcategory) return <SiteShell><div className="mx-auto min-h-[60vh] max-w-7xl px-4 py-6 sm:px-5 sm:py-10">
-  <div className="mb-7 flex items-center gap-3"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt={cat.name} width={56} height={56} onError={()=>setCategoryImageFailed(true)} className="size-12 object-contain sm:size-14"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow="Browse category" title={cat.name} copy={`Choose a subcategory to see matching listings`}/></div>
-  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-   {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <Link key={s} to="/category/$category/$subcategory" params={{category:cat.slug,subcategory:subcategorySlug(s)}} className="group flex min-h-32 flex-col items-center justify-center gap-3 rounded-card border border-border bg-card p-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-secondary/40"><Icon className="size-10 text-primary transition group-hover:scale-105"/><span className="text-sm font-semibold">{s}</span></Link>;})}
-  </div>
+ if (!routeSubcategory || !subcategory) return <SiteShell><div className="fixed inset-0 z-[70] flex items-center justify-center bg-foreground/65 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="category-picker-title">
+  <section className="relative flex max-h-[88svh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl animate-scale-in">
+   <header className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
+    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-secondary text-primary">{categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt="" width={44} height={44} onError={()=>setCategoryImageFailed(true)} className="size-10 object-contain"/>:<cat.icon className="size-7"/>}</span>
+    <div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-widest text-primary">Choose a subcategory</p><h1 id="category-picker-title" className="font-display text-xl font-bold sm:text-2xl">{cat.name}</h1></div>
+    <Button type="button" variant="ghost" onClick={()=>nav({to:"/dashboard"})} className="shrink-0"><ArrowLeft className="size-4"/> Back</Button>
+   </header>
+   <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+     {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <Link key={s} to="/category/$category/$subcategory" params={{category:cat.slug,subcategory:subcategorySlug(s)}} className="group flex min-h-28 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-3 text-center transition hover:border-primary/60 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-32 sm:p-4"><span className="grid size-12 place-items-center rounded-xl bg-secondary/70 text-primary transition group-hover:scale-105"><Icon className="size-7"/></span><span className="text-sm font-semibold leading-snug">{s}</span></Link>;})}
+    </div>
+   </div>
+   <footer className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-6">Select a subcategory to view matching listings.</footer>
+  </section>
  </div></SiteShell>;
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-5 sm:px-5 sm:py-8">
- <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubcategoryHeadingIcon ? <SubcategoryHeadingIcon className="size-8 sm:size-9" aria-hidden="true"/> : categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt={cat.name} width={56} height={56} onError={()=>setCategoryImageFailed(true)} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow={subcategory || "Category"} title={subcategory ? subcategory : cat.name} copy={subcategory ? `Browse ${subcategory.toLowerCase()} listings from across Kenya` : "Approved listings across Kenya"} /></div>
- <section aria-label="Subcategories" className="mb-8">
-  <h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2>
-  <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
-   <Link to="/category/$category" params={{ category: cat.slug }} className={tile(!subcategory)}><LayoutGrid className="size-5 text-primary sm:size-6"/>All</Link>
-   {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);const active=subcategory===s;return <Link key={s} to="/category/$category/$subcategory" params={{ category: cat.slug, subcategory: subcategorySlug(s) }} aria-current={active?"page":undefined} className={tile(active)}><Icon className="size-5 shrink-0 text-primary transition group-hover:scale-105 sm:size-6"/><span>{s}</span></Link>;})}
-  </div>
- </section>
- {makes&&<section aria-label={`${subcategory} brands`} className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Browse by {subcategory==="Cars"?"car make":subcategory==="Motorcycles"?"motorcycle brand":subcategory==="Buses"?"bus manufacturer":"truck manufacturer"}</h2><div className="grid grid-cols-4 gap-1.5 sm:gap-2 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" onClick={()=>setMakeSelection({key:selectionKey,value:make===m.name?"":m.name})} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/><span className="leading-tight">{m.name}</span></button>)}</div></section>}
- <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
- <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(make?{make}:{})}/></div></SiteShell>
+ return <SiteShell><div className="mx-auto min-h-[55vh] max-w-7xl px-4 py-5 sm:px-5 sm:py-8">
+  <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><Button type="button" variant="ghost" size="sm" onClick={()=>nav({to:"/category/$category",params:{category:cat.slug}})}><ArrowLeft className="size-4"/> All {cat.name} subcategories</Button><FilterMenu/></div>
+  <div className="mb-7 flex min-w-0 items-center gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubcategoryHeadingIcon?<SubcategoryHeadingIcon className="size-8 sm:size-9"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow={cat.name} title={subcategory} copy={"Browse "+subcategory.toLowerCase()+" listings from across Kenya"}/></div>
+  {makes&&<section aria-label={subcategory+" brands"} className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Browse by {subcategory==="Cars"?"car make":subcategory==="Motorcycles"?"motorcycle brand":subcategory==="Bicycles"?"bicycle brand":subcategory==="Buses"?"bus manufacturer":"truck manufacturer"}</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" aria-pressed={make===m.name} onClick={()=>setMakeSelection({key:selectionKey,value:make===m.name?"":m.name})} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/><span className="leading-tight">{m.name}</span></button>)}</div></section>}
+  <div className="mb-5 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory,make].filter(Boolean).join(" · ")}</p></div>
+  <LiveGrid category={cat.slug} subcategory={subcategory} {...(make?{make}:{})}/>
+ </div></SiteShell>;
 }
 
 export function ProductPage({ id }: { id: string }) {
