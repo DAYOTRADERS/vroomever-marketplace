@@ -3,6 +3,10 @@ import { CategoryPage, Seo } from "@/components/vroomever/marketplace-pages";
 import { categories } from "@/data/marketplace";
 
 export const Route = createFileRoute("/category/$category")({
+  validateSearch: (s: Record<string, unknown>): { sub?: string; make?: string } => ({
+    ...(typeof s.sub === "string" && s.sub ? { sub: s.sub } : {}),
+    ...(typeof s.make === "string" && s.make ? { make: s.make } : {}),
+  }),
   head: ({ params }) => {
     const cat = categories.find((c) => c.slug === params.category);
     const name = cat?.name ?? "Category";
@@ -13,5 +17,6 @@ export const Route = createFileRoute("/category/$category")({
 
 function CategoryRoute() {
   const { category } = Route.useParams();
-  return <CategoryPage slug={category} />;
+  const { sub, make } = Route.useSearch();
+  return <CategoryPage slug={category} sub={sub ?? ""} make={make ?? ""} />;
 }
