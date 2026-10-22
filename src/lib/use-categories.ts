@@ -16,7 +16,7 @@ export async function refreshCategories() {
   current = data.map((r) => ({
     slug: r.slug,
     name: r.name,
-    subcategories: r.subcategories ?? [],
+    subcategories: r.slug === "cars" ? Array.from(new Set([...(r.subcategories ?? []), "Bicycles"])) : (r.subcategories ?? []),
     icon: fallback.find((c) => c.slug === r.slug)?.icon ?? Tag,
   }));
   listeners.forEach((l) => l());
