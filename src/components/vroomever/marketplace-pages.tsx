@@ -22,7 +22,7 @@ import { useCategories } from "@/lib/use-categories";
 import { formatKsh, packages, vipOptions } from "@/data/marketplace";
 import { categoryImages } from "@/data/category-images";
 import { subcategoryIcon } from "@/data/subcategory-icons";
-import { carMakes } from "@/data/car-makes";
+import { makesFor } from "@/data/car-makes";
 import { useMarketFilters, setMarketFilters, activeFilterCount, type MarketFilters } from "@/lib/market-filters";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
