@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
+import { ArrowLeft, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
 import { useEffect, useState, type ReactNode } from "react";
 import { Brand } from "./brand";
+import { categories } from "@/data/marketplace";
 import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,6 @@ type DashboardMode = "buyer" | "seller";
 
 export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
   const [menu, setMenu] = useState(false);
-  const [footerOpen, setFooterOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
@@ -72,17 +72,52 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
       <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
-    </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
+    </div> : <main>{path !== "/" && !isSubcategoryRoute && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
-        <Brand inverted />
-        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
+      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-5 sm:py-10 md:grid-cols-4 lg:grid-cols-5">
+        <div className="min-w-0 md:col-span-2 lg:col-span-1">
+          <Brand inverted />
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-surface-muted">Kenya’s marketplace for great finds, trusted sellers and better deals. Discover listings, compare options and contact sellers directly.</p>
+          <div className="mt-4 grid gap-3 text-sm">
+            <Link to="/support" className="inline-flex items-center gap-2 hover:text-primary"><LifeBuoy className="size-4 shrink-0" /> Help & support</Link>
+            <Link to="/dashboard" className="inline-flex items-center gap-2 hover:text-primary"><LayoutGrid className="size-4 shrink-0" /> Browse marketplace</Link>
+          </div>
+        </div>
+        <div className="min-w-0 md:col-span-2 lg:col-span-2">
+          <strong className="text-sm">Popular categories</strong>
+          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-surface-muted sm:grid-cols-3">
+            {categories.map((category) => <Link key={category.slug} to="/category/$category" params={{ category: category.slug }} className="break-words transition hover:text-primary">{category.name}</Link>)}
+          </div>
+        </div>
+        <div className="min-w-0">
+          <strong className="text-sm">Marketplace</strong>
+          <div className="mt-4 grid gap-3 text-sm text-surface-muted">
+            <Link to="/dashboard" className="hover:text-primary">Browse listings</Link>
+            {canSell && <Link to="/sell" className="hover:text-primary">Post a listing</Link>}
+            <Link to="/subscriptions" className="hover:text-primary">Seller packages</Link>
+            <Link to="/favorites" className="hover:text-primary">Saved listings</Link>
+            <Link to="/profile" className="hover:text-primary">My account</Link>
+          </div>
+        </div>
+        <div className="min-w-0">
+          <strong className="text-sm">Help & information</strong>
+          <div className="mt-4 grid gap-3 text-sm text-surface-muted">
+            <Link to="/support" className="hover:text-primary">Contact support</Link>
+            <Link to="/support" className="hover:text-primary">Report an issue</Link>
+            <Link to="/terms" className="hover:text-primary">Terms & conditions</Link>
+            <Link to="/privacy" className="hover:text-primary">Privacy policy</Link>
+            <Link to="/buyer-terms" className="hover:text-primary">Buyer terms</Link>
+            <Link to="/seller-terms" className="hover:text-primary">Seller terms</Link>
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-surface-muted">Stay safe: verify listings and agree payment and delivery details directly with the seller.</p>
+        </div>
       </div>
-      {footerOpen && <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 pt-4 sm:px-5 md:grid-cols-4 animate-fade-in">
-        <div className="md:col-span-2"><p className="max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>
-        <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/support">Contact support</Link></div></div>
-        <div><strong className="text-sm">Legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
-      </div>}
+      <div className="border-t border-white/10">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-surface-muted sm:px-5 sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} VRUMEX. All rights reserved.</span>
+          <span>Made for buyers and sellers across Kenya.</span>
+        </div>
+      </div>
     </footer>}
   </div>;
 }

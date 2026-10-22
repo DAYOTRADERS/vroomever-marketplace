@@ -82,7 +82,7 @@ export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; 
 }
 export const Seo = (title: string, description: string) => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] });
 
-export function CategoryGrid() { const categories=useCategories(); return <div className="grid grid-cols-4 gap-2 pb-3 sm:flex sm:gap-4 sm:overflow-x-auto sm:snap-x sm:snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-24 min-w-0 flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-2 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75 sm:min-h-32 sm:min-w-[145px] sm:snap-start sm:p-4"><span className="grid size-11 place-items-center sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" loading="lazy" width={64} height={64} className="size-11 object-contain drop-shadow-lg transition group-hover:scale-110 sm:size-16"/>:<cat.icon className="size-6 text-primary"/>}</span><span className="mt-2 text-[10px] font-semibold leading-tight sm:mt-3 sm:text-xs">{cat.name}</span></Link>)}</div> }
+export function CategoryGrid() { const categories=useCategories(); return <div className="grid grid-cols-4 gap-1.5 pb-3 sm:flex sm:gap-3 sm:overflow-x-auto sm:snap-x sm:snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-20 min-w-0 flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-1.5 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75 sm:min-h-24 sm:min-w-[112px] sm:snap-start sm:p-2.5"><span className="grid size-8 place-items-center sm:size-10">{categoryImages[cat.slug]?<><img src={categoryImages[cat.slug]} alt={cat.name} loading="lazy" width={40} height={40} onError={(e)=>{e.currentTarget.classList.add("hidden");e.currentTarget.nextElementSibling?.classList.remove("hidden");}} className="size-8 object-contain drop-shadow-md transition group-hover:scale-105 sm:size-10"/><cat.icon className="hidden size-5 text-primary"/></>:<cat.icon className="size-5 text-primary"/>}</span><span className="mt-1.5 text-[9px] font-semibold leading-tight sm:mt-2 sm:text-[11px]">{cat.name}</span></Link>)}</div> }
 function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
 export function DashboardPage() {
@@ -99,19 +99,34 @@ export function DashboardPage() {
 }
 
 
-export function CategoryPage({ slug }: { slug: string }) {
+const subcategorySlug = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const vehicleMakes: Record<string, { name: string; logo: string }[]> = {
+ Cars: carMakes.filter((m) => !["Hino", "Isuzu"].includes(m.name)),
+ Buses: [["Toyota","toyota"],["Isuzu","isuzu"],["Hino","hino"],["Nissan","nissan"],["Mitsubishi","mitsubishi"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Ashok Leyland","ashokleyland"],["Yutong","yutong"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
+ Trucks: [["Isuzu","isuzu"],["Hino","hino"],["Mitsubishi Fuso","mitsubishi"],["Toyota","toyota"],["Nissan","nissan"],["Mercedes-Benz","mercedes"],["Volvo","volvo"],["Scania","scania"],["MAN","man"],["Tata","tata"],["Foton","foton"],["DAF","daf"],["FAW","faw"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
+ Motorcycles: [["Honda","honda"],["Yamaha","yamaha"],["Suzuki","suzuki"],["Kawasaki","kawasaki"],["TVS","tvs"],["Bajaj","bajaj"],["Hero","hero"],["KTM","ktm"],["BMW Motorrad","bmw"],["Harley-Davidson","harleydavidson"],["Royal Enfield","royalenfield"],["Boxer","boxer"]].map(([name,slug])=>({name:name!,logo:`https://cdn.simpleicons.org/${slug}`})),
+};
+export function CategoryPage({ slug, subcategorySlug: routeSubcategory }: { slug: string; subcategorySlug?: string }) {
  const categories=useCategories();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
- const [subcategory,setSubcategory]=useState("");
- const [make,setMake]=useState("");
- const tile=(on:boolean)=>`group flex min-h-24 flex-col items-center justify-center gap-2 rounded-card border p-3 text-center text-xs font-semibold leading-tight transition card-3d ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
- const choose=(s:string)=>{setSubcategory(s===subcategory?"":s); if(s!=="Cars")setMake("");};
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div>
- <section aria-label="Subcategories" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
-  <button type="button" onClick={()=>{setSubcategory("");setMake("");}} className={tile(!subcategory)}><LayoutGrid className="size-7 text-primary"/>All</button>
-  {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>choose(s)} className={tile(subcategory===s)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
- </div></section>
- {cat.slug==="cars"&&(!subcategory||subcategory==="Cars")&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{carMakes.map(m=><button key={m.name} type="button" onClick={()=>setMake(make===m.name?"":m.name)} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
+ const subcategory=cat.subcategories.find((s)=>subcategorySlug(s)===routeSubcategory) ?? "";
+ const [makeSelection,setMakeSelection]=useState({key:"",value:""});
+ const [categoryImageFailed,setCategoryImageFailed]=useState(false);
+ const selectionKey=`${slug}|${subcategory}`;
+ const make=makeSelection.key===selectionKey?makeSelection.value:"";
+ const tile=(on:boolean)=>`group flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-card border p-1.5 text-center text-[11px] font-semibold leading-tight transition card-3d sm:min-h-20 sm:gap-1.5 sm:p-2 sm:text-xs ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
+ const makes=cat.slug==="cars" ? vehicleMakes[subcategory] : undefined;
+ const SubcategoryHeadingIcon = subcategory ? subcategoryIcon(subcategory) : null;
+ return <SiteShell><div className="mx-auto max-w-7xl px-4 py-5 sm:px-5 sm:py-8">
+ <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubcategoryHeadingIcon ? <SubcategoryHeadingIcon className="size-8 sm:size-9" aria-hidden="true"/> : categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt={cat.name} width={56} height={56} onError={()=>setCategoryImageFailed(true)} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow={subcategory || "Category"} title={subcategory ? subcategory : cat.name} copy={subcategory ? `Browse ${subcategory.toLowerCase()} listings from across Kenya` : "Approved listings across Kenya"} /></div>
+ <section aria-label="Subcategories" className="mb-8">
+  <h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2>
+  <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
+   <Link to="/category/$category" params={{ category: cat.slug }} className={tile(!subcategory)}><LayoutGrid className="size-5 text-primary sm:size-6"/>All</Link>
+   {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);const active=subcategory===s;return <Link key={s} to="/category/$category/$subcategory" params={{ category: cat.slug, subcategory: subcategorySlug(s) }} aria-current={active?"page":undefined} className={tile(active)}><Icon className="size-5 shrink-0 text-primary transition group-hover:scale-105 sm:size-6"/><span>{s}</span></Link>;})}
+  </div>
+ </section>
+ {makes&&<section aria-label={`${subcategory} brands`} className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Browse by {subcategory==="Cars"?"car make":subcategory==="Motorcycles"?"motorcycle brand":subcategory==="Buses"?"bus manufacturer":"truck manufacturer"}</h2><div className="grid grid-cols-4 gap-1.5 sm:gap-2 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" onClick={()=>setMakeSelection({key:selectionKey,value:make===m.name?"":m.name})} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/><span className="leading-tight">{m.name}</span></button>)}</div></section>}
  <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
  <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(make?{make}:{})}/></div></SiteShell>
 }
