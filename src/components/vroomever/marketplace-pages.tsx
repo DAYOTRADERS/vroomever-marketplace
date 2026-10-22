@@ -24,7 +24,6 @@ import { categoryImages } from "@/data/category-images";
 import { subcategoryIcon } from "@/data/subcategory-icons";
 import { carMakes } from "@/data/car-makes";
 import { useMarketFilters, setMarketFilters, activeFilterCount, type MarketFilters } from "@/lib/market-filters";
-import { LayoutGrid } from "lucide-react";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";

@@ -78,10 +78,14 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <Brand inverted />
         <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
       </div>
-      {footerOpen && <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 pt-4 sm:px-5 md:grid-cols-4 animate-fade-in">
-        <div className="md:col-span-2"><p className="max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals.</p></div>
-        <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/support">Contact support</Link></div></div>
-        <div><strong className="text-sm">Legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
+      {footerOpen && <div className="animate-fade-in border-t border-white/10">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-5">
+          <div className="sm:col-span-2"><strong className="text-sm">About VRUMEVER</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
+          <div><strong className="text-sm">Popular categories</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/category/$category" params={{ category: "cars" }}>Cars & Vehicles</Link><Link to="/category/$category" params={{ category: "property" }}>Property</Link><Link to="/category/$category" params={{ category: "phones-tablets" }}>Phones & Tablets</Link><Link to="/">All categories</Link></div></div>
+          <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/vip">VIP promotion</Link></div></div>
+          <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
+        </div>
+        <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEVER · Discover • Connect • Trade · Kenya</p>
       </div>}
     </footer>}
   </div>;
