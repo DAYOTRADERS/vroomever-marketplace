@@ -99,21 +99,23 @@ export function DashboardPage() {
 }
 
 
-export function CategoryPage({ slug }: { slug: string }) {
+export function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?: string; make?: string }) {
  const categories=useCategories();
+ const navigate=useNavigate();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
- const [subcategory,setSubcategory]=useState("");
- const [make,setMake]=useState("");
+ const subcategory=cat.subcategories.includes(sub)?sub:"";
+ const makes=subcategory?makesFor(subcategory):null;
+ const activeMake=makes?.some(m=>m.name===make)?make:"";
  const tile=(on:boolean)=>`group flex min-h-24 flex-col items-center justify-center gap-2 rounded-card border p-3 text-center text-xs font-semibold leading-tight transition card-3d ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
- const choose=(s:string)=>{setSubcategory(s===subcategory?"":s); if(s!=="Cars")setMake("");};
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow="Category" title={cat.name} copy="Approved listings across Kenya" /></div>
- <section aria-label="Subcategories" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
-  <button type="button" onClick={()=>{setSubcategory("");setMake("");}} className={tile(!subcategory)}><LayoutGrid className="size-7 text-primary"/>All</button>
-  {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>choose(s)} className={tile(subcategory===s)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
- </div></section>
- {cat.slug==="cars"&&(!subcategory||subcategory==="Cars")&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{carMakes.map(m=><button key={m.name} type="button" onClick={()=>setMake(make===m.name?"":m.name)} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
- <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
- <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(make?{make}:{})}/></div></SiteShell>
+ const go=(s:{sub?:string;make?:string})=>navigate({to:"/category/$category",params:{category:cat.slug},search:s});
+ const SubIcon=subcategory?subcategoryIcon(subcategory):null;
+ return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubIcon?<SubIcon className="size-8"/>:categoryImages[cat.slug]?<img src={categoryImages[cat.slug]} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow={subcategory?cat.name:"Category"} title={subcategory||cat.name} copy="Approved listings across Kenya" /></div>
+ {!subcategory&&<section aria-label="Subcategories" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
+  {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>go({sub:s})} className={tile(false)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
+ </div></section>}
+ {makes&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" onClick={()=>go(activeMake===m.name?{sub:subcategory}:{sub:subcategory,make:m.name})} className={tile(activeMake===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
+ <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,activeMake].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
+ <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(activeMake?{make:activeMake.split(" ")[0]!}:{})}/></div></SiteShell>
 }
 
 export function ProductPage({ id }: { id: string }) {
