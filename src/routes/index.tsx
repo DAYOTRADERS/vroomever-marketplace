@@ -18,7 +18,7 @@ function BuyersMarket() {
         </div>
       </section>
       <section className="py-6" aria-label="Categories"><PageTitle title="Browse categories" /><CategoryGrid /></section>
-      <section className="pb-12" aria-label="Marketplace products"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<FilterMenu />} /><LiveGrid all /></section>
+      <section className="pb-12" aria-label="Marketplace products"><PageTitle eyebrow="Recommended" title="Fresh picks for you" /><LiveGrid all /></section>
     </div>
   </SiteShell>;
 }
