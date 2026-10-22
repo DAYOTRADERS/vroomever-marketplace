@@ -4,8 +4,8 @@ import { categories } from "@/data/marketplace";
 
 export const Route = createFileRoute("/category/$category")({
   validateSearch: (s: Record<string, unknown>): { sub?: string; make?: string } => ({
-    ...(typeof s.sub === "string" && s.sub ? { sub: s.sub } : {}),
-    ...(typeof s.make === "string" && s.make ? { make: s.make } : {}),
+    ...(typeof s["sub"] === "string" && s["sub"] ? { sub: s["sub"] } : {}),
+    ...(typeof s["make"] === "string" && s["make"] ? { make: s["make"] } : {}),
   }),
   head: ({ params }) => {
     const cat = categories.find((c) => c.slug === params.category);
