@@ -105,16 +105,30 @@ export function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?
  const subcategory=cat.subcategories.includes(sub)?sub:"";
  const makes=subcategory?makesFor(subcategory):null;
  const activeMake=makes?.some(m=>m.name===make)?make:"";
+ const [categoryImageFailed,setCategoryImageFailed]=useState(false);
  const tile=(on:boolean)=>`group flex min-h-24 flex-col items-center justify-center gap-2 rounded-card border p-3 text-center text-xs font-semibold leading-tight transition card-3d ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
  const go=(s:{sub?:string;make?:string})=>navigate({to:"/category/$category",params:{category:cat.slug},search:s});
  const SubIcon=subcategory?subcategoryIcon(subcategory):null;
- return <SiteShell><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10"><div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubIcon?<SubIcon className="size-8"/>:categoryImageFor(cat)?<img src={categoryImageFor(cat)} alt="" width={56} height={56} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon/>}</span><PageTitle eyebrow={subcategory?cat.name:"Category"} title={subcategory||cat.name} copy="Approved listings across Kenya" /></div>
- {!subcategory&&<section aria-label="Subcategories" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
-  {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>go({sub:s})} className={tile(false)}><Icon className="size-7 text-primary transition group-hover:scale-110"/>{s}</button>;})}
- </div></section>}
- {makes&&<section aria-label="By make" className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">By make</h2><div className="grid grid-cols-4 gap-2 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" onClick={()=>go(activeMake===m.name?{sub:subcategory}:{sub:subcategory,make:m.name})} className={tile(activeMake===m.name)}><MakeLogo name={m.name} src={m.logo}/>{m.name}</button>)}</div></section>}
- <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,activeMake].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
- <LiveGrid category={cat.slug} {...(subcategory?{subcategory}:{})} {...(activeMake?{make:activeMake.split(" ")[0]!}:{})}/></div></SiteShell>
+ if(!subcategory) return <SiteShell><div className="fixed inset-0 z-[70] flex items-center justify-center bg-foreground/65 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true" aria-labelledby="category-picker-title">
+  <section className="relative flex max-h-[88svh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-border bg-background text-foreground shadow-2xl animate-scale-in">
+   <header className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
+    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-secondary text-primary">{categoryImageFor(cat)&&!categoryImageFailed?<img src={categoryImageFor(cat)!} alt="" width={44} height={44} onError={()=>setCategoryImageFailed(true)} className="size-10 object-contain"/>:<cat.icon className="size-7"/>}</span>
+    <div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-widest text-primary">Choose a subcategory</p><h1 id="category-picker-title" className="font-display text-xl font-bold sm:text-2xl">{cat.name}</h1></div>
+    <Button type="button" variant="ghost" size="icon" onClick={()=>navigate({to:"/",replace:true})} className="shrink-0" aria-label="Close category popup" title="Close"><X className="size-5"/></Button>
+   </header>
+   <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6"><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+    {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>go({sub:s})} className="group flex min-h-28 flex-col items-center justify-center gap-3 rounded-xl border border-border bg-card p-3 text-center transition hover:border-primary/60 hover:bg-secondary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-32 sm:p-4"><span className="grid size-12 place-items-center rounded-xl bg-secondary/70 text-primary transition group-hover:scale-105"><Icon className="size-7"/></span><span className="text-sm font-semibold leading-snug">{s}</span></button>;})}
+   </div></div>
+   <footer className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-6">Select a subcategory to view matching listings.</footer>
+  </section>
+ </div></SiteShell>;
+ return <SiteShell><div className="mx-auto min-h-[55vh] max-w-7xl px-4 py-5 sm:px-5 sm:py-8">
+  <div className="mb-5 flex flex-wrap items-center justify-between gap-3"><Button type="button" variant="ghost" size="sm" onClick={()=>go({})}><ArrowLeft className="size-4"/> All {cat.name} subcategories</Button><FilterMenu/></div>
+  <div className="mb-7 flex min-w-0 items-center gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubIcon?<SubIcon className="size-8 sm:size-9"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow={cat.name} title={subcategory} copy={"Browse "+subcategory.toLowerCase()+" listings from across Kenya"}/></div>
+  {makes&&<section aria-label={subcategory+" brands"} className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Browse by {subcategory==="Cars"?"car make":subcategory==="Motorcycles"?"motorcycle brand":subcategory==="Bicycles"?"bicycle brand":subcategory==="Buses"?"bus manufacturer":"truck manufacturer"}</h2><div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" aria-pressed={activeMake===m.name} onClick={()=>go(activeMake===m.name?{sub:subcategory}:{sub:subcategory,make:m.name})} className={tile(activeMake===m.name)}><MakeLogo name={m.name} src={m.logo}/><span className="leading-tight">{m.name}</span></button>)}</div></section>}
+  <div className="mb-5 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory,activeMake].filter(Boolean).join(" · ")}</p></div>
+  <LiveGrid category={cat.slug} subcategory={subcategory} {...(activeMake?{make:activeMake}:{})}/>
+ </div></SiteShell>;
 }
 
 export function ProductPage({ id }: { id: string }) {
