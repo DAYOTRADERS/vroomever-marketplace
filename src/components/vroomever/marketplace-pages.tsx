@@ -93,12 +93,12 @@ export function DashboardPage() {
  return <SiteShell dashboardMode="buyer"><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10">
  <div className="relative overflow-hidden rounded-card bg-surface-strong p-5 text-surface-foreground sm:p-7 md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><MarketSearch className="mt-7"/></div></div>
  <div className="py-10"><PageTitle title="Browse categories"/><CategoryGrid/></div>
- <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<FilterMenu/>}/><LiveGrid/></div>
+ <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you"/><LiveGrid/></div>
  </div></SiteShell>;
 }
 
 
-export function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?: string; make?: string }) {
+const subcategoryPhoto = (name: string) => { const n=name.toLowerCase(); const id=/car|vehicle|motorcycle|bike|bicycle|truck|bus/.test(n)?"photo-1492144534655-ae79c964c9d7":/phone|computer|laptop|electronics/.test(n)?"photo-1498049794561-7780e7231661":/fashion|clothes|shoe|beauty/.test(n)?"photo-1483985988355-763728e1935b":/home|furniture|garden/.test(n)?"photo-1600210492486-724fe5c67fb0":/sport|fitness|outdoor/.test(n)?"photo-1461896836934-4c9b4b4f6e3d":/property|house|land|rent/.test(n)?"photo-1600585154340-be6161a56a0c":/animal|pet/.test(n)?"photo-1552053831-71594a27632d":"photo-1472851294608-062f824d29cc"; return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=480&h=320&q=80`; };\n\nexport function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?: string; make?: string }) {
  const categories=useCategories();
  const navigate=useNavigate();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
@@ -117,7 +117,7 @@ export function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?
     <Button type="button" variant="ghost" size="icon" onClick={()=>navigate({to:"/",replace:true})} className="shrink-0" aria-label="Close category popup" title="Close"><X className="size-5"/></Button>
    </header>
    <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4"><div className="grid grid-cols-2 gap-x-3 gap-y-1 sm:grid-cols-3 md:grid-cols-4">
-    {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>go({sub:s})} className="group flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-left transition hover:bg-secondary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:py-1.5"><span className="grid size-8 shrink-0 place-items-center text-primary"><Icon className="size-5"/></span><span className="text-xs font-semibold leading-tight sm:text-sm">{s}</span></button>;})}
+    {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);return <button key={s} type="button" onClick={()=>go({sub:s})} className="group flex min-w-0 flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-2 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-2.5"><span className="grid h-14 w-full place-items-center overflow-hidden rounded-lg bg-secondary/40"><img src={subcategoryPhoto(s)} alt="" loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105"/></span><span className="text-[11px] font-semibold leading-tight sm:text-xs">{s}</span></button>;})}
    </div></div>
    <footer className="border-t border-border px-4 py-3 text-xs text-muted-foreground sm:px-6">Select a subcategory to view matching listings.</footer>
   </section>
