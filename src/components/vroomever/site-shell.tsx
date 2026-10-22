@@ -28,13 +28,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => { setMenu(false); }, [path]);
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      if (footerOpen) footerContentRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-      else footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-    });
-  }, [footerOpen]);
-  // Dashboard menus only appear once someone is signed in.
+// Dashboard menus only appear once someone is signed in.
   const dashboardMode = role ? requestedMode : undefined;
   const canSell = role === "seller" || role === "admin";
   const dash = role === "seller" || role === "admin" ? "/seller/dashboard" : "/dashboard";
