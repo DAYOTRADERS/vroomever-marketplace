@@ -124,7 +124,7 @@ export function CategoryPage({ slug, subcategorySlug: routeSubcategory }: { slug
    <header className="flex items-center gap-3 border-b border-border px-4 py-4 sm:px-6">
     <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-secondary text-primary">{categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt="" width={44} height={44} onError={()=>setCategoryImageFailed(true)} className="size-10 object-contain"/>:<cat.icon className="size-7"/>}</span>
     <div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-widest text-primary">Choose a subcategory</p><h1 id="category-picker-title" className="font-display text-xl font-bold sm:text-2xl">{cat.name}</h1></div>
-    <Button type="button" variant="ghost" onClick={()=>nav({to:"/dashboard"})} className="shrink-0"><ArrowLeft className="size-4"/> Back</Button>
+    <Button type="button" variant="ghost" size="icon" onClick={()=>nav({to:"/dashboard"})} className="shrink-0" aria-label="Close category popup" title="Close"><X className="size-5"/></Button>
    </header>
    <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
