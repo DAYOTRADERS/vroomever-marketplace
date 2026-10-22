@@ -72,7 +72,7 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
       <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
-    </div> : <main>{path !== "/" && !isSubcategoryRoute && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
+    </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
       <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-5 sm:py-10 md:grid-cols-4 lg:grid-cols-5">
         <div className="min-w-0 md:col-span-2 lg:col-span-1">
