@@ -83,7 +83,7 @@ export function PageTitle({ eyebrow, title, copy, action }: { eyebrow?: string; 
 export const Seo = (title: string, description: string) => ({ meta: [{ title }, { name: "description", content: description }, { property: "og:title", content: title }, { property: "og:description", content: description }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] });
 
 export function CategoryGrid() { const categories=useCategories(); return <div className="grid grid-cols-4 gap-1.5 pb-3 sm:flex sm:gap-3 sm:overflow-x-auto sm:snap-x sm:snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">{categories.map((cat)=><Link key={cat.slug} to="/category/$category" params={{category:cat.slug}} className="group flex min-h-20 min-w-0 flex-col items-center justify-center rounded-card border border-white/60 bg-white/55 p-1.5 text-center shadow-sm backdrop-blur-xl card-3d hover:border-primary/40 hover:bg-white/75 sm:min-h-24 sm:min-w-[112px] sm:snap-start sm:p-2.5"><span className="grid size-8 place-items-center sm:size-10">{categoryImages[cat.slug]?<><img src={categoryImages[cat.slug]} alt={cat.name} loading="lazy" width={40} height={40} onError={(e)=>{e.currentTarget.classList.add("hidden");e.currentTarget.nextElementSibling?.classList.remove("hidden");}} className="size-8 object-contain drop-shadow-md transition group-hover:scale-105 sm:size-10"/><cat.icon className="hidden size-5 text-primary"/></>:<cat.icon className="size-5 text-primary"/>}</span><span className="mt-1.5 text-[9px] font-semibold leading-tight sm:mt-2 sm:text-[11px]">{cat.name}</span></Link>)}</div> }
-function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
+function ProductGrid({ items }: { items: CardProduct[] }) { return <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5">{items.map(p=><ProductCard key={p.id} product={p}/>)}</div> }
 
 export function DashboardPage() {
  const nav=useNavigate();
@@ -94,7 +94,7 @@ export function DashboardPage() {
  return <SiteShell dashboardMode="buyer"><div className="mx-auto max-w-7xl px-4 py-6 sm:px-5 sm:py-10">
  <div className="relative overflow-hidden rounded-card bg-surface-strong p-5 text-surface-foreground sm:p-7 md:p-10"><div className="dot-grid absolute inset-0 opacity-20"/><div className="relative max-w-2xl"><p className="text-sm text-primary">Welcome back, {firstName}</p><h1 className="mt-2 font-display text-3xl font-bold md:text-5xl">What are you looking for?</h1><MarketSearch className="mt-7"/></div></div>
  <div className="py-10"><PageTitle title="Browse categories"/><CategoryGrid/></div>
- <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you" action={<FilterMenu/>}/><LiveGrid/></div>
+ <div className="pb-12"><PageTitle eyebrow="Recommended" title="Fresh picks for you"/><LiveGrid/></div>
  </div></SiteShell>;
 }
 
