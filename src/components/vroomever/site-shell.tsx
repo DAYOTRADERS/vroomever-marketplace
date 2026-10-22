@@ -14,7 +14,6 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const [menu, setMenu] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
-  const footerContentRef = useRef<HTMLDivElement>(null);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
@@ -78,15 +77,15 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
     {!dashboardMode && <footer ref={footerRef} className="border-t border-border bg-surface-strong text-surface-foreground">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Brand inverted />
-        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
+        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full transition-transform duration-300 hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
       </div>
-      {footerOpen && <div ref={footerContentRef} className="animate-fade-in border-t border-white/10">
+      <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${footerOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} aria-hidden={!footerOpen}><div className="min-h-0 overflow-hidden border-t border-white/10">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-3">
           <div className="sm:col-span-2"><strong className="text-sm">About VRUMEX</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
           <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
         </div>
         <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
-      </div>}
+      </div></div>
     </footer>}
   </div>;
 }
