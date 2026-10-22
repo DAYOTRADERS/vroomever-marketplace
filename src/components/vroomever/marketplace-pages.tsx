@@ -117,24 +117,14 @@ export function CategoryPage({ slug, subcategorySlug: routeSubcategory }: { slug
  const tile=(on:boolean)=>`group flex min-h-20 min-w-0 flex-col items-center justify-center gap-1 rounded-card border p-1.5 text-center text-[11px] font-semibold leading-tight transition card-3d sm:min-h-20 sm:gap-1.5 sm:p-2 sm:text-xs ${on?"border-primary bg-primary/10 text-primary":"border-border bg-card hover:border-primary/50"}`;
  const makes=cat.slug==="cars" ? vehicleMakes[subcategory] : undefined;
  const SubcategoryHeadingIcon = subcategory ? subcategoryIcon(subcategory) : null;
- const subcategoryRows = (subcategory: string) => cat.subcategories.map((name) => {
-  const Icon = subcategoryIcon(name);
-  const selected = name === subcategory;
-  return <Link key={name} to="/category/$category/$subcategory" params={{ category: cat.slug, subcategory: subcategorySlug(name) }} aria-current={selected ? "page" : undefined} className={`group flex min-h-[68px] items-center gap-3 rounded-xl border px-3 py-3 transition hover:border-primary/50 hover:bg-muted/60 sm:min-h-[76px] sm:gap-4 sm:px-4 ${selected ? "border-primary/60 bg-primary/5" : "border-border bg-card"}`}>
-   <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-primary sm:size-12"><Icon className="size-6 sm:size-7" aria-hidden="true"/></span>
-   <span className="min-w-0 flex-1 text-sm font-semibold sm:text-base">{name}</span>
-   <ChevronRight className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"/>
-  </Link>;
- });
  return <SiteShell><div className="mx-auto max-w-7xl px-4 py-5 sm:px-5 sm:py-8">
- {subcategory && <Link to="/category/$category" params={{ category: cat.slug }} className="mb-5 inline-flex min-h-10 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold transition hover:border-primary/50 hover:text-primary"><ArrowLeft className="size-4"/>Back to {cat.name}</Link>}
  <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 sm:gap-4"><span className="grid size-14 shrink-0 place-items-center rounded-card bg-secondary text-primary sm:size-16">{SubcategoryHeadingIcon ? <SubcategoryHeadingIcon className="size-8 sm:size-9" aria-hidden="true"/> : categoryImages[cat.slug]&&!categoryImageFailed?<img src={categoryImages[cat.slug]} alt={cat.name} width={56} height={56} onError={()=>setCategoryImageFailed(true)} className="size-12 object-contain drop-shadow-md sm:size-14"/>:<cat.icon className="size-8"/>}</span><PageTitle eyebrow={subcategory || "Category"} title={subcategory ? subcategory : cat.name} copy={subcategory ? `Browse ${subcategory.toLowerCase()} listings from across Kenya` : "Approved listings across Kenya"} /></div>
  <section aria-label="Subcategories" className="mb-8">
-  <h2 className="mb-3 font-display text-lg font-bold">{subcategory ? "All subcategories" : "Subcategories"}</h2>
-  {subcategory ? <div className="grid gap-2">{subcategoryRows(subcategory)}</div> : <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
+  <h2 className="mb-3 font-display text-lg font-bold">Subcategories</h2>
+  <div className="grid grid-cols-4 gap-2 sm:grid-cols-4 sm:gap-3 md:grid-cols-6 lg:grid-cols-8">
    <Link to="/category/$category" params={{ category: cat.slug }} className={tile(!subcategory)}><LayoutGrid className="size-5 text-primary sm:size-6"/>All</Link>
    {cat.subcategories.map(s=>{const Icon=subcategoryIcon(s);const active=subcategory===s;return <Link key={s} to="/category/$category/$subcategory" params={{ category: cat.slug, subcategory: subcategorySlug(s) }} aria-current={active?"page":undefined} className={tile(active)}><Icon className="size-5 shrink-0 text-primary transition group-hover:scale-105 sm:size-6"/><span>{s}</span></Link>;})}
-  </div>}
+  </div>
  </section>
  {makes&&<section aria-label={`${subcategory} brands`} className="mb-8"><h2 className="mb-3 font-display text-lg font-bold">Browse by {subcategory==="Cars"?"car make":subcategory==="Motorcycles"?"motorcycle brand":subcategory==="Buses"?"bus manufacturer":"truck manufacturer"}</h2><div className="grid grid-cols-4 gap-1.5 sm:gap-2 md:grid-cols-6 lg:grid-cols-8">{makes.map(m=><button key={m.name} type="button" onClick={()=>setMakeSelection({key:selectionKey,value:make===m.name?"":m.name})} className={tile(make===m.name)}><MakeLogo name={m.name} src={m.logo}/><span className="leading-tight">{m.name}</span></button>)}</div></section>}
  <div className="relative mb-6 flex flex-wrap items-center justify-between gap-2"><p className="min-w-0 truncate text-sm text-muted-foreground">{[subcategory||`All ${cat.name}`,make].filter(Boolean).join(" · ")}</p><FilterMenu/></div>
