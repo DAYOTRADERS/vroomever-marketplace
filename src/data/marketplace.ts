@@ -11,7 +11,7 @@ import land from "@/assets/product-land.jpg";
 
 export type Category = { slug: string; name: string; icon: LucideIcon; subcategories: string[] };
 export const categories: Category[] = [
-  { slug: "cars", name: "Cars & Vehicles", icon: Car, subcategories: ["Cars", "Vehicle Parts", "Motorcycles", "Buses", "Trucks", "Heavy Machinery", "Boats", "Personal Mobility", "Car Services"] },
+  { slug: "cars", name: "Cars & Vehicles", icon: Car, subcategories: ["Cars", "Vehicle Parts", "Motorcycles", "Bicycles", "Buses", "Trucks", "Heavy Machinery", "Boats", "Personal Mobility", "Car Services"] },
   { slug: "property", name: "Property", icon: House, subcategories: ["Houses for Sale", "Apartments", "Land", "Commercial", "Short Lets", "Property Services"] },
   { slug: "phones-tablets", name: "Phones & Tablets", icon: Smartphone, subcategories: ["Smartphones", "Tablets", "Accessories", "Smart Watches", "Feature Phones", "Repairs"] },
   { slug: "electronics", name: "Electronics", icon: MonitorSmartphone, subcategories: ["TVs", "Audio", "Cameras", "Computers", "Gaming", "Accessories", "Other Electronics"] },
