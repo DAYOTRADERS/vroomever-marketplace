@@ -18,6 +18,7 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
+  const isSubcategoryRoute = /^\/category\/[^/]+\/[^/]+\/?$/.test(path);
   const [role, setRole] = useState<AppRole | null>(null);
   const [authReady, setAuthReady] = useState(false);
   useEffect(() => {
@@ -72,8 +73,8 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <p className="px-3 pb-3 pt-2 text-xs font-bold uppercase text-muted-foreground">{dashboardMode === "seller" ? "Seller dashboard" : "Buyer dashboard"}</p>
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
-      <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
-    </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
+      <main className="min-w-0">{path !== "/" && !isSubcategoryRoute && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
+    </div> : <main>{path !== "/" && !isSubcategoryRoute && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className={`fixed inset-x-0 bottom-0 z-[70] text-surface-foreground transition-all duration-500 ease-in-out ${footerExpanded ? "top-0" : "top-auto"}`}>
       <div className={`absolute inset-0 bg-surface-strong transition-opacity duration-500 ${footerExpanded ? "opacity-100" : "pointer-events-none opacity-0"}`} />
       <div className={`relative flex h-full flex-col border-t border-border bg-surface-strong transition-transform duration-500 ease-in-out ${footerExpanded ? "translate-y-0" : "translate-y-[calc(100%-3.5rem)]"}`}>
