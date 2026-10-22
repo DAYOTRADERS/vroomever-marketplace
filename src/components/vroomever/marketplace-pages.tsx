@@ -98,7 +98,9 @@ export function DashboardPage() {
 }
 
 
-const subcategoryPhoto = (name: string) => { const n=name.toLowerCase(); const id=/car|vehicle|motorcycle|bike|bicycle|truck|bus/.test(n)?"photo-1492144534655-ae79c964c9d7":/phone|computer|laptop|electronics/.test(n)?"photo-1498049794561-7780e7231661":/fashion|clothes|shoe|beauty/.test(n)?"photo-1483985988355-763728e1935b":/home|furniture|garden/.test(n)?"photo-1600210492486-724fe5c67fb0":/sport|fitness|outdoor/.test(n)?"photo-1461896836934-4c9b4b4f6e3d":/property|house|land|rent/.test(n)?"photo-1600585154340-be6161a56a0c":/animal|pet/.test(n)?"photo-1552053831-71594a27632d":"photo-1472851294608-062f824d29cc"; return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=480&h=320&q=80`; };\n\nexport function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?: string; make?: string }) {
+const subcategoryPhoto = (name: string) => { const n=name.toLowerCase(); const id=/car|vehicle|motorcycle|bike|bicycle|truck|bus/.test(n)?"photo-1492144534655-ae79c964c9d7":/phone|computer|laptop|electronics/.test(n)?"photo-1498049794561-7780e7231661":/fashion|clothes|shoe|beauty/.test(n)?"photo-1483985988355-763728e1935b":/home|furniture|garden/.test(n)?"photo-1600210492486-724fe5c67fb0":/sport|fitness|outdoor/.test(n)?"photo-1461896836934-4c9b4b4f6e3d":/property|house|land|rent/.test(n)?"photo-1600585154340-be6161a56a0c":/animal|pet/.test(n)?"photo-1552053831-71594a27632d":"photo-1472851294608-062f824d29cc"; return `https://images.unsplash.com/${id}?auto=format&fit=crop&w=480&h=320&q=80`; };
+
+export function CategoryPage({ slug, sub = "", make = "" }: { slug: string; sub?: string; make?: string }) {
  const categories=useCategories();
  const navigate=useNavigate();
  const cat=categories.find(c=>c.slug===slug) ?? categories[0]!;
