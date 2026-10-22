@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
+import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
 import { useEffect, useState, type ReactNode } from "react";
@@ -12,6 +12,7 @@ type DashboardMode = "buyer" | "seller";
 
 export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
   const [menu, setMenu] = useState(false);
+  const [footerOpen, setFooterOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
@@ -73,34 +74,36 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
       <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main className="flex-1">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
-      <div className="mx-auto grid w-full max-w-7xl gap-8 px-4 py-8 sm:px-5 sm:py-10 md:grid-cols-4 lg:grid-cols-5">
-        <div className="min-w-0">
-          <Brand inverted />
-          <p className="mt-4 max-w-sm text-sm leading-relaxed text-surface-muted">Kenya’s marketplace for great finds, trusted sellers and better deals. Discover listings, compare options and contact sellers directly.</p>
-          <div className="mt-4 grid gap-3 text-sm">
-            <Link to="/support" className="inline-flex items-center gap-2 hover:text-primary"><LifeBuoy className="size-4 shrink-0" /> Help & support</Link>
-            <Link to="/dashboard" className="inline-flex items-center gap-2 hover:text-primary"><LayoutGrid className="size-4 shrink-0" /> Browse marketplace</Link>
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
+        <Brand inverted />
+        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} aria-label={footerOpen ? "Hide footer details" : "Show footer details"} className="grid size-10 place-items-center rounded-full hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <ChevronUp className={`size-5 text-surface-muted transition-transform ${footerOpen ? "" : "rotate-180"}`} />
+        </button>
+      </div>
+      {footerOpen ? <div className="animate-fade-in border-t border-white/10">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2">
+          <div className="min-w-0">
+            <strong className="text-sm">About VRUMEX</strong>
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-surface-muted">Kenya’s marketplace for great finds, trusted sellers and better deals. Discover listings, compare options and contact sellers directly.</p>
+            <div className="mt-4 grid gap-3 text-sm">
+              <Link to="/support" className="inline-flex items-center gap-2 hover:text-primary"><LifeBuoy className="size-4 shrink-0" /> Help & support</Link>
+            </div>
+          </div>
+          <div className="min-w-0">
+            <strong className="text-sm">Help & information</strong>
+            <div className="mt-4 grid gap-3 text-sm text-surface-muted">
+              <Link to="/support" className="hover:text-primary">Contact support</Link>
+              <Link to="/support" className="hover:text-primary">Report an issue</Link>
+              <Link to="/terms" className="hover:text-primary">Terms & conditions</Link>
+              <Link to="/privacy" className="hover:text-primary">Privacy policy</Link>
+              <Link to="/buyer-terms" className="hover:text-primary">Buyer terms</Link>
+              <Link to="/seller-terms" className="hover:text-primary">Seller terms</Link>
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-surface-muted">Stay safe: verify listings and agree payment and delivery details directly with the seller.</p>
           </div>
         </div>
-        <div className="min-w-0">
-          <strong className="text-sm">Help & information</strong>
-          <div className="mt-4 grid gap-3 text-sm text-surface-muted">
-            <Link to="/support" className="hover:text-primary">Contact support</Link>
-            <Link to="/support" className="hover:text-primary">Report an issue</Link>
-            <Link to="/terms" className="hover:text-primary">Terms & conditions</Link>
-            <Link to="/privacy" className="hover:text-primary">Privacy policy</Link>
-            <Link to="/buyer-terms" className="hover:text-primary">Buyer terms</Link>
-            <Link to="/seller-terms" className="hover:text-primary">Seller terms</Link>
-          </div>
-          <p className="mt-4 text-xs leading-relaxed text-surface-muted">Stay safe: verify listings and agree payment and delivery details directly with the seller.</p>
-        </div>
-      </div>
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-surface-muted sm:px-5 sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} VRUMEX. All rights reserved.</span>
-          <span>Made for buyers and sellers across Kenya.</span>
-        </div>
-      </div>
+        <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
+      </div> : <div className="px-4 pb-3 text-center text-xs tracking-wide text-surface-muted sm:px-5">Discover • Connect • Trade</div>}
     </footer>}
   </div>;
 }
