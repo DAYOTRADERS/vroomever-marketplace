@@ -1,7 +1,18 @@
-// Vehicle brands per subcategory; logos come from each brand's official website icon (initials shown if a logo fails).
+// Vehicle brand marks use direct SVG logo images from Simple Icons (initials are the fallback).
 type Make = { name: string; logo: string };
+const logoSlugs: Record<string, string> = {
+  Toyota: "toyota", Honda: "honda", Nissan: "nissan", Mazda: "mazda", Suzuki: "suzuki",
+  Mitsubishi: "mitsubishi", Subaru: "subaru", Volkswagen: "volkswagen", BMW: "bmw",
+  "Mercedes-Benz": "mercedesbenz", Audi: "audi", Lexus: "lexus", "Land Rover": "landrover",
+  Ford: "ford", Hyundai: "hyundai", Kia: "kia", Peugeot: "peugeot", Volvo: "volvo",
+  Jeep: "jeep", Porsche: "porsche", Isuzu: "isuzu", Scania: "scania", "Mitsubishi Fuso": "mitsubishi",
+  Hino: "hino", Yutong: "yutong", "King Long": "kinglong", Bajaj: "bajaj", TVS: "tvs",
+  Yamaha: "yamaha", Kawasaki: "kawasaki", Boxer: "bajaj", Haojue: "haojue", KTM: "ktm",
+  "BMW Motorrad": "bmw", Ducati: "ducati", "Harley-Davidson": "harleydavidson", MAN: "man",
+  Tata: "tatamotors", Sinotruk: "sinotruk", DAF: "daf", Iveco: "iveco", "Renault Trucks": "renault",
+};
 const build = (list: [string, string][]): Make[] =>
-  list.map(([name, domain]) => ({ name, logo: `https://www.google.com/s2/favicons?domain=${domain}&sz=128` }));
+  list.map(([name]) => ({ name, logo: `https://cdn.simpleicons.org/${logoSlugs[name] ?? name.toLowerCase().replace(/[^a-z0-9]/g, "")}` }));
 
 export const carMakes = build([
   ["Toyota", "toyota.com"], ["Honda", "honda.com"], ["Nissan", "nissanusa.com"], ["Mazda", "mazda.com"], ["Suzuki", "suzuki.co.jp"],

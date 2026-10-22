@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Brand } from "./brand";
 import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,11 @@ import { Input } from "@/components/ui/input";
 
 type DashboardMode = "buyer" | "seller";
 
-export function SiteShell({ children, dashboardMode: requestedMode }: { children: ReactNode; dashboardMode?: DashboardMode }) {
+export function SiteShell({ children, dashboardMode: requestedMode, hideBackButton = false }: { children: ReactNode; dashboardMode?: DashboardMode; hideBackButton?: boolean }) {
   const [menu, setMenu] = useState(false);
   const [footerOpen, setFooterOpen] = useState(false);
+  const footerRef = useRef<HTMLElement>(null);
+  const footerContentRef = useRef<HTMLDivElement>(null);
   const [dark, setDark] = useState(false);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
@@ -26,6 +28,12 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => { setMenu(false); }, [path]);
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      if (footerOpen) footerContentRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      else footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+  }, [footerOpen]);
   // Dashboard menus only appear once someone is signed in.
   const dashboardMode = role ? requestedMode : undefined;
   const canSell = role === "seller" || role === "admin";
@@ -71,18 +79,16 @@ export function SiteShell({ children, dashboardMode: requestedMode }: { children
         <p className="px-3 pb-3 pt-2 text-xs font-bold uppercase text-muted-foreground">{dashboardMode === "seller" ? "Seller dashboard" : "Buyer dashboard"}</p>
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
-      <main className="min-w-0">{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
+      <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
-    {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
+    {!dashboardMode && <footer ref={footerRef} className="border-t border-border bg-surface-strong text-surface-foreground">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Brand inverted />
         <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
       </div>
-      {footerOpen && <div className="animate-fade-in border-t border-white/10">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-5">
+      {footerOpen && <div ref={footerContentRef} className="animate-fade-in border-t border-white/10">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-3">
           <div className="sm:col-span-2"><strong className="text-sm">About VRUMEX</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
-          <div><strong className="text-sm">Popular categories</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/category/$category" params={{ category: "cars" }}>Cars & Vehicles</Link><Link to="/category/$category" params={{ category: "property" }}>Property</Link><Link to="/category/$category" params={{ category: "phones-tablets" }}>Phones & Tablets</Link><Link to="/">All categories</Link></div></div>
-          <div><strong className="text-sm">Marketplace</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/dashboard">Browse</Link>{canSell && <Link to="/sell">Sell</Link>}<Link to="/subscriptions">Seller packages</Link><Link to="/vip">VIP promotion</Link></div></div>
           <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
         </div>
         <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>

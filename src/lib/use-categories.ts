@@ -13,12 +13,14 @@ export async function refreshCategories() {
   const { data, error } = await supabase.from("categories").select("slug,name,subcategories,position").order("position");
   if (error || !data) return;
   loaded = true;
-  current = data.map((r) => ({
+  const mapped = data.map((r) => ({
     slug: r.slug,
     name: r.name,
     subcategories: r.subcategories ?? [],
     icon: fallback.find((c) => c.slug === r.slug)?.icon ?? Tag,
   }));
+  const leisure = mapped.filter((c) => /leisure/i.test(c.name));
+  current = mapped.filter((c) => !/leisure/i.test(c.name) || c.slug === "leisure-sports" || (leisure.length === 1 && c === leisure[0]));
   listeners.forEach((l) => l());
 }
 
