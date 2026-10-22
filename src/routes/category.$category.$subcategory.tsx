@@ -7,7 +7,7 @@ export const Route = createFileRoute("/category/$category/$subcategory")({
     const category = categories.find((item) => item.slug === params.category);
     const subcategory = category?.subcategories.find(
       (item) =>
-        item.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") ===
+        item.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") ===
         params.subcategory,
     );
     const title = subcategory ? `${subcategory} — ${category?.name ?? "Category"}` : "Category";
