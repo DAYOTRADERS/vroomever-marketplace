@@ -18,7 +18,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const [dark, setDark] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
   const navigate = useNavigate();
-  useEffect(() => { if (!footerOpen) return; const timer = setTimeout(() => { const footer = footerRef.current; if (footer) window.scrollTo({top:window.scrollY+footer.getBoundingClientRect().bottom-window.innerHeight,behavior:"smooth"}); }, 450); return () => clearTimeout(timer); }, [footerOpen]);
+  useEffect(() => { if (!footerOpen || window.matchMedia("(max-width: 639px)").matches) return; const timer = setTimeout(() => footerRef.current?.scrollIntoView({behavior:"smooth",block:"end"}), 450); return () => clearTimeout(timer); }, [footerOpen]);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
@@ -79,7 +79,8 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
       </aside>
       <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
-    {!dashboardMode && <footer ref={footerRef} className="border-t border-border bg-surface-strong text-surface-foreground">
+    {!dashboardMode && footerOpen && <div className="h-16 sm:hidden"/>}
+    {!dashboardMode && <footer ref={footerRef} className={`border-t border-border bg-surface-strong text-surface-foreground ${footerOpen ? "fixed inset-x-0 bottom-0 z-[60] max-h-[calc(100svh-5rem)] overflow-y-auto shadow-elevated sm:static sm:max-h-none sm:overflow-visible" : ""}`}>
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Brand inverted />
         <Button type="button" variant="ghost" size="icon" onClick={() => setFooterOpen(!footerOpen)} aria-label={footerOpen ? "Hide footer" : "Show footer"} aria-expanded={footerOpen} className="text-surface-foreground"><ChevronUp className={`size-5 transition ${footerOpen ? "rotate-180" : ""}`} /></Button>

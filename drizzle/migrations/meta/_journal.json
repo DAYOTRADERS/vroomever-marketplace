@@ -8,6 +8,13 @@
       "when": 1793009292990,
       "tag": "0000_subcategory_listing_packages",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793009982956,
+      "tag": "0001_record_simulated_listing_packages",
+      "breakpoints": true
     }
   ]
 }

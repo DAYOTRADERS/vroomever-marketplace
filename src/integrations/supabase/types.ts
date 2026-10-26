@@ -176,6 +176,7 @@ export type Database = {
           listing_cadence: string | null
           listing_expires_at: string | null
           listing_fee_ksh: number | null
+          listing_payment_method: string | null
           location: string | null
           price_ksh: number
           rejection_reason: string | null
@@ -201,6 +202,7 @@ export type Database = {
           listing_cadence?: string | null
           listing_expires_at?: string | null
           listing_fee_ksh?: number | null
+          listing_payment_method?: string | null
           location?: string | null
           price_ksh?: number
           rejection_reason?: string | null
@@ -226,6 +228,7 @@ export type Database = {
           listing_cadence?: string | null
           listing_expires_at?: string | null
           listing_fee_ksh?: number | null
+          listing_payment_method?: string | null
           location?: string | null
           price_ksh?: number
           rejection_reason?: string | null
