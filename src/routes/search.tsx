@@ -5,7 +5,7 @@ import { LiveGrid, MarketSearch, PageTitle, Seo } from "@/components/vroomever/m
 import { setMarketFilters } from "@/lib/market-filters";
 
 export const Route = createFileRoute("/search")({
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
+  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s["q"] === "string" ? (s["q"] as string) : "" }),
   head: () => Seo("Search listings — VRUMEX", "Search approved marketplace listings across Kenya."),
   component: SearchResultsPage,
   errorComponent: ({ error }) => (

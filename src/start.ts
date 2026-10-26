@@ -27,7 +27,7 @@ const csrfMiddleware = createCsrfMiddleware({
 
 // Baseline browser hardening headers on every response.
 const securityHeadersMiddleware = createMiddleware().server(async ({ next }) => {
-  const res = await next();
+  const { response: res } = await next();
   const headers = new Headers(res.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "DENY");
