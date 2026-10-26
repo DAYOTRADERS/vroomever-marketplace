@@ -31,8 +31,10 @@ export async function mediaUrls(paths: string[], opts?: { width?: number; qualit
     else missing.push(p);
   }
   if (missing.length) {
-    const transform = opts?.width ? { transform: { width: opts.width, quality: opts.quality ?? 70, resize: "contain" as const } } : undefined;
-    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(missing, 60 * 60 * 6, transform);
+    // opts.width/quality are kept for call-site clarity; this storage version
+    // cannot transform server-side, so caching is what makes repeat loads instant.
+    void opts;
+    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(missing, 60 * 60 * 6);
     data?.forEach((d) => {
       if (d.path && d.signedUrl) {
         map.set(d.path, d.signedUrl);
