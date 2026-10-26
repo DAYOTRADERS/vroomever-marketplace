@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { BadgeCheck, Heart, MapPin, Sparkles } from "lucide-react";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { formatKsh } from "@/data/marketplace";
 import { Button } from "@/components/ui/button";
@@ -50,20 +50,10 @@ export function ProductCard({ product }: { product: CardProduct }) {
     setBusy(false);
   };
 
-  const openListing = async (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      await navigate({ to: "/auth", search: { role: "buyer", mode: "login" } });
-      return;
-    }
-    await navigate({ to: "/product/$id", params: { id: product.id } });
-  };
-
   return (
     <article className="group overflow-hidden rounded-card border border-border bg-card shadow-card card-3d">
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <Link to="/product/$id" params={{ id: product.id }} onClick={(event) => void openListing(event)}>
+        <Link to="/product/$id" params={{ id: product.id }}>
           <img
             src={product.image}
             alt={product.title}
@@ -100,7 +90,6 @@ export function ProductCard({ product }: { product: CardProduct }) {
         <Link
           to="/product/$id"
           params={{ id: product.id }}
-          onClick={(event) => void openListing(event)}
           className="mt-2 block break-words text-sm font-semibold leading-snug hover:text-primary sm:text-base"
         >
           {product.title}
