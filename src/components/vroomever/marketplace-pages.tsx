@@ -170,20 +170,25 @@ export function ProductPage({ id }: { id: string }) {
   const [active,setActive]=useState(0);
   const touchX=useRef(0);
  const [liked,setLiked]=useState(false);
+ const [signedIn,setSignedIn]=useState(false);
+ useEffect(()=>{
+  void supabase.auth.getSession().then(({data})=>setSignedIn(!!data.session));
+  const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>setSignedIn(!!session));
+  return()=>subscription.unsubscribe();
+ },[]);
  useEffect(()=>{if(sample)return;(async()=>{
-  const {data}=await supabase.from("products").select("*").eq("id",id).eq("status","active").maybeSingle();
+  const {data}=await supabase.from("products").select("title,price_ksh,location,condition,is_vip,description,seller_id,images,video_url").eq("id",id).eq("status","active").maybeSingle();
   if(!data){setMissing(true);return;}
   const [{data:prof},photos,vid]=await Promise.all([supabase.rpc("get_public_profile",{_id:data.seller_id}).maybeSingle(),mediaUrls(data.images??[]),data.video_url?mediaUrls([data.video_url]):Promise.resolve([])]);
-  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"VRUMEX seller",sellerId:data.seller_id,phone:toIntl((data as {contact_phone?:string|null}).contact_phone)??toIntl(prof?.phone),photos,video:vid[0]??null});
+  const {data:contact}=signedIn?await supabase.from("products").select("contact_phone").eq("id",id).eq("status","active").maybeSingle():{data:null};
+  setP({title:data.title,price:Number(data.price_ksh),location:data.location,condition:data.condition,vip:data.is_vip,description:data.description||"",seller:prof?.full_name||"VRUMEX seller",sellerId:data.seller_id,phone:signedIn?(toIntl(contact?.contact_phone)??toIntl(prof?.phone)):null,photos,video:vid[0]??null});
    setActive(0);
   const {data:{session}}=await supabase.auth.getSession();
   if(session){const {data:f}=await supabase.from("favorites").select("product_id").eq("user_id",session.user.id).eq("product_id",id).maybeSingle();setLiked(!!f);}
- })();},[id,sample]);
+ })();},[id,sample,signedIn]);
  const toggleFav=async()=>{const {data:{session}}=await supabase.auth.getSession(); if(!session){window.location.href="/auth?role=buyer&mode=login";return;} if(sample){setLiked(!liked);return;} if(liked){await supabase.from("favorites").delete().eq("user_id",session.user.id).eq("product_id",id);setLiked(false);}else{await supabase.from("favorites").insert({user_id:session.user.id,product_id:id});setLiked(true);}};
  const reportListing=async()=>{const {data:{session}}=await supabase.auth.getSession(); if(!session){window.location.href="/auth?role=buyer&mode=login";return;} const reason=window.prompt("What is wrong with this listing?"); if(!reason?.trim())return; const {error}=await supabase.from("reports").insert({reporter_id:session.user.id,product_id:id,reason:reason.trim().slice(0,500)}); window.alert(error?error.message:"Thanks — our team will review this listing.");};
  useEffect(()=>{if(id)void supabase.rpc("record_product_view",{_product_id:id});},[id]);
- const [signedIn,setSignedIn]=useState(false);
- useEffect(()=>{void supabase.auth.getSession().then(({data})=>setSignedIn(!!data.session));},[]);
  const logEnquiry=(channel:"whatsapp"|"call",e:{preventDefault:()=>void})=>{if(!signedIn){e.preventDefault();window.location.href="/auth?role=buyer&mode=login";return;} if(!p?.sellerId)return;void supabase.auth.getSession().then(({data})=>supabase.from("product_enquiries").insert({product_id:id,seller_id:p.sellerId ?? "",buyer_id:data.session?.user.id??null,channel}));};
  if(missing)return <SiteShell><div className="mx-auto max-w-3xl px-5 py-20 text-center"><h1 className="font-display text-3xl font-bold">Listing not available</h1><p className="mt-3 text-muted-foreground">It may be awaiting approval or was removed.</p><Button asChild className="mt-6"><Link to="/dashboard">Back to marketplace</Link></Button></div></SiteShell>;
  if(!p)return <SiteShell><div className="mx-auto max-w-7xl px-5 py-20 text-sm text-muted-foreground">Loading listing…</div></SiteShell>;
