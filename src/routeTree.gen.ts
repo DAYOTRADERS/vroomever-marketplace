@@ -46,6 +46,7 @@ import { Route as SellerDashboardRouteImport } from './routes/seller.dashboard'
 import { Route as SellerListingsRouteImport } from './routes/seller.listings'
 import { Route as SubscriptionsIndexRouteImport } from './routes/subscriptions.index'
 import { Route as SubscriptionsPaymentRouteImport } from './routes/subscriptions.payment'
+import { Route as MasteradminPricingCategoryRouteImport } from './routes/masteradmin.pricing.$category'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -233,6 +234,12 @@ const SubscriptionsPaymentRoute = SubscriptionsPaymentRouteImport.update({
   path: '/subscriptions/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasteradminPricingCategoryRoute =
+  MasteradminPricingCategoryRouteImport.update({
+    id: '/masteradmin/pricing/$category',
+    path: '/masteradmin/pricing/$category',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/subscriptions/payment': typeof SubscriptionsPaymentRoute
   '/masteradmin/': typeof MasteradminIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
+  '/masteradmin/pricing/$category': typeof MasteradminPricingCategoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,6 +319,7 @@ export interface FileRoutesByTo {
   '/subscriptions/payment': typeof SubscriptionsPaymentRoute
   '/masteradmin': typeof MasteradminIndexRoute
   '/subscriptions': typeof SubscriptionsIndexRoute
+  '/masteradmin/pricing/$category': typeof MasteradminPricingCategoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -351,6 +360,7 @@ export interface FileRoutesById {
   '/subscriptions/payment': typeof SubscriptionsPaymentRoute
   '/masteradmin/': typeof MasteradminIndexRoute
   '/subscriptions/': typeof SubscriptionsIndexRoute
+  '/masteradmin/pricing/$category': typeof MasteradminPricingCategoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/subscriptions/payment'
     | '/masteradmin/'
     | '/subscriptions/'
+    | '/masteradmin/pricing/$category'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/subscriptions/payment'
     | '/masteradmin'
     | '/subscriptions'
+    | '/masteradmin/pricing/$category'
   id:
     | '__root__'
     | '/'
@@ -470,6 +482,7 @@ export interface FileRouteTypes {
     | '/subscriptions/payment'
     | '/masteradmin/'
     | '/subscriptions/'
+    | '/masteradmin/pricing/$category'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -509,6 +522,7 @@ export interface RootRouteChildren {
   SubscriptionsPaymentRoute: typeof SubscriptionsPaymentRoute
   MasteradminIndexRoute: typeof MasteradminIndexRoute
   SubscriptionsIndexRoute: typeof SubscriptionsIndexRoute
+  MasteradminPricingCategoryRoute: typeof MasteradminPricingCategoryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -772,6 +786,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsPaymentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masteradmin/pricing/$category': {
+      id: '/masteradmin/pricing/$category'
+      path: '/masteradmin/pricing/$category'
+      fullPath: '/masteradmin/pricing/$category'
+      preLoaderRoute: typeof MasteradminPricingCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -822,6 +843,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsPaymentRoute: SubscriptionsPaymentRoute,
   MasteradminIndexRoute: MasteradminIndexRoute,
   SubscriptionsIndexRoute: SubscriptionsIndexRoute,
+  MasteradminPricingCategoryRoute: MasteradminPricingCategoryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

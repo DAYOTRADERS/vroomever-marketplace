@@ -5,8 +5,9 @@ import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Brand } from "@/components/vroomever/brand";
 import { Button } from "@/components/ui/button";
+import { Seo } from "@/components/vroomever/marketplace-pages";
 
-export const Route = createFileRoute("/auth/confirm")({ component: AuthConfirmPage });
+export const Route = createFileRoute("/auth/confirm")({ head: () => Seo("Confirm your email — VRUMEVER", "Verify your VRUMEVER account email and continue to your buyer or seller dashboard."), component: AuthConfirmPage });
 
 function AuthConfirmPage() {
   const nav = useNavigate();

@@ -9,6 +9,11 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [x] Compact subcategory/brand views, missing artwork, clearing and transportation service
+- [x] Shared buyer/home layout, responsive account popup, mobile footer reveal
+- [x] Working product/category search, compact inline filters, readable listing details
+- [x] Admin-managed subcategory monthly/annual prices connected to seller posting and listing records
+- [x] Verify pricing rules, connected admin/seller/buyer flows and device layouts
 - [x] Restore all approved listings below the unchanged 3D landing; rename buyer button to Buyers Market
 - [x] Vercel (vrumever.vercel.app) database connection explained/fixed
 - [x] Email links (confirm, reset) go to correct buyer/seller paths on the live domain

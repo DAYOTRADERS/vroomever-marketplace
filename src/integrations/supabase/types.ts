@@ -164,6 +164,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
           category_slug: string
           condition: string | null
           contact_phone: string | null
@@ -172,6 +173,10 @@ export type Database = {
           id: string
           images: string[]
           is_vip: boolean
+          listing_cadence: string | null
+          listing_expires_at: string | null
+          listing_fee_ksh: number | null
+          listing_payment_method: string | null
           location: string | null
           price_ksh: number
           rejection_reason: string | null
@@ -185,6 +190,7 @@ export type Database = {
           vip_expires_at: string | null
         }
         Insert: {
+          brand?: string | null
           category_slug: string
           condition?: string | null
           contact_phone?: string | null
@@ -193,6 +199,10 @@ export type Database = {
           id?: string
           images?: string[]
           is_vip?: boolean
+          listing_cadence?: string | null
+          listing_expires_at?: string | null
+          listing_fee_ksh?: number | null
+          listing_payment_method?: string | null
           location?: string | null
           price_ksh?: number
           rejection_reason?: string | null
@@ -206,6 +216,7 @@ export type Database = {
           vip_expires_at?: string | null
         }
         Update: {
+          brand?: string | null
           category_slug?: string
           condition?: string | null
           contact_phone?: string | null
@@ -214,6 +225,10 @@ export type Database = {
           id?: string
           images?: string[]
           is_vip?: boolean
+          listing_cadence?: string | null
+          listing_expires_at?: string | null
+          listing_fee_ksh?: number | null
+          listing_payment_method?: string | null
           location?: string | null
           price_ksh?: number
           rejection_reason?: string | null
@@ -307,6 +322,35 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      subcategory_prices: {
+        Row: {
+          annual_ksh: number
+          category_slug: string
+          monthly_ksh: number
+          subcategory: string
+        }
+        Insert: {
+          annual_ksh?: number
+          category_slug: string
+          monthly_ksh?: number
+          subcategory: string
+        }
+        Update: {
+          annual_ksh?: number
+          category_slug?: string
+          monthly_ksh?: number
+          subcategory?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subcategory_prices_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
           },
         ]
       }
