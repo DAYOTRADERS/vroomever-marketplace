@@ -19,6 +19,7 @@ import { Route as NotevereveresitRouteImport } from './routes/notevereveresit'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SellerTermsRouteImport } from './routes/seller-terms'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -96,6 +97,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellRoute = SellRouteImport.update({
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/search'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/search'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/reset-password'
+    | '/search'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -496,6 +508,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SearchRoute: typeof SearchRoute
   SellRoute: typeof SellRoute
   SellerTermsRoute: typeof SellerTermsRoute
   SignupRoute: typeof SignupRoute
@@ -595,6 +608,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell': {
@@ -817,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SearchRoute: SearchRoute,
   SellRoute: SellRoute,
   SellerTermsRoute: SellerTermsRoute,
   SignupRoute: SignupRoute,
