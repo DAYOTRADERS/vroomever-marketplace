@@ -357,11 +357,11 @@ export function AdminUsers() {
 }
 
 export function AdminProducts() {
-  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string; rejection_reason: string | null; images: string[] | null; video_url: string | null; description: string | null }>>([]);
+  const [rows, setRows] = useState<Array<{ id: string; title: string; price: number; status: string; seller_id: string; is_vip: boolean; category_slug: string; created_at: string; rejection_reason: string | null; images: string[] | null; video_url: string | null; description: string | null; subcategory:string|null; brand:string|null;listing_fee_ksh:number|null;listing_cadence:string|null;listing_expires_at:string|null }>>([]);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [filter, setFilter] = useState<"all" | ProductStatus>("all");
   const n = useNotice();
-  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at,rejection_reason,images,video_url,description").order("created_at", { ascending: false })
+  const load = () => supabase.from("products").select("id,title,price_ksh,status,seller_id,is_vip,category_slug,created_at,rejection_reason,images,video_url,description,subcategory,brand,listing_fee_ksh,listing_cadence,listing_expires_at").order("created_at", { ascending: false })
     .then(({ data, error }) => { if (error) n.show(error, ""); setRows((data ?? []).map((p) => ({ ...p, price: Number(p.price_ksh) }))); });
   useEffect(() => { void load(); }, []);
   const setStatus = async (id: string, status: ProductStatus) => {
@@ -387,8 +387,8 @@ export function AdminProducts() {
       <Table
         head={["Listing", "Price", "Status", "Actions"]}
         rows={shown.map((p) => [
-          <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{p.category_slug} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small><div className="mt-2 max-w-sm"><ListingMedia images={p.images} video={p.video_url} /></div>{p.description && <p className="mt-2 max-w-sm whitespace-pre-line text-xs text-muted-foreground">{p.description}</p>}</div>,
-          formatKsh(p.price),
+          <div><Link to="/product/$id" params={{ id: p.id }} className="block font-semibold hover:text-primary">{p.title}</Link><small className="text-muted-foreground">{[p.category_slug,p.subcategory,p.brand].filter(Boolean).join(" · ")} · {new Date(p.created_at).toLocaleDateString()}{p.is_vip ? " · VIP" : ""}</small><div className="mt-2 max-w-sm"><ListingMedia images={p.images} video={p.video_url} /></div>{p.description && <p className="mt-2 max-w-sm whitespace-pre-line text-xs text-muted-foreground">{p.description}</p>}</div>,
+          <div><strong>{formatKsh(p.price)}</strong>{p.listing_fee_ksh!==null&&<small className="mt-1 block">Listing fee {formatKsh(p.listing_fee_ksh)} · {p.listing_cadence} · Simulated<br/>Expires {p.listing_expires_at?new Date(p.listing_expires_at).toLocaleDateString():"—"}</small>}</div>,
           <div><Badge variant="outline">{p.status}</Badge>{p.status === "rejected" && p.rejection_reason && <small className="mt-1 block max-w-48 text-muted-foreground">Reason: {p.rejection_reason}</small>}</div>,
           <span className="flex flex-wrap gap-2">
             <Input className="h-8 w-full min-w-48" placeholder="Reason (required to reject)" value={reasons[p.id] ?? ""} maxLength={500} onChange={(e) => setReasons({ ...reasons, [p.id]: e.target.value })} />

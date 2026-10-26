@@ -11,8 +11,10 @@ const logoSlugs: Record<string, string> = {
   "BMW Motorrad": "bmw", Ducati: "ducati", "Harley-Davidson": "harleydavidson", MAN: "man",
   Tata: "tatamotors", Sinotruk: "sinotruk", DAF: "daf", Iveco: "iveco", "Renault Trucks": "renault",
 };
+const pointers=import.meta.glob("@/assets/brands/*.asset.json", {eager:true,import:"default"}) as Record<string,{url:string}>;
+const stored=Object.fromEntries(Object.entries(pointers).map(([path,p])=>[(path.split("/").pop() ?? "").split(".")[0],p.url]));
 const build = (list: [string, string][]): Make[] =>
-  list.map(([name]) => ({ name, logo: `https://cdn.simpleicons.org/${logoSlugs[name] ?? name.toLowerCase().replace(/[^a-z0-9]/g, "")}` }));
+ list.map(([name]) => ({name,logo:stored[name.toLowerCase().replace(/[^a-z0-9]/g, "")] ?? `https://cdn.simpleicons.org/${logoSlugs[name] ?? name.toLowerCase().replace(/[^a-z0-9]/g, "")}`}));
 
 export const carMakes = build([
   ["Toyota", "toyota.com"], ["Honda", "honda.com"], ["Nissan", "nissanusa.com"], ["Mazda", "mazda.com"], ["Suzuki", "suzuki.co.jp"],
