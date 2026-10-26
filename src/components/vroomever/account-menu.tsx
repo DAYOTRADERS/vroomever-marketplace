@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Account = { name: string; email: string; role: AppRole; phone?: string | null; location?: string | null };
 
@@ -50,26 +51,24 @@ export function AccountMenu() {
   const initials = account.name.split(/\s+/).map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <div className="relative min-w-0">
-      <Button variant="outline" onClick={() => setOpen(!open)} aria-label="Account menu" className="max-w-full justify-start rounded-full py-1 pl-1 pr-3 text-sm">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild><Button variant="outline" aria-label="Account menu" className="max-w-full justify-start rounded-full py-1 pl-1 pr-3 text-sm">
         <span className="grid size-8 place-items-center rounded-full bg-primary font-bold text-primary-foreground">{initials}</span>
         <span className="min-w-0 max-w-28 truncate font-medium">{account.name.split(" ")[0]}</span>
-      </Button>
-      {open && (
-        <div className="absolute left-0 right-auto z-50 mt-2 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-border bg-popover p-4 text-popover-foreground shadow-card sm:left-auto sm:right-0">
+      </Button></PopoverTrigger>
+        <PopoverContent align="end" sideOffset={8} collisionPadding={12} className="z-[90] max-h-[var(--radix-popover-content-available-height)] w-[min(18rem,calc(100vw-1.5rem))] overflow-y-auto p-4">
           <strong className="block truncate">{account.name}</strong>
           <span className="block truncate text-sm text-muted-foreground">{account.email}</span>
           <span className="mt-2 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold uppercase text-primary">{account.role}</span>
           {(account.phone || account.location) && (
-            <p className="mt-2 text-xs text-muted-foreground">{[account.phone, account.location].filter(Boolean).join(" · ")}</p>
+            <p className="mt-2 break-words text-xs text-muted-foreground">{[account.phone, account.location].filter(Boolean).join(" · ")}</p>
           )}
           <div className="mt-4 grid gap-1">
             <Button asChild variant="ghost" className="justify-start" onClick={() => setOpen(false)}><Link to={dash}><LayoutDashboard /> My dashboard</Link></Button>
             <Button asChild variant="ghost" className="justify-start" onClick={() => setOpen(false)}><Link to="/profile"><UserRound /> Profile details</Link></Button>
             <Button variant="ghost" className="justify-start text-destructive" onClick={signOut}><LogOut /> Sign out</Button>
           </div>
-        </div>
-      )}
-    </div>
+        </PopoverContent>
+    </Popover>
   );
 }

@@ -7,6 +7,7 @@ import { Brand } from "./brand";
 import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { setMarketFilters } from "@/lib/market-filters";
 
 type DashboardMode = "buyer" | "seller";
 
@@ -15,6 +16,8 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const [footerOpen, setFooterOpen] = useState(false);
   const footerRef = useRef<HTMLElement>(null);
   const [dark, setDark] = useState(false);
+  const [menuSearch, setMenuSearch] = useState("");
+  useEffect(() => { if (footerOpen) { const timer = setTimeout(() => footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 320); return () => clearTimeout(timer); } }, [footerOpen]);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
@@ -36,7 +39,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
   return <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
-      <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 sm:flex sm:gap-5 lg:px-6">
+      <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />
         <div className="hidden flex-1 md:block" />
         <nav className={`ml-auto items-center gap-1 ${dashboardMode ? "hidden" : "hidden lg:flex"}`}>
@@ -54,10 +57,11 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
       <button className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in" onClick={() => setMenu(false)} aria-label="Close menu" />
       <nav className="absolute inset-0 overflow-y-auto bg-surface-strong p-5 pt-6 text-surface-foreground animate-scale-in">
         <div className="mb-4 flex items-center justify-between"><strong className="font-display text-lg">Menu</strong><Button variant="ghost" size="icon" className="text-surface-foreground" onClick={() => setMenu(false)} aria-label="Close menu"><X /></Button></div>
-        <div className="relative mb-4">
+        <form className="relative mb-4" onSubmit={e => { e.preventDefault(); setMarketFilters({q:menuSearch}); setMenu(false); window.location.assign(role === "buyer" ? "/dashboard" : "/"); }}>
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-surface-muted" />
-          <Input className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground caret-primary placeholder:text-surface-muted" placeholder="Search marketplace" />
-        </div>
+          <Input value={menuSearch} onChange={e => { setMenuSearch(e.target.value); setMarketFilters({q:e.target.value}); }} className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground caret-primary placeholder:text-surface-muted" placeholder="Search marketplace" />
+          <Button type="submit" size="sm" className="mt-2">Search</Button>
+        </form>
         <div className="grid gap-2">
           {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ...(role ? [["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard]] : []), ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
             <Link key={label} to={to} className={`flex min-h-14 items-center gap-4 px-4 text-base rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5 text-surface-foreground"}`}><Icon className="size-5" />{label}</Link>
@@ -73,11 +77,11 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
       <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
-    </div> : <main>{path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
+    </div> : <main>{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer ref={footerRef} className="border-t border-border bg-surface-strong text-surface-foreground">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <Brand inverted />
-        <button type="button" onClick={() => setFooterOpen(!footerOpen)} aria-expanded={footerOpen} className="grid size-10 place-items-center rounded-full transition-transform duration-300 hover:bg-white/10"><ChevronUp className={`size-5 text-surface-muted transition ${footerOpen ? "" : "rotate-180"}`} aria-label={footerOpen ? "Hide footer" : "Show footer"} /></button>
+        <Button type="button" variant="ghost" size="icon" onClick={() => setFooterOpen(!footerOpen)} aria-label={footerOpen ? "Hide footer" : "Show footer"} aria-expanded={footerOpen} className="text-surface-foreground"><ChevronUp className={`size-5 transition ${footerOpen ? "rotate-180" : ""}`} /></Button>
       </div>
       <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${footerOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} aria-hidden={!footerOpen}><div className="min-h-0 overflow-hidden border-t border-white/10">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-3">
