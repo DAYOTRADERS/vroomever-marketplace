@@ -89,8 +89,8 @@ export function ProductCard({ product }: { product: CardProduct }) {
           <Heart className={liked ? "fill-current text-destructive" : ""} />
         </Button>
       </div>
-      <div className="p-4">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <div className="p-2.5 sm:p-4">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <span className="truncate text-xs font-medium text-primary">{product.condition ?? ""}</span>
           <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3" />
@@ -101,12 +101,12 @@ export function ProductCard({ product }: { product: CardProduct }) {
           to="/product/$id"
           params={{ id: product.id }}
           onClick={(event) => void openListing(event)}
-          className="mt-2 block font-semibold leading-snug hover:text-primary"
+          className="mt-2 block break-words text-sm font-semibold leading-snug hover:text-primary sm:text-base"
         >
           {product.title}
         </Link>
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-          <strong className="min-w-0 truncate font-display text-lg">{formatKsh(product.price)}</strong>
+        <div className="mt-2 flex min-w-0 flex-col items-start gap-1">
+          <strong className="min-w-0 break-words font-display text-base sm:text-lg">{formatKsh(product.price)}</strong>
           <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
             <BadgeCheck className="size-4 shrink-0 text-primary" />
             <span className="max-w-28 truncate">{product.seller}</span>

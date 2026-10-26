@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
@@ -17,7 +17,8 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const footerRef = useRef<HTMLElement>(null);
   const [dark, setDark] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
-  useEffect(() => { if (footerOpen) { const timer = setTimeout(() => footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 320); return () => clearTimeout(timer); } }, [footerOpen]);
+  const navigate = useNavigate();
+  useEffect(() => { if (!footerOpen) return; const timer = setTimeout(() => footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 320); return () => clearTimeout(timer); }, [footerOpen]);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
@@ -57,7 +58,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
       <button className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in" onClick={() => setMenu(false)} aria-label="Close menu" />
       <nav className="absolute inset-0 overflow-y-auto bg-surface-strong p-5 pt-6 text-surface-foreground animate-scale-in">
         <div className="mb-4 flex items-center justify-between"><strong className="font-display text-lg">Menu</strong><Button variant="ghost" size="icon" className="text-surface-foreground" onClick={() => setMenu(false)} aria-label="Close menu"><X /></Button></div>
-        <form className="relative mb-4" onSubmit={e => { e.preventDefault(); setMarketFilters({q:menuSearch}); setMenu(false); window.location.assign(role === "buyer" ? "/dashboard" : "/"); }}>
+        <form className="relative mb-4" onSubmit={e => { e.preventDefault(); setMarketFilters({q:menuSearch}); setMenu(false); void navigate({to:role === "buyer" ? "/dashboard" : "/"}); }}>
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-surface-muted" />
           <Input value={menuSearch} onChange={e => { setMenuSearch(e.target.value); setMarketFilters({q:e.target.value}); }} className="h-11 rounded-full border-white/10 bg-white/10 pl-10 text-surface-foreground caret-primary placeholder:text-surface-muted" placeholder="Search marketplace" />
           <Button type="submit" size="sm" className="mt-2">Search</Button>

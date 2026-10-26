@@ -1,6 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ListingMedia } from "./listing-media";
 import { refreshCategories } from "@/lib/use-categories";
+import { categoryImageFor } from "@/data/category-images";
+import { useCategories } from "@/lib/use-categories";
 import {
   BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
@@ -21,7 +23,7 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin", label: "Overview", icon: LayoutDashboard },
   { to: "/masteradmin/users", label: "Users", icon: UsersRound },
   { to: "/masteradmin/products", label: "Products", icon: Boxes },
-  { to: "/masteradmin/categories", label: "Categories", icon: Tags },
+  { to: "/masteradmin/categories", label: "Listing prices & categories", icon: Tags },
   { to: "/masteradmin/subscriptions", label: "Subscriptions", icon: CircleDollarSign },
   { to: "/masteradmin/vip", label: "VIP ads", icon: Sparkles },
   { to: "/masteradmin/reports", label: "Reports", icon: Flag },
@@ -402,6 +404,7 @@ export function AdminProducts() {
 }
 
 export function AdminCategories() {
+  const liveCategories=useCategories();
   const [rows, setRows] = useState<Array<{ slug: string; name: string; subcategories: string[]; position: number }>>([]);
   const [draft, setDraft] = useState({ name: "", subs: "" });
   const n = useNotice();
@@ -430,7 +433,9 @@ export function AdminCategories() {
   };
   return (
     <AdminShell>
-      <PageTitle eyebrow="Taxonomy" title="Categories & subcategories" copy="Edit names and subcategories (comma separated). Changes apply instantly." />
+      <PageTitle title="Subcategory listing prices" />
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">{liveCategories.map(c=><Button key={c.slug} asChild variant="outline" className="h-auto min-w-0 justify-start whitespace-normal p-3"><Link to="/masteradmin/pricing/$category" params={{category:c.slug}}>{categoryImageFor(c)&&<img src={categoryImageFor(c)} alt="" width={32} height={32} className="size-8 shrink-0 object-contain"/>}<span className="min-w-0 text-left"><strong className="block text-sm">{c.name}</strong><small>{c.subcategories.length} subcategories · Monthly / annual</small></span></Link></Button>)}</div>
+      <PageTitle title="Categories & subcategories" />
       {n.el}
       <form onSubmit={add} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-5 md:grid-cols-[1fr_2fr_auto]">
         <Input placeholder="New category name" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} required />
