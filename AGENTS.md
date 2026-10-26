@@ -14,4 +14,5 @@
 - Home and buyer dashboard share MarketHome so search, category layout, and filters stay identical.
 - Subcategory listing packages use public.subcategory_prices with admin-only writes and database-validated prices; listing fee, cadence, and expiry are snapshotted on products separately from item asking prices, and payment remains simulation-only.
 - Store selected vehicle brands in products.brand; title matching is only a compatibility fallback for older listings without a brand.
+- Marketplace option helpers centralize compact brand partitioning, subcategory counts, and contact visibility so these rules stay testable across listing views.
 - Package submissions record payments with status simulated via a database trigger; never represent them as real successful charges.

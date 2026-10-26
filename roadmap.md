@@ -9,6 +9,9 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [x] Compact popup filters, subcategory counts/sort, and seven brands plus Others list
+- [x] Public listing viewing with signed-in seller contact and Cleaning service rename
+- [x] Verify requested marketplace changes on mobile and desktop
 - [x] Compact subcategory/brand views, missing artwork, clearing and transportation service
 - [x] Shared buyer/home layout, responsive account popup, mobile footer reveal
 - [x] Working product/category search, compact inline filters, readable listing details

@@ -1,8 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 // One shared set of buyer filters, so search/price/location/sort apply on every listings page.
-export type MarketFilters = { q: string; min: string; max: string; location: string; sort: "recent" | "price_asc" | "price_desc" };
-export const emptyFilters: MarketFilters = { q: "", min: "", max: "", location: "", sort: "recent" };
+export type MarketFilters = { q: string; min: string; max: string; location: string; condition: string; sort: "recent" | "price_asc" | "price_desc" };
+export const emptyFilters: MarketFilters = { q: "", min: "", max: "", location: "", condition: "", sort: "recent" };
 let state: MarketFilters = emptyFilters;
 const listeners = new Set<() => void>();
 
@@ -18,4 +18,4 @@ export function useMarketFilters(): MarketFilters {
   );
 }
 export const activeFilterCount = (f: MarketFilters) =>
-  [f.min, f.max, f.location].filter(Boolean).length + (f.sort !== "recent" ? 1 : 0);
+  [f.min, f.max, f.location, f.condition].filter(Boolean).length + (f.sort !== "recent" ? 1 : 0);
