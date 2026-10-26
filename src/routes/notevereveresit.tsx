@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Brand } from "@/components/vroomever/brand";
 import { createAdminAccount, getAdminSetupState } from "@/lib/admin-accounts.functions";
 import { adminExistsPublic, createAdminInBrowser, isServerKeyMissing } from "@/lib/admin-setup";
+import { Seo } from "@/components/vroomever/marketplace-pages";
 
 export const Route = createFileRoute("/notevereveresit")({
+  head: () => Seo("Administrator setup — VRUMEVER", "Authorized administrator account setup for the VRUMEVER marketplace."),
   component: CreateAdminPage,
 });
 
