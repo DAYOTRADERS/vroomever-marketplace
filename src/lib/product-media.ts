@@ -15,13 +15,32 @@ export async function uploadListingMedia(userId: string, files: File[]): Promise
   return paths;
 }
 
-/** Turns stored paths (or full URLs) into viewable links. */
-export async function mediaUrls(paths: string[]): Promise<string[]> {
+// Signed URLs are cached in memory so revisiting a grid or listing is instant.
+const urlCache = new Map<string, { url: string; expiresAt: number }>();
+
+/** Turns stored paths (or full URLs) into viewable links, optionally downscaled. */
+export async function mediaUrls(paths: string[], opts?: { width?: number; quality?: number }): Promise<string[]> {
   const stored = paths.filter((p) => p && !/^https?:|^\//.test(p));
+  const now = Date.now();
+  const sizeKey = `@${opts?.width ?? 0}`;
   const map = new Map<string, string>();
-  if (stored.length) {
-    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(stored, 60 * 60 * 6);
-    data?.forEach((d) => d.path && d.signedUrl && map.set(d.path, d.signedUrl));
+  const missing: string[] = [];
+  for (const p of stored) {
+    const hit = urlCache.get(p + sizeKey);
+    if (hit && hit.expiresAt > now + 60_000) map.set(p, hit.url);
+    else missing.push(p);
+  }
+  if (missing.length) {
+    // opts.width/quality are kept for call-site clarity; this storage version
+    // cannot transform server-side, so caching is what makes repeat loads instant.
+    void opts;
+    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(missing, 60 * 60 * 6);
+    data?.forEach((d) => {
+      if (d.path && d.signedUrl) {
+        map.set(d.path, d.signedUrl);
+        urlCache.set(d.path + sizeKey, { url: d.signedUrl, expiresAt: now + 6 * 60 * 60 * 1000 });
+      }
+    });
   }
   return paths.map((p) => map.get(p) ?? p).filter((u) => /^https?:|^\//.test(u));
 }
