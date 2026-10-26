@@ -18,7 +18,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const [dark, setDark] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
   const navigate = useNavigate();
-  useEffect(() => { if (!footerOpen) return; const timer = setTimeout(() => footerRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), 320); return () => clearTimeout(timer); }, [footerOpen]);
+  useEffect(() => { if (!footerOpen) return; const timer = setTimeout(() => { const footer = footerRef.current; if (footer) window.scrollTo({top:window.scrollY+footer.getBoundingClientRect().bottom-window.innerHeight,behavior:"smooth"}); }, 450); return () => clearTimeout(timer); }, [footerOpen]);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
