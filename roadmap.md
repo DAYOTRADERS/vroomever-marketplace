@@ -9,6 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [ ] Rename newest-first sort to New post and load current admin category names on first visit
 - [x] Compact popup filters, subcategory counts/sort, and seven brands plus Others list
 - [x] Public listing viewing with signed-in seller contact and Cleaning service rename
 - [x] Verify requested marketplace changes on mobile and desktop
