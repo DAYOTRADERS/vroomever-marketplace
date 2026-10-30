@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { getPublicCategories } from "../lib/categories.functions";
+import { InitialCategoriesContext } from "../lib/use-categories";
 
 function NotFoundComponent() {
   return (
@@ -73,6 +75,8 @@ function ErrorComponent({ error, reset }: import("@tanstack/react-router").Error
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async () => ({ categories: await getPublicCategories() }),
+  staleTime: Infinity,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -120,6 +124,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { categories } = Route.useLoaderData();
   // If a password-reset email lands on another page, send it to the reset page.
   useEffect(() => {
     const { pathname, search, hash } = window.location;
@@ -129,8 +134,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <InitialCategoriesContext.Provider value={categories}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      </InitialCategoriesContext.Provider>
     </QueryClientProvider>
   );
 }
