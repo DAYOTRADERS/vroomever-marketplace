@@ -82,7 +82,7 @@ export function FilterMenu({ category, subcategory, make="", onMake }: {category
  if(!category||!subcategory)return null;
  return <div className="mb-3 flex flex-wrap items-center gap-2">
   <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5 px-2.5 text-xs" onClick={()=>setOpen(true)}><Filter className="size-3.5"/> Filters{n>0?` (${n})`:""}<ChevronRight className="size-3.5"/></Button>
-  <label className="flex items-center gap-1.5 text-xs font-semibold">Sort<select aria-label="Sort listings" value={f.sort} onChange={e=>setMarketFilters({sort:e.target.value as MarketFilters["sort"]})} className="h-8 max-w-44 rounded-md border border-input bg-background px-2 text-xs"><option value="recent">Newest</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
+  <label className="flex items-center gap-1.5 text-xs font-semibold">Sort<select aria-label="Sort listings" value={f.sort} onChange={e=>setMarketFilters({sort:e.target.value as MarketFilters["sort"]})} className="h-8 max-w-44 rounded-md border border-input bg-background px-2 text-xs"><option value="recent">New post</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
   <Dialog open={open} onOpenChange={setOpen}><DialogContent className="flex max-h-[90svh] w-[calc(100%-1.5rem)] max-w-xl flex-col gap-3 rounded-lg p-4">
    <DialogTitle className="pr-7">Filters · {subcategory}</DialogTitle><DialogDescription>Listing preferences</DialogDescription>
    <div className="grid min-h-0 grid-cols-2 gap-3 overflow-y-auto pb-1">
