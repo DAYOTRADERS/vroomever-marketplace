@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
+import authPattern from "@/assets/auth-pattern.jpg";
 import { PageTitle } from "./marketplace-pages";
 import { categories, formatKsh, vipOptions } from "@/data/marketplace";
 
@@ -147,8 +148,9 @@ export function AdminLoginPage() {
     setLoading(false);
   };
   return (
-    <div className="auth-backdrop grid min-h-screen place-items-center px-5 text-surface-foreground">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+    <div className="auth-backdrop relative isolate grid min-h-screen place-items-center overflow-hidden px-5 text-surface-foreground">
+      <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      <form onSubmit={submit} className="auth-form-surface w-full max-w-sm rounded-card border p-8">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
         <p className="mt-2 text-sm text-surface-muted">Sign in to the VRUMEVER administration panel.</p>

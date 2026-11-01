@@ -29,6 +29,7 @@ import { makesFor } from "@/data/car-makes";
 import { useMarketFilters, setMarketFilters, activeFilterCount, type MarketFilters } from "@/lib/market-filters";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
+import authPattern from "@/assets/auth-pattern.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -476,8 +477,9 @@ export function AuthPage({
         </div>
       </div>
 
-      <div className="relative flex items-center justify-center border-brand-bright/20 px-5 py-12 lg:border-l">
-        <form onSubmit={submit} className="w-full max-w-md">
+      <div className="relative isolate flex items-center justify-center overflow-hidden border-brand-bright/20 px-5 py-12 lg:border-l">
+        <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+        <form onSubmit={submit} className="auth-form-surface w-full max-w-md rounded-lg border p-5 sm:p-7">
           <div className="lg:hidden">
             <Brand inverted />
           </div>
@@ -492,7 +494,7 @@ export function AuthPage({
           </p>
 
           {!signup && (
-            <div className="mt-7 grid grid-cols-2 gap-2 rounded-card border border-white/10 bg-white/5 p-1">
+            <div className="mt-7 grid grid-cols-2 gap-2 rounded-card border border-surface-muted/30 bg-surface-foreground/5 p-1">
               {(["buyer","seller"] as const).map((r) => (
                 <button key={r} type="button" onClick={() => { setRole(r); setError(""); }} className={`rounded-lg py-2.5 text-sm font-semibold transition ${role === r ? "bg-primary text-primary-foreground" : "text-surface-muted"}`}>
                   {r === "buyer" ? "Buyer login" : "Seller login"}
@@ -507,7 +509,7 @@ export function AuthPage({
                   type="button"
 
                   onClick={() => setRole("buyer")}
-                  className={`rounded-card border p-4 text-left transition ${signupRole === "buyer" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/30 bg-transparent opacity-70 hover:opacity-100"}`}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "buyer" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/50 bg-transparent hover:bg-surface-foreground/5"}`}
                 >
                   <UserRound className="size-5 text-primary" />
                   <strong className="mt-2 block">Buyer</strong>
@@ -517,7 +519,7 @@ export function AuthPage({
                   type="button"
 
                   onClick={() => setRole("seller")}
-                  className={`rounded-card border p-4 text-left transition ${signupRole === "seller" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/30 bg-transparent opacity-70 hover:opacity-100"}`}
+                  className={`rounded-card border p-4 text-left transition ${signupRole === "seller" ? "border-primary bg-primary/20 ring-2 ring-primary" : "border-surface-muted/50 bg-transparent hover:bg-surface-foreground/5"}`}
                 >
                   <Store className="size-5 text-primary" />
                   <strong className="mt-2 block">Seller</strong>
@@ -575,7 +577,7 @@ export function AuthPage({
             <p className="mt-4 rounded-md bg-primary/10 p-3 text-sm text-primary">{info}</p>
           )}
           {pendingEmail && !forgot && (
-            <div className="mt-4 rounded-md border border-primary/30 bg-white/5 p-4 text-sm">
+            <div className="mt-4 rounded-md border border-primary/30 bg-surface-foreground/5 p-4 text-sm">
               <p className="font-semibold">Confirmation email status</p>
               <p className="mt-1 text-surface-muted">
                 Sent to <strong className="text-surface-foreground">{pendingEmail}</strong>. Open the link in that email, then sign in with the {signupRole === "seller" ? "Seller" : "Buyer"} login form. Didn't get it? Check spam, then resend.
@@ -604,7 +606,7 @@ export function AuthPage({
             <ArrowRight />
           </Button>
           {!forgot && <div className="mt-4 grid gap-2">
-            <div className="flex items-center gap-3 text-xs text-surface-muted"><span className="h-px flex-1 bg-white/10" />or continue as {signupRole === "seller" ? "SELLER" : "BUYER"} with<span className="h-px flex-1 bg-white/10" /></div>
+            <div className="flex items-center gap-3 text-xs text-surface-muted"><span className="h-px flex-1 bg-surface-muted/30" />or continue as {signupRole === "seller" ? "SELLER" : "BUYER"} with<span className="h-px flex-1 bg-surface-muted/30" /></div>
             <div className="grid gap-2 sm:grid-cols-2">
               <button type="button" onClick={() => void social("google")} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <svg aria-hidden="true" viewBox="0 0 48 48" className="size-5"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>

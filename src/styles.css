@@ -67,6 +67,7 @@
   --color-surface-foreground: var(--surface-foreground);
   --color-surface-muted: var(--surface-muted);
   --color-brand-bright: var(--brand-bright);
+  --color-brand-ink: var(--brand-ink);
   --radius-card: 0.75rem;
   --shadow-card: 0 12px 36px -20px oklch(0.18 0.04 235 / 0.25);
   --shadow-elevated: 0 24px 60px -24px oklch(0.18 0.07 235 / 0.4);
@@ -81,6 +82,10 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
   --brand-bright: oklch(from #0095FD l c h);
+  --brand-ink: oklch(0.19 0.06 260);
+  --auth-field: oklch(0.27 0.065 260);
+  --auth-border: oklch(0.57 0.06 250);
+  --auth-error: oklch(0.8 0.11 25);
   --primary: oklch(0.37 0.14 260);
   --primary-foreground: oklch(0.985 0.004 235);
   --secondary: oklch(0.93 0.035 250);
@@ -179,12 +184,27 @@
 
 @utility auth-backdrop {
   --primary: var(--brand-bright);
-  --primary-foreground: oklch(0.19 0.06 260);
+  --primary-foreground: var(--brand-ink);
+  --background: var(--auth-field);
+  --foreground: var(--surface-foreground);
+  --muted-foreground: var(--surface-muted);
+  --border: var(--auth-border);
+  --input: var(--auth-border);
+  --accent: var(--auth-field);
+  --accent-foreground: var(--surface-foreground);
+  --destructive: var(--auth-error);
   background-color: var(--surface-strong);
   background-image:
     linear-gradient(125deg, transparent 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 43%, transparent 43%),
     linear-gradient(155deg, transparent 68%, color-mix(in oklab, var(--brand-bright) 6%, transparent) 68%),
     linear-gradient(110deg, var(--surface-strong), color-mix(in oklab, var(--surface-strong) 85%, var(--brand-bright)));
+}
+
+@utility auth-form-surface {
+  background: color-mix(in oklab, var(--surface-strong) 94%, transparent);
+  border-color: color-mix(in oklab, var(--brand-bright) 35%, var(--auth-border));
+  box-shadow: var(--shadow-elevated);
+  backdrop-filter: blur(12px);
 }
 
 @utility dot-grid {
