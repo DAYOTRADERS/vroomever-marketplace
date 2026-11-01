@@ -66,6 +66,7 @@
   --color-surface-strong: var(--surface-strong);
   --color-surface-foreground: var(--surface-foreground);
   --color-surface-muted: var(--surface-muted);
+  --color-brand-bright: var(--brand-bright);
   --radius-card: 0.75rem;
   --shadow-card: 0 12px 36px -20px oklch(0.18 0.04 235 / 0.25);
   --shadow-elevated: 0 24px 60px -24px oklch(0.18 0.07 235 / 0.4);
@@ -79,19 +80,20 @@
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.58 0.125 235);
+  --brand-bright: oklch(from #0095FD l c h);
+  --primary: oklch(0.37 0.14 260);
   --primary-foreground: oklch(0.985 0.004 235);
-  --secondary: oklch(0.93 0.035 235);
-  --secondary-foreground: oklch(0.28 0.06 235);
+  --secondary: oklch(0.93 0.035 250);
+  --secondary-foreground: oklch(0.3 0.1 260);
   --muted: oklch(0.955 0.012 235);
   --muted-foreground: oklch(0.48 0.025 235);
-  --accent: oklch(0.93 0.045 230);
-  --accent-foreground: oklch(0.3 0.05 235);
+  --accent: color-mix(in oklab, var(--brand-bright) 14%, var(--card));
+  --accent-foreground: oklch(0.3 0.1 260);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --ring: var(--brand-bright);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.7 0.118 235);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -107,7 +109,7 @@
   --sidebar-ring: oklch(0.704 0.04 256.788);
   --vip: oklch(0.78 0.16 78);
   --vip-foreground: oklch(0.22 0.04 70);
-  --surface-strong: oklch(0.19 0.025 235);
+  --surface-strong: oklch(0.23 0.075 260);
   --surface-foreground: oklch(0.97 0.006 235);
   --surface-muted: oklch(0.76 0.025 235);
 }
@@ -119,8 +121,8 @@
   --card-foreground: oklch(0.984 0.003 247.858);
   --popover: oklch(0.208 0.042 265.755);
   --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.78 0.11 235);
-  --primary-foreground: oklch(0.16 0.03 235);
+  --primary: var(--brand-bright);
+  --primary-foreground: oklch(0.19 0.06 260);
   --secondary: oklch(0.279 0.041 260.031);
   --secondary-foreground: oklch(0.984 0.003 247.858);
   --muted: oklch(0.279 0.041 260.031);
@@ -147,7 +149,7 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
   --vip: oklch(0.82 0.16 80);
   --vip-foreground: oklch(0.2 0.035 75);
-  --surface-strong: oklch(0.105 0.018 235);
+  --surface-strong: oklch(0.17 0.055 260);
   --surface-foreground: oklch(0.97 0.006 235);
   --surface-muted: oklch(0.72 0.025 235);
 }
@@ -173,6 +175,16 @@
   border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(18px);
+}
+
+@utility auth-backdrop {
+  --primary: var(--brand-bright);
+  --primary-foreground: oklch(0.19 0.06 260);
+  background-color: var(--surface-strong);
+  background-image:
+    linear-gradient(125deg, transparent 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 43%, transparent 43%),
+    linear-gradient(155deg, transparent 68%, color-mix(in oklab, var(--brand-bright) 6%, transparent) 68%),
+    linear-gradient(110deg, var(--surface-strong), color-mix(in oklab, var(--surface-strong) 85%, var(--brand-bright)));
 }
 
 @utility dot-grid {

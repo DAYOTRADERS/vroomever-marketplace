@@ -455,7 +455,7 @@ export function AuthPage({
   };
 
   return (
-    <div className="grid min-h-screen bg-surface-strong text-surface-foreground lg:grid-cols-2">
+    <div className="auth-backdrop grid min-h-screen text-surface-foreground lg:grid-cols-2">
       <div className="relative hidden overflow-hidden lg:block">
         <img
           src={hero}
@@ -464,7 +464,7 @@ export function AuthPage({
           height={1000}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-surface-strong/55" />
+        <div className="absolute inset-0 bg-surface-strong/75" />
         <div className="relative flex h-full flex-col justify-between p-12">
           <Brand inverted />
           <div>
@@ -476,7 +476,7 @@ export function AuthPage({
         </div>
       </div>
 
-      <div className="flex items-center justify-center px-5 py-12">
+      <div className="relative flex items-center justify-center border-brand-bright/20 px-5 py-12 lg:border-l">
         <form onSubmit={submit} className="w-full max-w-md">
           <div className="lg:hidden">
             <Brand inverted />

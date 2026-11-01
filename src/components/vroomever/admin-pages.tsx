@@ -147,7 +147,7 @@ export function AdminLoginPage() {
     setLoading(false);
   };
   return (
-    <div className="grid min-h-screen place-items-center bg-surface-strong px-5 text-surface-foreground">
+    <div className="auth-backdrop grid min-h-screen place-items-center px-5 text-surface-foreground">
       <form onSubmit={submit} className="w-full max-w-sm rounded-card border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
