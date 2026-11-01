@@ -214,6 +214,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.auth-backdrop .auth-form-surface {
+  border: 0;
+  border-radius: 0;
+}
+
 .auth-backdrop a.text-primary-foreground {
   color: var(--surface-foreground);
 }
