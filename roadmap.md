@@ -9,6 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [ ] Apply navy and #0095FD theme and matching login background without other changes
 - [x] Change green theme to sky/light blue and recolour fashion shirt and shoes only
 - [x] Rename newest-first sort to New post and load current admin category names on first visit
 - [x] Compact popup filters, subcategory counts/sort, and seven brands plus Others list
