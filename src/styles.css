@@ -207,6 +207,14 @@
   backdrop-filter: blur(12px);
 }
 
+.auth-backdrop a.text-primary-foreground {
+  color: var(--surface-foreground);
+}
+
+.auth-backdrop img[aria-hidden="true"] {
+  object-fit: fill;
+}
+
 @utility dot-grid {
   background-image: radial-gradient(color-mix(in oklab, var(--primary) 18%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
