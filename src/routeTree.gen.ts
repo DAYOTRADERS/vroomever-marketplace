@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
+import { Route as CustomeradminRouteImport } from './routes/customeradmin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as LoginRouteImport } from './routes/login'
@@ -20,6 +21,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SecretaryadminRouteImport } from './routes/secretaryadmin'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SellerTermsRouteImport } from './routes/seller-terms'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -34,10 +36,12 @@ import { Route as MasteradminAuditRouteImport } from './routes/masteradmin.audit
 import { Route as MasteradminCategoriesRouteImport } from './routes/masteradmin.categories'
 import { Route as MasteradminDiagnosticsRouteImport } from './routes/masteradmin.diagnostics'
 import { Route as MasteradminLoginRouteImport } from './routes/masteradmin.login'
+import { Route as MasteradminMonitorRouteImport } from './routes/masteradmin.monitor'
 import { Route as MasteradminPaymentsRouteImport } from './routes/masteradmin.payments'
 import { Route as MasteradminProductsRouteImport } from './routes/masteradmin.products'
 import { Route as MasteradminReportsRouteImport } from './routes/masteradmin.reports'
 import { Route as MasteradminSettingsRouteImport } from './routes/masteradmin.settings'
+import { Route as MasteradminStaffRouteImport } from './routes/masteradmin.staff'
 import { Route as MasteradminSubscriptionsRouteImport } from './routes/masteradmin.subscriptions'
 import { Route as MasteradminUsersRouteImport } from './routes/masteradmin.users'
 import { Route as MasteradminVipRouteImport } from './routes/masteradmin.vip'
@@ -62,6 +66,11 @@ const AuthRoute = AuthRouteImport.update({
 const BuyerTermsRoute = BuyerTermsRouteImport.update({
   id: '/buyer-terms',
   path: '/buyer-terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomeradminRoute = CustomeradminRouteImport.update({
+  id: '/customeradmin',
+  path: '/customeradmin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -102,6 +111,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecretaryadminRoute = SecretaryadminRouteImport.update({
+  id: '/secretaryadmin',
+  path: '/secretaryadmin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellRoute = SellRouteImport.update({
@@ -174,6 +188,11 @@ const MasteradminLoginRoute = MasteradminLoginRouteImport.update({
   path: '/masteradmin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasteradminMonitorRoute = MasteradminMonitorRouteImport.update({
+  id: '/masteradmin/monitor',
+  path: '/masteradmin/monitor',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MasteradminPaymentsRoute = MasteradminPaymentsRouteImport.update({
   id: '/masteradmin/payments',
   path: '/masteradmin/payments',
@@ -192,6 +211,11 @@ const MasteradminReportsRoute = MasteradminReportsRouteImport.update({
 const MasteradminSettingsRoute = MasteradminSettingsRouteImport.update({
   id: '/masteradmin/settings',
   path: '/masteradmin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasteradminStaffRoute = MasteradminStaffRouteImport.update({
+  id: '/masteradmin/staff',
+  path: '/masteradmin/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasteradminSubscriptionsRoute =
@@ -251,6 +275,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -259,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -272,10 +298,12 @@ export interface FileRoutesByFullPath {
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
   '/masteradmin/diagnostics': typeof MasteradminDiagnosticsRoute
   '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/monitor': typeof MasteradminMonitorRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/staff': typeof MasteradminStaffRoute
   '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
@@ -292,6 +320,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -300,6 +329,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -313,10 +343,12 @@ export interface FileRoutesByTo {
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
   '/masteradmin/diagnostics': typeof MasteradminDiagnosticsRoute
   '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/monitor': typeof MasteradminMonitorRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/staff': typeof MasteradminStaffRoute
   '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
@@ -334,6 +366,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -342,6 +375,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
   '/signup': typeof SignupRoute
@@ -355,10 +389,12 @@ export interface FileRoutesById {
   '/masteradmin/categories': typeof MasteradminCategoriesRoute
   '/masteradmin/diagnostics': typeof MasteradminDiagnosticsRoute
   '/masteradmin/login': typeof MasteradminLoginRoute
+  '/masteradmin/monitor': typeof MasteradminMonitorRoute
   '/masteradmin/payments': typeof MasteradminPaymentsRoute
   '/masteradmin/products': typeof MasteradminProductsRoute
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
+  '/masteradmin/staff': typeof MasteradminStaffRoute
   '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
@@ -377,6 +413,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/buyer-terms'
+    | '/customeradmin'
     | '/dashboard'
     | '/favorites'
     | '/login'
@@ -385,6 +422,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/search'
+    | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -398,10 +436,12 @@ export interface FileRouteTypes {
     | '/masteradmin/categories'
     | '/masteradmin/diagnostics'
     | '/masteradmin/login'
+    | '/masteradmin/monitor'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
     | '/masteradmin/settings'
+    | '/masteradmin/staff'
     | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
@@ -418,6 +458,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/buyer-terms'
+    | '/customeradmin'
     | '/dashboard'
     | '/favorites'
     | '/login'
@@ -426,6 +467,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/search'
+    | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -439,10 +481,12 @@ export interface FileRouteTypes {
     | '/masteradmin/categories'
     | '/masteradmin/diagnostics'
     | '/masteradmin/login'
+    | '/masteradmin/monitor'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
     | '/masteradmin/settings'
+    | '/masteradmin/staff'
     | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
@@ -459,6 +503,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/buyer-terms'
+    | '/customeradmin'
     | '/dashboard'
     | '/favorites'
     | '/login'
@@ -467,6 +512,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/reset-password'
     | '/search'
+    | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
     | '/signup'
@@ -480,10 +526,12 @@ export interface FileRouteTypes {
     | '/masteradmin/categories'
     | '/masteradmin/diagnostics'
     | '/masteradmin/login'
+    | '/masteradmin/monitor'
     | '/masteradmin/payments'
     | '/masteradmin/products'
     | '/masteradmin/reports'
     | '/masteradmin/settings'
+    | '/masteradmin/staff'
     | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
@@ -501,6 +549,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   BuyerTermsRoute: typeof BuyerTermsRoute
+  CustomeradminRoute: typeof CustomeradminRoute
   DashboardRoute: typeof DashboardRoute
   FavoritesRoute: typeof FavoritesRoute
   LoginRoute: typeof LoginRoute
@@ -509,6 +558,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SearchRoute: typeof SearchRoute
+  SecretaryadminRoute: typeof SecretaryadminRoute
   SellRoute: typeof SellRoute
   SellerTermsRoute: typeof SellerTermsRoute
   SignupRoute: typeof SignupRoute
@@ -521,10 +571,12 @@ export interface RootRouteChildren {
   MasteradminCategoriesRoute: typeof MasteradminCategoriesRoute
   MasteradminDiagnosticsRoute: typeof MasteradminDiagnosticsRoute
   MasteradminLoginRoute: typeof MasteradminLoginRoute
+  MasteradminMonitorRoute: typeof MasteradminMonitorRoute
   MasteradminPaymentsRoute: typeof MasteradminPaymentsRoute
   MasteradminProductsRoute: typeof MasteradminProductsRoute
   MasteradminReportsRoute: typeof MasteradminReportsRoute
   MasteradminSettingsRoute: typeof MasteradminSettingsRoute
+  MasteradminStaffRoute: typeof MasteradminStaffRoute
   MasteradminSubscriptionsRoute: typeof MasteradminSubscriptionsRoute
   MasteradminUsersRoute: typeof MasteradminUsersRoute
   MasteradminVipRoute: typeof MasteradminVipRoute
@@ -559,6 +611,13 @@ declare module '@tanstack/react-router' {
       path: '/buyer-terms'
       fullPath: '/buyer-terms'
       preLoaderRoute: typeof BuyerTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customeradmin': {
+      id: '/customeradmin'
+      path: '/customeradmin'
+      fullPath: '/customeradmin'
+      preLoaderRoute: typeof CustomeradminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -615,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/secretaryadmin': {
+      id: '/secretaryadmin'
+      path: '/secretaryadmin'
+      fullPath: '/secretaryadmin'
+      preLoaderRoute: typeof SecretaryadminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell': {
@@ -715,6 +781,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasteradminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/masteradmin/monitor': {
+      id: '/masteradmin/monitor'
+      path: '/masteradmin/monitor'
+      fullPath: '/masteradmin/monitor'
+      preLoaderRoute: typeof MasteradminMonitorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/masteradmin/payments': {
       id: '/masteradmin/payments'
       path: '/masteradmin/payments'
@@ -741,6 +814,13 @@ declare module '@tanstack/react-router' {
       path: '/masteradmin/settings'
       fullPath: '/masteradmin/settings'
       preLoaderRoute: typeof MasteradminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/masteradmin/staff': {
+      id: '/masteradmin/staff'
+      path: '/masteradmin/staff'
+      fullPath: '/masteradmin/staff'
+      preLoaderRoute: typeof MasteradminStaffRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/masteradmin/subscriptions': {
@@ -830,6 +910,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   BuyerTermsRoute: BuyerTermsRoute,
+  CustomeradminRoute: CustomeradminRoute,
   DashboardRoute: DashboardRoute,
   FavoritesRoute: FavoritesRoute,
   LoginRoute: LoginRoute,
@@ -838,6 +919,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SearchRoute: SearchRoute,
+  SecretaryadminRoute: SecretaryadminRoute,
   SellRoute: SellRoute,
   SellerTermsRoute: SellerTermsRoute,
   SignupRoute: SignupRoute,
@@ -850,10 +932,12 @@ const rootRouteChildren: RootRouteChildren = {
   MasteradminCategoriesRoute: MasteradminCategoriesRoute,
   MasteradminDiagnosticsRoute: MasteradminDiagnosticsRoute,
   MasteradminLoginRoute: MasteradminLoginRoute,
+  MasteradminMonitorRoute: MasteradminMonitorRoute,
   MasteradminPaymentsRoute: MasteradminPaymentsRoute,
   MasteradminProductsRoute: MasteradminProductsRoute,
   MasteradminReportsRoute: MasteradminReportsRoute,
   MasteradminSettingsRoute: MasteradminSettingsRoute,
+  MasteradminStaffRoute: MasteradminStaffRoute,
   MasteradminSubscriptionsRoute: MasteradminSubscriptionsRoute,
   MasteradminUsersRoute: MasteradminUsersRoute,
   MasteradminVipRoute: MasteradminVipRoute,
