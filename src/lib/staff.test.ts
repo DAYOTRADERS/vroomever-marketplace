@@ -1,7 +1,8 @@
-import { describe, expect, test } from "bun:test";
+import { describe, it } from "node:test";
+import { strict as assert } from "node:assert";
 import { canOpenStaffPage, staffHome } from "./staff";
 describe("staff pages", () => {
-  test("customer care opens only /customeradmin", () => { expect(canOpenStaffPage("customer_care", "customer_care")).toBe(true); expect(canOpenStaffPage("secretary", "customer_care")).toBe(false); });
-  test("buyers, sellers and admins cannot use staff pages", () => { for (const r of ["buyer", "seller", "admin", null]) expect(canOpenStaffPage("secretary", r)).toBe(false); });
-  test("staff homes", () => { expect(staffHome.customer_care).toBe("/customeradmin"); expect(staffHome.secretary).toBe("/secretaryadmin"); });
+  it("customer care opens only /customeradmin", () => { assert.equal(canOpenStaffPage("customer_care", "customer_care"), true); assert.equal(canOpenStaffPage("secretary", "customer_care"), false); });
+  it("buyers, sellers and admins cannot use staff pages", () => { for (const r of ["buyer", "seller", "admin", null]) assert.equal(canOpenStaffPage("secretary", r), false); });
+  it("staff homes", () => { assert.equal(staffHome.customer_care, "/customeradmin"); assert.equal(staffHome.secretary, "/secretaryadmin"); });
 });
