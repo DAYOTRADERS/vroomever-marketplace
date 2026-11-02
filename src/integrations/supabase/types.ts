@@ -582,7 +582,7 @@ export type Database = {
       record_product_view: { Args: { _product_id: string }; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "seller" | "buyer"
+      app_role: "admin" | "seller" | "buyer" | "customer_care" | "secretary"
       product_status: "pending" | "active" | "hidden" | "rejected"
     }
     CompositeTypes: {
@@ -711,7 +711,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "seller", "buyer"],
+      app_role: ["admin", "seller", "buyer", "customer_care", "secretary"],
       product_status: ["pending", "active", "hidden", "rejected"],
     },
   },

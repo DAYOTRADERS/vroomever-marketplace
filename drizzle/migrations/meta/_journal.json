@@ -15,6 +15,13 @@
       "when": 1793009982956,
       "tag": "0001_record_simulated_listing_packages",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793626449161,
+      "tag": "0002_staff_roles_enum",
+      "breakpoints": true
     }
   ]
 }
