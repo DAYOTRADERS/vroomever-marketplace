@@ -181,7 +181,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
+export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
     <div className="rounded-card border border-border bg-card">
       <table className="hidden w-full min-w-[640px] text-sm md:table">
@@ -255,7 +255,7 @@ export function AdminEntryPage() {
 
 type ProductStatus = "pending" | "active" | "hidden" | "rejected";
 const confirmDo = (msg: string) => typeof window !== "undefined" && window.confirm(msg);
-function useNotice() {
+export function useNotice() {
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const show = (error: { message: string } | null, okText: string) => setNotice(error ? { ok: false, text: error.message } : { ok: true, text: okText });
   const el = notice ? <p className={`mb-4 rounded-lg p-3 text-sm ${notice.ok ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>{notice.text}</p> : null;
