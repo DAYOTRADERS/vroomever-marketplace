@@ -325,6 +325,42 @@ export type Database = {
           },
         ]
       }
+      staff_activity: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string
+          actor_role: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id: string
+          actor_role: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string
+          actor_role?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       subcategory_prices: {
         Row: {
           annual_ksh: number
@@ -580,9 +616,10 @@ export type Database = {
         Returns: undefined
       }
       record_product_view: { Args: { _product_id: string }; Returns: undefined }
+      staff_role_of: { Args: { _uid: string }; Returns: string }
     }
     Enums: {
-      app_role: "admin" | "seller" | "buyer"
+      app_role: "admin" | "seller" | "buyer" | "customer_care" | "secretary"
       product_status: "pending" | "active" | "hidden" | "rejected"
     }
     CompositeTypes: {
@@ -711,7 +748,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "seller", "buyer"],
+      app_role: ["admin", "seller", "buyer", "customer_care", "secretary"],
       product_status: ["pending", "active", "hidden", "rejected"],
     },
   },

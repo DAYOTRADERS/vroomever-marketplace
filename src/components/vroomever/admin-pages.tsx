@@ -4,7 +4,7 @@ import { refreshCategories } from "@/lib/use-categories";
 import { categoryImageFor } from "@/data/category-images";
 import { useCategories } from "@/lib/use-categories";
 import {
-  BarChart3, Boxes, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
+  Activity, BarChart3, Boxes, KeyRound, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
@@ -31,6 +31,8 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin/payments", label: "Payments", icon: CircleDollarSign },
   { to: "/masteradmin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/masteradmin/audit", label: "Audit log", icon: FileClock },
+  { to: "/masteradmin/monitor", label: "Staff monitor", icon: Activity },
+  { to: "/masteradmin/staff", label: "Staff logins", icon: KeyRound },
   { to: "/masteradmin/diagnostics", label: "Diagnostics", icon: ShieldCheck },
   { to: "/masteradmin/settings", label: "Settings", icon: Settings },
 ];
@@ -181,7 +183,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
+export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
     <div className="rounded-card border border-border bg-card">
       <table className="hidden w-full min-w-[640px] text-sm md:table">
@@ -255,7 +257,7 @@ export function AdminEntryPage() {
 
 type ProductStatus = "pending" | "active" | "hidden" | "rejected";
 const confirmDo = (msg: string) => typeof window !== "undefined" && window.confirm(msg);
-function useNotice() {
+export function useNotice() {
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const show = (error: { message: string } | null, okText: string) => setNotice(error ? { ok: false, text: error.message } : { ok: true, text: okText });
   const el = notice ? <p className={`mb-4 rounded-lg p-3 text-sm ${notice.ok ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>{notice.text}</p> : null;

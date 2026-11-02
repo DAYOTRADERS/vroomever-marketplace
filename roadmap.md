@@ -9,6 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [x] Crescent V logo lockup, customer care and secretary desks, staff monitor and admin-created staff logins
 - [x] Blend unframed login/signup forms into artwork, add reduced-motion-safe transitions, and restore white search heading
 - [x] Use solid #0095FD search section and readable login/signup with dimensional patterned backgrounds only
 - [x] Apply navy and #0095FD theme and matching login background without other changes

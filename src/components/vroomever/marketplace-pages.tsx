@@ -430,6 +430,10 @@ export function AuthPage({
         await supabase.auth.signOut();
         throw new Error("This is an administrator account. Please sign in through the Master Admin login at /masteradmin/login.");
       }
+      if (actual === "customer_care" || actual === "secretary") {
+        await supabase.auth.signOut();
+        throw new Error(actual === "secretary" ? "This is a secretary login. Please sign in at /secretaryadmin." : "This is a customer care login. Please sign in at /customeradmin.");
+      }
       if (actual !== expected) {
         await supabase.auth.signOut();
         setRole(actual);

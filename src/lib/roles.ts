@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "buyer" | "seller" | "admin";
+export type AppRole = "buyer" | "seller" | "admin" | "customer_care" | "secretary";
 
 const rank = (roles: string[]): AppRole | null =>
   roles.includes("admin") ? "admin" : roles.includes("seller") ? "seller" : roles.length ? "buyer" : null;
