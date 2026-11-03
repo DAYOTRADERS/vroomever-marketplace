@@ -25,7 +25,6 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin/users", label: "Users", icon: UsersRound },
   { to: "/masteradmin/products", label: "Products", icon: Boxes },
   { to: "/masteradmin/categories", label: "Listing prices & categories", icon: Tags },
-  { to: "/masteradmin/subscriptions", label: "Subscriptions", icon: CircleDollarSign },
   { to: "/masteradmin/vip", label: "VIP ads", icon: Sparkles },
   { to: "/masteradmin/reports", label: "Reports", icon: Flag },
   { to: "/masteradmin/payments", label: "Payments", icon: CircleDollarSign },
@@ -458,55 +457,6 @@ function CategoryEditor({ c, onSave, onDelete }: { c: { slug: string; name: stri
       <Input value={name} onChange={(e) => setName(e.target.value)} className="font-semibold" />
       <textarea value={subs} onChange={(e) => setSubs(e.target.value)} className="mt-3 min-h-20 w-full rounded-md border border-border bg-background p-2 text-sm" />
       <div className="mt-3 flex gap-2"><Button size="sm" onClick={() => onSave(c.slug, name, subs)}>Save</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => onDelete(c.slug, c.name)}>Delete</Button></div>
-    </div>
-  );
-}
-
-export function AdminSubscriptions() {
-  const [pk, setPk] = useState<Array<{ id: string; name: string; cadence: string; price_ksh: number; listing_limit: number; popular: boolean }>>([]);
-  const [subs, setSubs] = useState<Array<{ id: string; user_id: string; package_id: string; status: string; started_at: string; expires_at: string | null }>>([]);
-  const n = useNotice();
-  const load = async () => {
-    const [a, b] = await Promise.all([supabase.from("subscription_packages").select("*").order("price_ksh"), supabase.from("subscriptions").select("*").order("created_at", { ascending: false })]);
-    setPk(a.data ?? []); setSubs(b.data ?? []);
-  };
-  useEffect(() => { void load(); }, []);
-  const savePkg = async (id: string, price: number, limit: number) => {
-    const { error } = await supabase.from("subscription_packages").update({ price_ksh: price, listing_limit: limit }).eq("id", id);
-    n.show(error, "Package updated."); if (!error) void load();
-  };
-  const setSub = async (id: string, status: string) => {
-    const { error } = await supabase.from("subscriptions").update({ status }).eq("id", id);
-    n.show(error, `Subscription ${status}.`); if (!error) void load();
-  };
-  const delSub = async (id: string) => {
-    if (!confirmDo("Delete this subscription?")) return;
-    const { error } = await supabase.from("subscriptions").delete().eq("id", id);
-    n.show(error, "Subscription deleted."); if (!error) void load();
-  };
-  return (
-    <AdminShell>
-      <PageTitle eyebrow="Revenue" title="Seller subscriptions" copy="Edit package prices and limits, and manage every seller plan." />
-      {n.el}
-      <div className="grid gap-4 md:grid-cols-3">{pk.map((p) => <PackageEditor key={p.id + p.price_ksh + p.listing_limit} p={p} onSave={savePkg} active={subs.filter((s) => s.package_id === p.id && s.status === "active").length} />)}</div>
-      <h2 className="mb-3 mt-10 font-display text-xl font-bold">All subscriptions</h2>
-      <Table head={["Seller ID", "Package", "Status", "Started", "Actions"]} rows={subs.map((s) => [
-        <small className="font-mono">{s.user_id.slice(0, 8)}…</small>, s.package_id, <Badge variant="outline">{s.status}</Badge>, new Date(s.started_at).toLocaleDateString(),
-        <span className="flex gap-2"><Button size="sm" variant="outline" onClick={() => void setSub(s.id, s.status === "active" ? "cancelled" : "active")}>{s.status === "active" ? "Cancel" : "Activate"}</Button><Button size="sm" variant="ghost" className="text-destructive" onClick={() => void delSub(s.id)}>Delete</Button></span>,
-      ])} />
-      {!subs.length && <p className="mt-3 text-sm text-muted-foreground">No subscriptions yet.</p>}
-    </AdminShell>
-  );
-}
-function PackageEditor({ p, onSave, active }: { p: { id: string; name: string; cadence: string; price_ksh: number; listing_limit: number }; onSave: (id: string, price: number, limit: number) => void; active: number }) {
-  const [price, setPrice] = useState(String(p.price_ksh));
-  const [limit, setLimit] = useState(String(p.listing_limit));
-  return (
-    <div className="rounded-card border border-border bg-card p-5">
-      <strong className="font-display text-lg">{p.name}</strong> <small className="text-muted-foreground">/ {p.cadence} · {active} active</small>
-      <label className="mt-3 block text-xs font-semibold">Price (KSh)<Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="mt-1" /></label>
-      <label className="mt-3 block text-xs font-semibold">Listing limit<Input type="number" value={limit} onChange={(e) => setLimit(e.target.value)} className="mt-1" /></label>
-      <Button size="sm" className="mt-3" onClick={() => onSave(p.id, Number(price), Number(limit))}>Save</Button>
     </div>
   );
 }
