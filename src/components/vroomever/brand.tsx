@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import logo from "@/assets/vrumex-logo-arched.webp";
+import logo from "@/assets/vrumex-logo-flat.webp";
 import { cn } from "@/lib/utils";
 
 /** Single VRUMEX logo: arched 3D varsity lettering with the tagline beneath. */
