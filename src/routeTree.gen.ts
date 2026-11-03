@@ -42,7 +42,6 @@ import { Route as MasteradminProductsRouteImport } from './routes/masteradmin.pr
 import { Route as MasteradminReportsRouteImport } from './routes/masteradmin.reports'
 import { Route as MasteradminSettingsRouteImport } from './routes/masteradmin.settings'
 import { Route as MasteradminStaffRouteImport } from './routes/masteradmin.staff'
-import { Route as MasteradminSubscriptionsRouteImport } from './routes/masteradmin.subscriptions'
 import { Route as MasteradminUsersRouteImport } from './routes/masteradmin.users'
 import { Route as MasteradminVipRouteImport } from './routes/masteradmin.vip'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -218,12 +217,6 @@ const MasteradminStaffRoute = MasteradminStaffRouteImport.update({
   path: '/masteradmin/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MasteradminSubscriptionsRoute =
-  MasteradminSubscriptionsRouteImport.update({
-    id: '/masteradmin/subscriptions',
-    path: '/masteradmin/subscriptions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const MasteradminUsersRoute = MasteradminUsersRouteImport.update({
   id: '/masteradmin/users',
   path: '/masteradmin/users',
@@ -304,7 +297,6 @@ export interface FileRoutesByFullPath {
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
   '/masteradmin/staff': typeof MasteradminStaffRoute
-  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
   '/product/$id': typeof ProductIdRoute
@@ -349,7 +341,6 @@ export interface FileRoutesByTo {
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
   '/masteradmin/staff': typeof MasteradminStaffRoute
-  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
   '/product/$id': typeof ProductIdRoute
@@ -395,7 +386,6 @@ export interface FileRoutesById {
   '/masteradmin/reports': typeof MasteradminReportsRoute
   '/masteradmin/settings': typeof MasteradminSettingsRoute
   '/masteradmin/staff': typeof MasteradminStaffRoute
-  '/masteradmin/subscriptions': typeof MasteradminSubscriptionsRoute
   '/masteradmin/users': typeof MasteradminUsersRoute
   '/masteradmin/vip': typeof MasteradminVipRoute
   '/product/$id': typeof ProductIdRoute
@@ -442,7 +432,6 @@ export interface FileRouteTypes {
     | '/masteradmin/reports'
     | '/masteradmin/settings'
     | '/masteradmin/staff'
-    | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
     | '/product/$id'
@@ -487,7 +476,6 @@ export interface FileRouteTypes {
     | '/masteradmin/reports'
     | '/masteradmin/settings'
     | '/masteradmin/staff'
-    | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
     | '/product/$id'
@@ -532,7 +520,6 @@ export interface FileRouteTypes {
     | '/masteradmin/reports'
     | '/masteradmin/settings'
     | '/masteradmin/staff'
-    | '/masteradmin/subscriptions'
     | '/masteradmin/users'
     | '/masteradmin/vip'
     | '/product/$id'
@@ -577,7 +564,6 @@ export interface RootRouteChildren {
   MasteradminReportsRoute: typeof MasteradminReportsRoute
   MasteradminSettingsRoute: typeof MasteradminSettingsRoute
   MasteradminStaffRoute: typeof MasteradminStaffRoute
-  MasteradminSubscriptionsRoute: typeof MasteradminSubscriptionsRoute
   MasteradminUsersRoute: typeof MasteradminUsersRoute
   MasteradminVipRoute: typeof MasteradminVipRoute
   ProductIdRoute: typeof ProductIdRoute
@@ -823,13 +809,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasteradminStaffRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/masteradmin/subscriptions': {
-      id: '/masteradmin/subscriptions'
-      path: '/masteradmin/subscriptions'
-      fullPath: '/masteradmin/subscriptions'
-      preLoaderRoute: typeof MasteradminSubscriptionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/masteradmin/users': {
       id: '/masteradmin/users'
       path: '/masteradmin/users'
@@ -938,7 +917,6 @@ const rootRouteChildren: RootRouteChildren = {
   MasteradminReportsRoute: MasteradminReportsRoute,
   MasteradminSettingsRoute: MasteradminSettingsRoute,
   MasteradminStaffRoute: MasteradminStaffRoute,
-  MasteradminSubscriptionsRoute: MasteradminSubscriptionsRoute,
   MasteradminUsersRoute: MasteradminUsersRoute,
   MasteradminVipRoute: MasteradminVipRoute,
   ProductIdRoute: ProductIdRoute,
