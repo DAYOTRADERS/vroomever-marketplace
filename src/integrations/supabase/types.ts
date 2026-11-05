@@ -367,18 +367,21 @@ export type Database = {
           category_slug: string
           monthly_ksh: number
           subcategory: string
+          weekly_ksh: number
         }
         Insert: {
           annual_ksh?: number
           category_slug: string
           monthly_ksh?: number
           subcategory: string
+          weekly_ksh?: number
         }
         Update: {
           annual_ksh?: number
           category_slug?: string
           monthly_ksh?: number
           subcategory?: string
+          weekly_ksh?: number
         }
         Relationships: [
           {

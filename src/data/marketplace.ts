@@ -58,11 +58,6 @@ export const products = [
   { id: "school-pack", title: "Complete School & Office Starter Pack", price: 8500, location: "Thika, Kiambu", condition: "Brand New", seller: "Stationery House", category: "office-school", image: land, vip: false, verified: true, views: 201 },
 ];
 
-export const packages = [
-  { name: "Bronze", cadence: "monthly", price: 1500, limit: 15, description: "Start selling with the essentials." },
-  { name: "Silver", cadence: "monthly", price: 3500, limit: 50, description: "Built for growing businesses.", popular: true },
-  { name: "Gold", cadence: "yearly", price: 24000, limit: 250, description: "Maximum reach for established stores." },
-];
 export const vipOptions = [
   { duration: "3 days", price: 500 }, { duration: "7 days", price: 950 }, { duration: "14 days", price: 1700 }, { duration: "30 days", price: 2900 },
 ];

@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
-import authPattern from "@/assets/auth-pattern.jpg";
 import { PageTitle } from "./marketplace-pages";
 import { categories, formatKsh, vipOptions } from "@/data/marketplace";
 
@@ -150,7 +149,7 @@ export function AdminLoginPage() {
   };
   return (
     <div className="auth-backdrop relative isolate grid min-h-screen place-items-center overflow-hidden px-5 text-surface-foreground">
-      <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      
       <form onSubmit={submit} className="auth-form-surface w-full max-w-sm rounded-card border p-8">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>
@@ -437,7 +436,7 @@ export function AdminCategories() {
   return (
     <AdminShell>
       <PageTitle title="Subcategory listing prices" />
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">{liveCategories.map(c=><Button key={c.slug} asChild variant="outline" className="h-auto min-w-0 justify-start whitespace-normal p-3"><Link to="/masteradmin/pricing/$category" params={{category:c.slug}}>{categoryImageFor(c)&&<img src={categoryImageFor(c)} alt="" width={32} height={32} className="size-8 shrink-0 object-contain"/>}<span className="min-w-0 text-left"><strong className="block text-sm">{c.name}</strong><small>{c.subcategories.length} subcategories · Monthly / annual</small></span></Link></Button>)}</div>
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">{liveCategories.map(c=><Button key={c.slug} asChild variant="outline" className="h-auto min-w-0 justify-start whitespace-normal p-3"><Link to="/masteradmin/pricing/$category" params={{category:c.slug}}>{categoryImageFor(c)&&<img src={categoryImageFor(c)} alt="" width={32} height={32} className="size-8 shrink-0 object-contain"/>}<span className="min-w-0 text-left"><strong className="block text-sm">{c.name}</strong><small>{c.subcategories.length} subcategories · Weekly / monthly / yearly</small></span></Link></Button>)}</div>
       <PageTitle title="Categories & subcategories" />
       {n.el}
       <form onSubmit={add} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-5 md:grid-cols-[1fr_2fr_auto]">
