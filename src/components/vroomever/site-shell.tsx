@@ -1,8 +1,8 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { ArrowLeft, ChevronUp, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
+import { ArrowLeft, Heart, Home, LifeBuoy, LayoutDashboard, LayoutGrid, Menu, Moon, Plus, Search, Store, Sun, UserRound, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow, type AppRole } from "@/lib/roles";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Brand } from "./brand";
 import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,9 @@ type DashboardMode = "buyer" | "seller";
 
 export function SiteShell({ children, dashboardMode: requestedMode, hideBackButton = false }: { children: ReactNode; dashboardMode?: DashboardMode; hideBackButton?: boolean }) {
   const [menu, setMenu] = useState(false);
-  const [footerOpen, setFooterOpen] = useState(false);
-  const footerRef = useRef<HTMLElement>(null);
   const [dark, setDark] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
   const navigate = useNavigate();
-  useEffect(() => { if (!footerOpen || window.matchMedia("(max-width: 639px)").matches) return; const timer = setTimeout(() => footerRef.current?.scrollIntoView({behavior:"smooth",block:"end"}), 450); return () => clearTimeout(timer); }, [footerOpen]);
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
@@ -79,19 +76,12 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
       </aside>
       <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
-    {!dashboardMode && footerOpen && <div className="h-16 sm:hidden"/>}
-    {!dashboardMode && <footer ref={footerRef} className={`border-t border-border bg-surface-strong text-surface-foreground ${footerOpen ? "fixed inset-x-0 bottom-0 z-[60] max-h-[calc(100svh-5rem)] overflow-y-auto shadow-elevated sm:static sm:max-h-none sm:overflow-visible" : ""}`}>
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5">
-        <Brand inverted />
-        <Button type="button" variant="ghost" size="icon" onClick={() => setFooterOpen(!footerOpen)} aria-label={footerOpen ? "Hide footer" : "Show footer"} aria-expanded={footerOpen} className="text-surface-foreground"><ChevronUp className={`size-5 transition ${footerOpen ? "rotate-180" : ""}`} /></Button>
+    {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
+      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-x-6 gap-y-3 px-4 py-4 sm:px-5">
+        <div className="min-w-0"><Brand inverted /><p className="mt-2 max-w-xs text-xs text-surface-muted">Kenya’s trusted marketplace. Every listing is reviewed before it goes live. Payments: M-Pesa and card.</p></div>
+        <nav aria-label="Help and legal" className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs text-surface-muted sm:grid-cols-3"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></nav>
       </div>
-      <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${footerOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} aria-hidden={!footerOpen}><div className="min-h-0 overflow-hidden border-t border-white/10">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-6 sm:px-5 sm:grid-cols-2 md:grid-cols-3">
-          <div className="sm:col-span-2"><strong className="text-sm">About VRUMEX</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
-          <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
-        </div>
-        <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
-      </div></div>
+      <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-2 text-[11px] text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
     </footer>}
   </div>;
 }
