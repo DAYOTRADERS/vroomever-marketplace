@@ -36,7 +36,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { lovable } from "@/integrations/lovable/index";
 import { MarketHome } from "./market-home";
 import { useListingPrices } from "@/lib/use-listing-prices";
-import type { ListingCadence } from "@/lib/listing-pricing";
+import { cadenceLabel, feeFor, type ListingCadence } from "@/lib/listing-pricing";
 import { countryCodes, buildPhone, toIntl, whatsappLink, callLink } from "@/lib/phone";
 
 type DbProduct = { id:string; title:string; price_ksh:number; location:string|null; condition:string|null; images:string[]; is_vip:boolean; category_slug:string; seller_id:string; views:number; description?:string|null; subcategory?:string|null; video_url?:string|null };
@@ -741,7 +741,7 @@ export function SellerDashboardPage() {
  {!d?<p className="text-sm text-muted-foreground">Loading your numbers…</p>:<>
  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{stats.map(([Icon,n,l])=><div className="rounded-card border border-border bg-card p-5 shadow-card" key={l}><Icon className="text-primary"/><strong className="mt-4 block font-display text-3xl">{n}</strong><span className="text-sm text-muted-foreground">{l}</span></div>)}</div>
  <p className="mt-3 text-xs text-muted-foreground">{d.total} listing{d.total===1?"":"s"} in total · {d.pending} awaiting admin approval · {d.rejected} rejected{d.rejected?" — see the reasons in Your listings":""}</p>
- <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_.6fr]"><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Enquiries per month</h2>{d.enquiries===0?<p className="mt-8 text-sm text-muted-foreground">No enquiries yet. Buyers tapping WhatsApp or Call on your listings will show here.</p>:<div className="mt-8 grid h-56 grid-cols-12 items-end gap-1.5 sm:gap-3">{d.months.map((h,i)=><div key={i} className="flex h-full flex-col justify-end text-center"><div className="rounded-t bg-primary/70" style={{height:`${(h/max)*85}%`}} title={`${h} enquiries`}/><small className="mt-1 text-[10px] text-muted-foreground">{monthLabel(i)}</small></div>)}</div>}</div>
+ <div className="mt-8 grid gap-6"><div className="rounded-card border border-border bg-card p-6"><h2 className="font-display text-xl font-bold">Enquiries per month</h2>{d.enquiries===0?<p className="mt-8 text-sm text-muted-foreground">No enquiries yet. Buyers tapping WhatsApp or Call on your listings will show here.</p>:<div className="mt-8 grid h-56 grid-cols-12 items-end gap-1.5 sm:gap-3">{d.months.map((h,i)=><div key={i} className="flex h-full flex-col justify-end text-center"><div className="rounded-t bg-primary/70" style={{height:`${(h/max)*85}%`}} title={`${h} enquiries`}/><small className="mt-1 text-[10px] text-muted-foreground">{monthLabel(i)}</small></div>)}</div>}</div>
 </div></>}
  </div></SiteShell>;
 }

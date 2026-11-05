@@ -36,7 +36,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const canSell = role === "seller" || role === "admin";
   const dash = role === "seller" || role === "admin" ? "/seller/dashboard" : "/dashboard";
   const dashboardLinks = dashboardMode === "seller"
-    ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/subscriptions", "Packages", LayoutGrid], ["/support", "Contact support", LifeBuoy]] as const
+    ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
   return <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
