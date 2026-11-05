@@ -29,7 +29,6 @@ import { makesFor } from "@/data/car-makes";
 import { useMarketFilters, setMarketFilters, activeFilterCount, type MarketFilters } from "@/lib/market-filters";
 import type { CardProduct } from "@/types/marketplace";
 import hero from "@/assets/marketplace-hero.jpg";
-import authPattern from "@/assets/auth-pattern.jpg";
 import { mediaUrls, uploadListingMedia, imageToDataUrl } from "@/lib/product-media";
 import { generateListingDescription } from "@/lib/describe.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -482,7 +481,7 @@ export function AuthPage({
       </div>
 
       <div className="relative isolate flex items-center justify-center overflow-hidden border-brand-bright/20 px-5 py-12 lg:border-l">
-        <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+        
         <form onSubmit={submit} className="auth-form-surface w-full max-w-md rounded-lg border p-5 sm:p-7">
           <div className="lg:hidden">
             <Brand inverted />

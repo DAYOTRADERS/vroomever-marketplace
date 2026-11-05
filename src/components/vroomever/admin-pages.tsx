@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
-import authPattern from "@/assets/auth-pattern.jpg";
 import { PageTitle } from "./marketplace-pages";
 import { categories, formatKsh, vipOptions } from "@/data/marketplace";
 
@@ -150,7 +149,7 @@ export function AdminLoginPage() {
   };
   return (
     <div className="auth-backdrop relative isolate grid min-h-screen place-items-center overflow-hidden px-5 text-surface-foreground">
-      <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      
       <form onSubmit={submit} className="auth-form-surface w-full max-w-sm rounded-card border p-8">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">Master admin</h1>

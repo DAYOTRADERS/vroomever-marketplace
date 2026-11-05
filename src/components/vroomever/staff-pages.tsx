@@ -13,7 +13,6 @@ import { Brand } from "./brand";
 import { ListingMedia } from "./listing-media";
 import { PageTitle } from "./marketplace-pages";
 import { AdminShell, Table, useNotice } from "./admin-pages";
-import authPattern from "@/assets/auth-pattern.jpg";
 import { formatKsh } from "@/data/marketplace";
 
 const logActivity = async (role: StaffRole, action: string) => {
@@ -58,7 +57,7 @@ function StaffShell({ role, children }: { role: StaffRole; children: ReactNode }
   if (state === "checking") return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking access…</p></div>;
   if (state === "login") return (
     <div className="auth-backdrop relative isolate grid min-h-screen place-items-center overflow-hidden px-5 text-surface-foreground">
-      <img src={authPattern} alt="" aria-hidden="true" width={1536} height={1024} className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      
       <form onSubmit={submit} className="auth-form-surface w-full max-w-sm rounded-card border p-6 sm:p-8">
         <Brand inverted />
         <h1 className="mt-8 font-display text-3xl font-bold">{staffLabel[role]}</h1>
