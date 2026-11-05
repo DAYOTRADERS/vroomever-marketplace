@@ -2,7 +2,7 @@
 
 - [x] Stage 1: Brand, design system, shared components, and centralized configuration
 - [x] Stage 1: Marketplace, authentication, buyer, and seller pages
-- [x] Stage 1: Product posting, subscriptions, VIP, and simulated payments
+- [x] Stage 1: Product posting, VIP, and simulated payments
 - [x] Stage 1: Master admin control center and moderation pages
 - [x] Stage 1: Legal pages, metadata, responsive verification, and preview QA
 - [x] Stage 2: Backend-ready models, services, authentication, storage, permissions, and RLS architecture
@@ -41,3 +41,6 @@
 - [x] Buyer flow test: signup -> confirm -> login -> support -> admin inbox
 - [ ] Emails from vrumever.vercel.app — blocked: needs a domain the owner controls
 - [ ] Google/Apple on Vercel — blocked: only works on Lovable-hosted domains
+- [x] Plain navy sign-in pages with white text, always-visible compact footer, refreshed tab icon
+- [x] Weekly/monthly/yearly listing plans; Bronze/Silver/Gold packages page removed
+- [ ] Facebook sign-in — not supported by Lovable Cloud sign-in
