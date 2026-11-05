@@ -437,7 +437,7 @@ export function AdminCategories() {
   return (
     <AdminShell>
       <PageTitle title="Subcategory listing prices" />
-      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">{liveCategories.map(c=><Button key={c.slug} asChild variant="outline" className="h-auto min-w-0 justify-start whitespace-normal p-3"><Link to="/masteradmin/pricing/$category" params={{category:c.slug}}>{categoryImageFor(c)&&<img src={categoryImageFor(c)} alt="" width={32} height={32} className="size-8 shrink-0 object-contain"/>}<span className="min-w-0 text-left"><strong className="block text-sm">{c.name}</strong><small>{c.subcategories.length} subcategories · Monthly / annual</small></span></Link></Button>)}</div>
+      <div className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">{liveCategories.map(c=><Button key={c.slug} asChild variant="outline" className="h-auto min-w-0 justify-start whitespace-normal p-3"><Link to="/masteradmin/pricing/$category" params={{category:c.slug}}>{categoryImageFor(c)&&<img src={categoryImageFor(c)} alt="" width={32} height={32} className="size-8 shrink-0 object-contain"/>}<span className="min-w-0 text-left"><strong className="block text-sm">{c.name}</strong><small>{c.subcategories.length} subcategories · Weekly / monthly / yearly</small></span></Link></Button>)}</div>
       <PageTitle title="Categories & subcategories" />
       {n.el}
       <form onSubmit={add} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-5 md:grid-cols-[1fr_2fr_auto]">
