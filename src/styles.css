@@ -187,17 +187,18 @@
   --primary-foreground: var(--brand-ink);
   --background: var(--auth-field);
   --foreground: var(--surface-foreground);
-  --muted-foreground: var(--surface-muted);
+  --muted-foreground: var(--surface-foreground);
+  --surface-muted: var(--surface-foreground);
+  --card-foreground: var(--surface-foreground);
+  --secondary-foreground: var(--surface-foreground);
   --border: var(--auth-border);
   --input: var(--auth-border);
   --accent: var(--auth-field);
   --accent-foreground: var(--surface-foreground);
   --destructive: var(--auth-error);
+  color: var(--surface-foreground);
   background-color: var(--surface-strong);
-  background-image:
-    linear-gradient(125deg, transparent 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 42%, color-mix(in oklab, var(--brand-bright) 9%, transparent) 43%, transparent 43%),
-    linear-gradient(155deg, transparent 68%, color-mix(in oklab, var(--brand-bright) 6%, transparent) 68%),
-    linear-gradient(110deg, var(--surface-strong), color-mix(in oklab, var(--surface-strong) 85%, var(--brand-bright)));
+  background-image: linear-gradient(160deg, var(--surface-strong), color-mix(in oklab, var(--surface-strong) 88%, var(--brand-bright)));
 }
 
 @utility auth-form-surface {
