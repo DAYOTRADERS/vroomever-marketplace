@@ -4,7 +4,7 @@ import { refreshCategories } from "@/lib/use-categories";
 import { categoryImageFor } from "@/data/category-images";
 import { useCategories } from "@/lib/use-categories";
 import {
-  Activity, BarChart3, Boxes, KeyRound, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
+  Activity, BarChart3, Boxes, KeyRound, LockKeyhole, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
 import { PageTitle } from "./marketplace-pages";
@@ -31,6 +32,7 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin/audit", label: "Audit log", icon: FileClock },
   { to: "/masteradmin/monitor", label: "Staff monitor", icon: Activity },
   { to: "/masteradmin/staff", label: "Staff logins", icon: KeyRound },
+  { to: "/masteradmin/passwords", label: "Login passwords", icon: LockKeyhole },
   { to: "/masteradmin/diagnostics", label: "Diagnostics", icon: ShieldCheck },
   { to: "/masteradmin/settings", label: "Settings", icon: Settings },
 ];
@@ -161,7 +163,7 @@ export function AdminLoginPage() {
         </label>
         <label className="mt-4 block text-sm">
           Password
-          <Input name="password" required type="password" autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" />
+          <PasswordInput name="password" required autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" />
         </label>
         <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
@@ -700,7 +702,7 @@ export function AdminDatabasePage() {
           </label>
           <label className="mt-4 block text-sm">
             Password
-            <Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" />
+            <PasswordInput required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" />
           </label>
           <Button className="mt-6 w-full" size="lg" type="submit" disabled={signingIn}>
             {signingIn ? "Signing in…" : "Open admin database"}

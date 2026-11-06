@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Brand } from "@/components/vroomever/brand";
 
 export const Route = createFileRoute("/reset-password")({
@@ -97,8 +98,8 @@ function ResetPasswordPage() {
           </p>
         ) : (
           <form onSubmit={submit} className="mt-6 grid gap-3">
-            <label className="text-sm">New password<Input name="password" type="password" required minLength={8} autoComplete="new-password" className="mt-2 h-11 bg-background text-foreground" /></label>
-            <label className="text-sm">Confirm new password<Input name="confirm" type="password" required minLength={8} autoComplete="new-password" className="mt-2 h-11 bg-background text-foreground" /></label>
+            <label className="text-sm">New password<PasswordInput name="password" required minLength={8} autoComplete="new-password" className="mt-2 h-11 bg-background text-foreground" /></label>
+            <label className="text-sm">Confirm new password<PasswordInput name="confirm" required minLength={8} autoComplete="new-password" className="mt-2 h-11 bg-background text-foreground" /></label>
             {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save new password"}</Button>
           </form>
