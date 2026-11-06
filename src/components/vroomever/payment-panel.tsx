@@ -24,9 +24,9 @@ const MastercardLogo = () => <svg viewBox="0 0 48 30" className="h-7" aria-label
 const AmexLogo = () => <svg viewBox="0 0 48 30" className="h-7" aria-label="American Express"><rect width="48" height="30" rx="3" fill="#2E77BC" /><text x="24" y="13" textAnchor="middle" fontFamily="Arial" fontWeight="900" fontSize="8" fill="#fff">AMERICAN</text><text x="24" y="23" textAnchor="middle" fontFamily="Arial" fontWeight="900" fontSize="8" fill="#fff">EXPRESS</text></svg>;
 
 const detectBrand = (n: string): CardBrand => /^4/.test(n) ? "visa" : /^(5[1-5]|2[2-7])/.test(n) ? "mastercard" : /^3[47]/.test(n) ? "amex" : "unknown";
-const luhn = (n: string) => { let sum = 0, alt = false; for (let i = n.length - 1; i >= 0; i--) { let d = +n[i]; if (alt) { d *= 2; if (d > 9) d -= 9; } sum += d; alt = !alt; } return n.length >= 13 && sum % 10 === 0; };
+const luhn = (n: string) => { let sum = 0, alt = false; for (let i = n.length - 1; i >= 0; i--) { let d = Number(n[i] ?? 0); if (alt) { d *= 2; if (d > 9) d -= 9; } sum += d; alt = !alt; } return n.length >= 13 && sum % 10 === 0; };
 const formatNumber = (raw: string, brand: CardBrand) => { const d = raw.replace(/\D/g, "").slice(0, brand === "amex" ? 15 : 16); return brand === "amex" ? d.replace(/^(\d{0,4})(\d{0,6})(\d{0,5}).*/, (_, a, b, c) => [a, b, c].filter(Boolean).join(" ")) : d.replace(/(\d{4})(?=\d)/g, "$1 "); };
-const validExpiry = (v: string) => { const m = /^(\d{2})\/(\d{2})$/.exec(v); if (!m) return false; const mm = +m[1], yy = 2000 + +m[2]; if (mm < 1 || mm > 12) return false; const now = new Date(); return yy > now.getFullYear() || (yy === now.getFullYear() && mm >= now.getMonth() + 1); };
+const validExpiry = (v: string) => { const m = /^(\d{2})\/(\d{2})$/.exec(v); if (!m) return false; const mm = Number(m[1]), yy = 2000 + Number(m[2]); if (mm < 1 || mm > 12) return false; const now = new Date(); return yy > now.getFullYear() || (yy === now.getFullYear() && mm >= now.getMonth() + 1); };
 
 export function PaymentPanel({ onResult, amountLabel, title }: { onResult?: (success: boolean, method: Method) => void; amountLabel?: string; title?: string } = {}) {
   const [tab, setTab] = useState<Method>("mpesa");
