@@ -77,11 +77,11 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
       <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
     {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-start justify-between gap-x-6 gap-y-3 px-4 py-4 sm:px-5">
-        <div className="min-w-0"><Brand inverted /><p className="mt-2 max-w-xs text-xs text-surface-muted">Kenya’s trusted marketplace. Every listing is reviewed before it goes live. Payments: M-Pesa and card.</p></div>
-        <nav aria-label="Help and legal" className="grid grid-cols-2 gap-x-5 gap-y-1.5 text-xs text-surface-muted sm:grid-cols-3"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></nav>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-8 sm:grid-cols-2 sm:px-5 md:grid-cols-3">
+        <div className="sm:col-span-2"><Brand inverted /><strong className="mt-5 block text-sm">About VRUMEX</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
+        <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
       </div>
-      <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-2 text-[11px] text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
+      <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
     </footer>}
   </div>;
 }
