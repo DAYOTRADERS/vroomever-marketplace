@@ -65,3 +65,36 @@ export const deleteStaffAccount = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/** Admin and staff logins, for the admin password reset page. */
+export const listLoginAccounts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    const { data: roles } = await admin.from("user_roles").select("user_id,role,created_at").in("role", ["admin", ...STAFF_ROLES]);
+    const out: { id: string; email: string; fullName: string; role: string; lastSignIn: string | null; isMe: boolean }[] = [];
+    for (const r of roles ?? []) {
+      const { data: u } = await admin.auth.admin.getUserById(r.user_id);
+      out.push({ id: r.user_id, email: u?.user?.email ?? "", fullName: String(u?.user?.user_metadata?.full_name ?? ""), role: r.role, lastSignIn: u?.user?.last_sign_in_at ?? null, isMe: r.user_id === context.userId });
+    }
+    return out.sort((a, b) => (a.role === "admin" ? -1 : 1) - (b.role === "admin" ? -1 : 1) || a.email.localeCompare(b.email));
+  });
+
+export const resetLoginPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ id: z.string().uuid(), password: z.string().min(8).max(128) }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const admin = supabaseAdmin as any;
+    const { data: roles } = await admin.from("user_roles").select("role").eq("user_id", data.id);
+    const list = (roles ?? []).map((r: { role: string }) => r.role);
+    const allowed = ["admin", ...STAFF_ROLES] as string[];
+    if (!list.length || !list.every((r: string) => allowed.includes(r))) throw new Error("Only admin and staff passwords can be reset here.");
+    const { error } = await admin.auth.admin.updateUserById(data.id, { password: data.password });
+    if (error) throw new Error(error.message);
+    await admin.rpc("log_admin_action", { _action: "reset login password", _table: "auth.users", _target: data.id, _details: { role: list[0] } }).then(() => null, () => null);
+    return { ok: true };
+  });
