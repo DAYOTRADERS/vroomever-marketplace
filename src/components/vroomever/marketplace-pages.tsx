@@ -303,7 +303,7 @@ export function AuthPage({
   };
 
   const sendReset = async (email: string) => {
-    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/reset-password?role=${role}` }));
+    const { error: e } = await withTimeout(supabase.auth.resetPasswordForEmail(email, { redirectTo: `${/(lovable\.app|lovableproject\.com|localhost|127\.0\.0\.1)/.test(window.location.hostname) ? "https://vrumex.com" : window.location.origin}/reset-password?role=${role}` }));
     if (e && /rate limit/i.test(e.message)) throw e;
     setInfo(`If an account exists for ${email}, a password reset link is on its way. Check your inbox and spam folder.`);
     setCooldown(60);
