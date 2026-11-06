@@ -5,7 +5,7 @@ import { LogOut, ShieldCheck, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { canOpenStaffPage, staffHome, staffLabel, type StaffRole } from "@/lib/staff";
-import { createStaffAccount, deleteStaffAccount, listStaffAccounts } from "@/lib/staff-accounts.functions";
+import { createStaffAccount, deleteStaffAccount, listLoginAccounts, listStaffAccounts, resetLoginPassword } from "@/lib/staff-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -265,6 +265,52 @@ export function AdminStaffLogins() {
         <Button type="submit" disabled={busy} className="sm:col-span-2 sm:w-fit">{busy ? "Creating…" : "Create login"}</Button>
       </form>
       <Table head={["Name", "Email", "Role", "Sign-in page", "Created", ""]} rows={rows.map((r) => [r.fullName || "—", r.email, staffLabel[r.role as StaffRole] ?? r.role, staffHome[r.role as StaffRole] ?? "—", new Date(r.createdAt).toLocaleDateString(), <Button size="sm" variant="ghost" className="text-destructive" onClick={() => void del(r.id, r.email)} aria-label={`Remove ${r.email}`}><Trash2 /></Button>])} />
+    </AdminShell>
+  );
+}
+
+/* ---------- Admin: reset admin & staff passwords ---------- */
+export function AdminLoginPasswords() {
+  const list = useServerFn(listLoginAccounts);
+  const reset = useServerFn(resetLoginPassword);
+  const [rows, setRows] = useState<Awaited<ReturnType<typeof listLoginAccounts>>>([]);
+  const [target, setTarget] = useState<{ id: string; email: string } | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const n = useNotice();
+  useEffect(() => { list().then(setRows).catch((e: Error) => n.show(e, "")); }, []);
+  const roleName = (r: string) => (r === "admin" ? "Administrator" : staffLabel[r as StaffRole] ?? r);
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); if (!target) return;
+    const f = new FormData(e.currentTarget);
+    const pw = String(f.get("password") ?? "");
+    if (pw.length < 8) return setError("Password must be at least 8 characters.");
+    if (pw !== String(f.get("confirm") ?? "")) return setError("The two passwords don't match.");
+    setBusy(true); setError("");
+    try {
+      await reset({ data: { id: target.id, password: pw } });
+      n.show(null, `Password updated for ${target.email}. Share it with them securely.`);
+      setTarget(null);
+    } catch (err) { setError((err as Error).message); }
+    setBusy(false);
+  };
+  return (
+    <AdminShell>
+      <PageTitle eyebrow="Security" title="Login passwords" copy="Reset passwords for administrator, customer care and secretary logins. Buyers and sellers reset their own password by email." />
+      {n.el}
+      {target && (
+        <form onSubmit={submit} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-4 shadow-card sm:grid-cols-2 sm:p-5">
+          <p className="text-sm font-semibold sm:col-span-2">New password for {target.email}</p>
+          <label className="text-sm">New password<PasswordInput name="password" required minLength={8} maxLength={128} autoComplete="new-password" className="mt-1" /></label>
+          <label className="text-sm">Confirm new password<PasswordInput name="confirm" required minLength={8} maxLength={128} autoComplete="new-password" className="mt-1" /></label>
+          {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive sm:col-span-2">{error}</p>}
+          <div className="flex gap-2 sm:col-span-2">
+            <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save password"}</Button>
+            <Button type="button" variant="ghost" onClick={() => { setTarget(null); setError(""); }}>Cancel</Button>
+          </div>
+        </form>
+      )}
+      <Table head={["Name", "Email", "Role", "Last sign-in", ""]} rows={rows.map((r) => [r.fullName || "—", r.email + (r.isMe ? " (you)" : ""), roleName(r.role), r.lastSignIn ? new Date(r.lastSignIn).toLocaleString() : "Never", <Button size="sm" variant="outline" onClick={() => { setTarget({ id: r.id, email: r.email }); setError(""); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Reset password</Button>])} />
     </AdminShell>
   );
 }

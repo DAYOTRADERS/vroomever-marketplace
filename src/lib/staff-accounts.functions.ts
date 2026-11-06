@@ -95,6 +95,6 @@ export const resetLoginPassword = createServerFn({ method: "POST" })
     if (!list.length || !list.every((r: string) => allowed.includes(r))) throw new Error("Only admin and staff passwords can be reset here.");
     const { error } = await admin.auth.admin.updateUserById(data.id, { password: data.password });
     if (error) throw new Error(error.message);
-    await admin.rpc("log_admin_action", { _action: "reset login password", _table: "auth.users", _target: data.id, _details: { role: list[0] } }).then(() => null, () => null);
+    await admin.from("audit_logs").insert({ actor_id: context.userId, actor_email: (context.claims as any)?.email ?? null, action: "reset login password", target_table: "auth.users", target_id: data.id, details: { role: list[0] } }).then(() => null, () => null);
     return { ok: true };
   });

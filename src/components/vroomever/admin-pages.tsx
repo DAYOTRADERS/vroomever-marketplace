@@ -4,7 +4,7 @@ import { refreshCategories } from "@/lib/use-categories";
 import { categoryImageFor } from "@/data/category-images";
 import { useCategories } from "@/lib/use-categories";
 import {
-  Activity, BarChart3, Boxes, KeyRound, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
+  Activity, BarChart3, Boxes, KeyRound, LockKeyhole, CircleDollarSign, FileClock, Flag, LayoutDashboard, LogOut,
   Menu, Settings, ShieldCheck, Sparkles, Tags, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
@@ -32,6 +32,7 @@ const adminNav: { to: string; label: string; icon: LucideIcon }[] = [
   { to: "/masteradmin/audit", label: "Audit log", icon: FileClock },
   { to: "/masteradmin/monitor", label: "Staff monitor", icon: Activity },
   { to: "/masteradmin/staff", label: "Staff logins", icon: KeyRound },
+  { to: "/masteradmin/passwords", label: "Login passwords", icon: LockKeyhole },
   { to: "/masteradmin/diagnostics", label: "Diagnostics", icon: ShieldCheck },
   { to: "/masteradmin/settings", label: "Settings", icon: Settings },
 ];
