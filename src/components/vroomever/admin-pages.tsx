@@ -14,6 +14,7 @@ import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
 import { PageTitle } from "./marketplace-pages";
@@ -161,7 +162,7 @@ export function AdminLoginPage() {
         </label>
         <label className="mt-4 block text-sm">
           Password
-          <Input name="password" required type="password" autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" />
+          <PasswordInput name="password" required autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" />
         </label>
         <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
@@ -700,7 +701,7 @@ export function AdminDatabasePage() {
           </label>
           <label className="mt-4 block text-sm">
             Password
-            <Input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" />
+            <PasswordInput required value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 h-11 bg-background text-foreground" />
           </label>
           <Button className="mt-6 w-full" size="lg" type="submit" disabled={signingIn}>
             {signingIn ? "Signing in…" : "Open admin database"}

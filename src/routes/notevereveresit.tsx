@@ -4,6 +4,7 @@ import { ShieldCheck, Loader2, UserPlus } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Brand } from "@/components/vroomever/brand";
 import { createAdminAccount, getAdminSetupState } from "@/lib/admin-accounts.functions";
 import { adminExistsPublic, createAdminInBrowser, isServerKeyMissing } from "@/lib/admin-setup";
@@ -104,7 +105,7 @@ function CreateAdminPage() {
           </label>
           <label className="text-sm">
             Password
-            <Input name="password" required minLength={8} type="password" className="mt-2 h-11 bg-background text-foreground" autoComplete="new-password" />
+            <PasswordInput name="password" required minLength={8} className="mt-2 h-11 bg-background text-foreground" autoComplete="new-password" />
           </label>
           <Button type="submit" className="mt-2 w-full" disabled={busy}>
             {busy ? "Creating admin…" : "Create admin account"}

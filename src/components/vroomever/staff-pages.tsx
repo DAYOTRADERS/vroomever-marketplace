@@ -8,6 +8,7 @@ import { canOpenStaffPage, staffHome, staffLabel, type StaffRole } from "@/lib/s
 import { createStaffAccount, deleteStaffAccount, listStaffAccounts } from "@/lib/staff-accounts.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
 import { ListingMedia } from "./listing-media";
@@ -64,7 +65,7 @@ function StaffShell({ role, children }: { role: StaffRole; children: ReactNode }
         <p className="mt-2 text-sm text-surface-muted">Sign in with the login the administrator created for you.</p>
         {error && <p className="mt-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
         <label className="mt-6 block text-sm">Email<Input name="email" required type="email" autoComplete="email" className="mt-2 h-11 bg-background text-foreground" /></label>
-        <label className="mt-4 block text-sm">Password<Input name="password" required type="password" autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" /></label>
+        <label className="mt-4 block text-sm">Password<PasswordInput name="password" required autoComplete="current-password" className="mt-2 h-11 bg-background text-foreground" /></label>
         <Button className="mt-6 w-full" size="lg" type="submit" disabled={loading}>{loading ? "Signing in…" : "Sign in"}<ShieldCheck /></Button>
       </form>
     </div>
@@ -259,7 +260,7 @@ export function AdminStaffLogins() {
       <form onSubmit={submit} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-4 shadow-card sm:grid-cols-2 sm:p-5">
         <label className="text-sm">Full name<Input name="fullName" required minLength={2} maxLength={120} className="mt-1" /></label>
         <label className="text-sm">Email<Input name="email" type="email" required maxLength={255} className="mt-1" /></label>
-        <label className="text-sm">Password (min 8 characters)<Input name="password" type="password" required minLength={8} maxLength={128} autoComplete="new-password" className="mt-1" /></label>
+        <label className="text-sm">Password (min 8 characters)<PasswordInput name="password" required minLength={8} maxLength={128} autoComplete="new-password" className="mt-1" /></label>
         <label className="text-sm">Role<select name="role" required className="mt-1 h-9 w-full rounded-md border border-input bg-background px-3 text-sm"><option value="customer_care">Customer care</option><option value="secretary">Secretary</option></select></label>
         <Button type="submit" disabled={busy} className="sm:col-span-2 sm:w-fit">{busy ? "Creating…" : "Create login"}</Button>
       </form>

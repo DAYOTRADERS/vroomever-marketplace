@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { getMyRoleRow } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -579,10 +580,9 @@ export function AuthPage({
           {!forgot && (
           <label className="mt-5 block text-sm">
             Password
-            <Input
+            <PasswordInput
               name="password"
-              type="password"
-              className="mt-2 h-11 bg-background text-foreground"
+                            className="mt-2 h-11 bg-background text-foreground"
               required
               minLength={8}
               autoComplete={signup ? "new-password" : "current-password"}
