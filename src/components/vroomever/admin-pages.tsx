@@ -291,6 +291,7 @@ export function AdminOverview() {
   return (
     <AdminShell>
       <PageTitle eyebrow="Control center" title="Marketplace overview" copy="Live data from the VRUMEVER database." />
+      <div className="mb-6 flex flex-col gap-3 rounded-card border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><LockKeyhole className="size-5 text-primary" /><div><strong className="block text-sm">Reset admin & staff passwords</strong><small className="text-muted-foreground">Set a new password for administrator, customer care or secretary logins.</small></div></div><Button asChild size="sm"><Link to="/masteradmin/passwords">Reset passwords</Link></Button></div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Total users" value={String(s.users)} />
         <Stat label="Sellers" value={String(s.sellers)} />

@@ -256,6 +256,7 @@ export function AdminStaffLogins() {
   return (
     <AdminShell>
       <PageTitle eyebrow="Team" title="Staff logins" copy="Only admins can create logins for customer care (/customeradmin) and secretary (/secretaryadmin)." />
+      <Button asChild size="sm" variant="outline" className="mb-4"><Link to="/masteradmin/passwords">Reset a staff password</Link></Button>
       {n.el}
       <form onSubmit={submit} className="mb-6 grid gap-3 rounded-card border border-border bg-card p-4 shadow-card sm:grid-cols-2 sm:p-5">
         <label className="text-sm">Full name<Input name="fullName" required minLength={2} maxLength={120} className="mt-1" /></label>
