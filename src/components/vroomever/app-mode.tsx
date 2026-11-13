@@ -60,25 +60,29 @@ export function AppSplash() {
     if (!detectAppMode()) { setShow(false); return; }
     document.documentElement.dataset["appLaunch"] = "pending";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduced ? 500 : scene === 0 ? 2800 : 1800;
-    const t1 = setTimeout(() => { if (scene < 3) setScene(scene + 1); else setLeaving(true); }, duration);
-    const t2 = scene === 3 ? setTimeout(finish, duration + (reduced ? 150 : 500)) : undefined;
+    const duration = reduced ? 700 : scene === 0 ? 2400 : 3400;
+    const t1 = setTimeout(() => { if (scene === 0) setScene(1); else setLeaving(true); }, duration);
+    const t2 = scene === 1 ? setTimeout(finish, duration + (reduced ? 150 : 400)) : undefined;
     return () => { clearTimeout(t1); if (t2) clearTimeout(t2); };
   }, [scene]);
   if (!show) return null;
-  const word = ["VRUMEX", "DISCOVER", "CONNECT", "TRADE"][scene] ?? "VRUMEX";
-  const SceneIcon = [Compass, Compass, Link2, ShoppingBag][scene] ?? Compass;
-  return <div aria-label="Opening VRUMEX" className={`app-splash fixed inset-0 z-[100] place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`} onTouchStart={e => setTouchStart(e.touches[0]?.clientY ?? null)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientY; if (touchStart !== null && end !== undefined && touchStart - end > 45) { if (scene < 3) setScene(scene + 1); else finish(); } setTouchStart(null); }}>
+  return <div aria-label="Opening VRUMEX" className={`app-splash fixed inset-0 z-[100] place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`} onTouchStart={e => setTouchStart(e.touches[0]?.clientY ?? null)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientY; if (touchStart !== null && end !== undefined && touchStart - end > 45) { if (scene === 0) setScene(1); else finish(); } setTouchStart(null); }}>
     <div className="app-splash-grid" aria-hidden="true" />
     <Button variant="ghost" size="icon" onClick={finish} aria-label="Open marketplace" className="app-splash-skip"><ArrowRight /></Button>
     <div key={scene} className="app-splash-stage relative text-center">
-      {scene > 0 && <div className="app-scene-emblem" aria-hidden="true"><SceneIcon strokeWidth={1.3} /></div>}
-      <div role="status" aria-label={word} className="app-splash-word flex justify-center gap-1">
-        {word.split("").map((ch, i) => <span key={i} aria-hidden="true" className="app-splash-letter font-display font-black"><span>{ch}</span>{Array.from({ length: 6 }, (_, layer) => <span key={layer} className="app-letter-depth">{ch}</span>)}</span>)}
-      </div>
-      <div className="app-bounce-loader" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} />)}</div>
+      {scene === 0 ? <>
+        <div role="status" aria-label="VRUMEX" className="app-splash-word flex justify-center">
+          {"VRUMEX".split("").map((ch, i) => <span key={i} aria-hidden="true" className="app-splash-letter font-display font-black"><span>{ch}</span></span>)}
+        </div>
+        <div className="app-bounce-loader" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} />)}</div>
+      </> : <div role="status" aria-label="Discover, Connect, Trade" className="app-launch-journey">
+        <div className="app-journey-track" aria-hidden="true" />
+        <div className="app-journey-step app-journey-discover"><span className="app-journey-icon"><Compass strokeWidth={1.6} /></span><span>Discover</span></div>
+        <div className="app-journey-step app-journey-connect"><span className="app-journey-icon"><Link2 strokeWidth={1.6} /></span><span>Connect</span></div>
+        <div className="app-journey-step app-journey-trade"><span className="app-journey-icon"><ShoppingBag strokeWidth={1.6} /></span><span>Trade</span></div>
+      </div>}
     </div>
-    <div className="app-splash-progress" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} data-active={i === scene} />)}<ArrowUp className="ml-3 size-4" /></div>
+    <div className="app-splash-progress" aria-hidden="true">{[0, 1].map(i => <span key={i} data-active={i === scene} />)}<ArrowUp className="ml-3 size-4" /></div>
   </div>;
 }
 

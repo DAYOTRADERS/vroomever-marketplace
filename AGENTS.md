@@ -23,4 +23,5 @@
 - Appearance controls share the persisted document theme through useTheme; pre-hydration setup prevents route mounts from resetting dark mode.
 - The app launch overlay is present in SSR markup and enabled before paint for app mode; CSS-layered letters and reduced-motion-safe animation avoid delaying data loading or needing a 3D engine.
 - App-only iOS safe-area spacing and header hiding are applied through pre-paint document attributes; timed launch scenes are skippable and never block marketplace data loading.
+- App opening uses two stages: upright extruded brand letters, then a combined three-action composition; iPhone portrait startup images are plain blue to avoid a pre-content logo.
 - Admin phone pages reuse the app navigation dock with a mobile-only flag and bottom content clearance, keeping desktop navigation unchanged.
