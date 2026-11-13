@@ -9,6 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [ ] Five-item object-photo phone menu; Profile inside Settings; no dock Categories or Profile
 - [x] Slightly smaller VRUMEX, flip-and-rotate letters, and sequential animated Discover/Connect/Trade reveals
 - [x] Larger upright glow-free 3D app opening, combined Discover/Connect/Trade layout, and plain blue iPhone startup artwork
 - [x] Rename app Cart to Favorite, refresh the phone dock, and show it on administrator phone pages
