@@ -1,10 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Search, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
-import homeIcon from "@/assets/phone-menu-home.webp";
-import favoriteIcon from "@/assets/phone-menu-favorite.webp";
-import postIcon from "@/assets/phone-menu-post.webp";
-import aboutIcon from "@/assets/phone-menu-about.webp";
-import settingsIcon from "@/assets/phone-menu-settings.webp";
+import { Home, Heart, Plus, Info, Settings, Search, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,11 +19,11 @@ export function AppTopSearch() {
 }
 
 const items = [
-  ["/", "Home", homeIcon],
-  ["/favorites", "Favorite", favoriteIcon],
-  ["/sell", "Post", postIcon],
-  ["/about", "About", aboutIcon],
-  ["/settings", "Settings", settingsIcon],
+  ["/", "Home", Home],
+  ["/favorites", "Favorite", Heart],
+  ["/sell", "Post", Plus],
+  ["/about", "About", Info],
+  ["/settings", "Settings", Settings],
 ] as const;
 
 /** Floating bottom menu for the app. Hides while scrolling up, shows while scrolling down. */
@@ -43,9 +38,9 @@ export function AppBottomNav({ mobileOnly = false }: { mobileOnly?: boolean }) {
   }, []);
   return <nav aria-label="App menu" inert={!shown} className={`app-dock fixed inset-x-2 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-50 ${mobileOnly ? "lg:hidden" : ""} ${shown ? "" : "app-dock-hidden"}`}>
     <div className="app-dock-surface mx-auto grid max-w-md grid-cols-5 items-center">
-      {items.map(([to, label, image]) => {
+      {items.map(([to, label, Icon]) => {
         const on = to === "/" ? path === to : path === to || path.startsWith(`${to}/`) || (to === "/settings" && path === "/profile");
-        return <Link key={to} to={to} aria-label={to === "/sell" ? "Post a listing" : label} aria-current={on ? "page" : undefined} className={`app-dock-item ${to === "/sell" ? "app-dock-post" : ""}`}><span className={to === "/sell" ? "app-dock-post-icon" : "app-dock-icon"}><img src={image} alt="" width={40} height={40} loading="eager" decoding="async" className="app-dock-photo" /></span><span>{label}</span></Link>;
+        return <Link key={to} to={to} aria-label={to === "/sell" ? "Post a listing" : label} aria-current={on ? "page" : undefined} className={`app-dock-item ${to === "/sell" ? "app-dock-post" : ""}`}><span className={to === "/sell" ? "app-dock-post-icon" : "app-dock-icon"}><Icon aria-hidden="true" className={to === "/sell" ? "size-7" : "size-6"} strokeWidth={on ? 2.1 : 1.7} /></span><span>{label}</span></Link>;
       })}
     </div>
   </nav>;
