@@ -107,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/vrumex-icon.png?v=8", type: "image/png", sizes: "64x64" },
       { rel: "icon", href: "/logo-512.png?v=8", type: "image/png", sizes: "512x512" },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=8" },
+      { rel: "apple-touch-icon", href: "/app-icon-ios-blue.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -120,7 +120,7 @@ function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <ScriptOnce>{`try { const dark = localStorage.getItem('vrumex-theme') === 'dark'; document.documentElement.classList.toggle('dark', dark); const app = new URLSearchParams(location.search).get('app') === '1' || sessionStorage.getItem('vrumex-app-mode') === '1' || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; if (app) document.documentElement.dataset.appLaunch = 'pending'; } catch { if (matchMedia('(display-mode: standalone)').matches || new URLSearchParams(location.search).get('app') === '1') document.documentElement.dataset.appLaunch = 'pending'; }`}</ScriptOnce>
+        <ScriptOnce>{`try { const dark = localStorage.getItem('vrumex-theme') === 'dark'; document.documentElement.classList.toggle('dark', dark); } catch {} try { const app = new URLSearchParams(location.search).get('app') === '1' || sessionStorage.getItem('vrumex-app-mode') === '1' || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; if (app) { document.documentElement.dataset.appLaunch = 'pending'; document.documentElement.dataset.appMode = 'true'; if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) document.documentElement.dataset.appPlatform = 'ios'; } } catch { if (matchMedia('(display-mode: standalone)').matches || new URLSearchParams(location.search).get('app') === '1') { document.documentElement.dataset.appLaunch = 'pending'; document.documentElement.dataset.appMode = 'true'; } }`}</ScriptOnce>
         <HeadContent />
       </head>
       <body>

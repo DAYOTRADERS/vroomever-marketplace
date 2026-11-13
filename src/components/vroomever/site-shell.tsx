@@ -38,7 +38,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const dashboardLinks = dashboardMode === "seller"
     ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
-  return <div className={`min-h-screen bg-background text-foreground ${appMode ? "pb-28" : ""}`}>
+  return <div className={`site-shell min-h-screen bg-background text-foreground ${appMode ? "pb-28" : ""}`}>
     {!appMode && <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />

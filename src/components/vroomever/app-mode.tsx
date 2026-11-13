@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Info, LayoutGrid, Plus, Search, Settings, ShoppingCart, UserRound, Smartphone, Apple, X } from "lucide-react";
+import { Home, Info, LayoutGrid, Plus, Search, Settings, ShoppingCart, UserRound, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -53,24 +53,32 @@ export function AppBottomNav() {
 export function AppSplash() {
   const [show, setShow] = useState(true);
   const [leaving, setLeaving] = useState(false);
+  const [scene, setScene] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const finish = () => { delete document.documentElement.dataset["appLaunch"]; setShow(false); };
   useEffect(() => {
     if (!detectAppMode()) { setShow(false); return; }
     document.documentElement.dataset["appLaunch"] = "pending";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const t1 = setTimeout(() => setLeaving(true), reduced ? 600 : 3200);
-    const t2 = setTimeout(() => { delete document.documentElement.dataset["appLaunch"]; setShow(false); }, reduced ? 800 : 3800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+    const duration = reduced ? 500 : scene === 0 ? 2800 : 1800;
+    const t1 = setTimeout(() => { if (scene < 3) setScene(scene + 1); else setLeaving(true); }, duration);
+    const t2 = scene === 3 ? setTimeout(finish, duration + (reduced ? 150 : 500)) : undefined;
+    return () => { clearTimeout(t1); if (t2) clearTimeout(t2); };
+  }, [scene]);
   if (!show) return null;
-  return <div role="status" aria-label="Opening VRUMEX" className={`app-splash fixed inset-0 z-[100] place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`}>
+  const word = ["VRUMEX", "DISCOVER", "CONNECT", "TRADE"][scene] ?? "VRUMEX";
+  const SceneIcon = [Compass, Compass, Link2, ShoppingBag][scene] ?? Compass;
+  return <div aria-label="Opening VRUMEX" className={`app-splash fixed inset-0 z-[100] place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`} onTouchStart={e => setTouchStart(e.touches[0]?.clientY ?? null)} onTouchEnd={e => { const end = e.changedTouches[0]?.clientY; if (touchStart !== null && end !== undefined && touchStart - end > 45) { if (scene < 3) setScene(scene + 1); else finish(); } setTouchStart(null); }}>
     <div className="app-splash-grid" aria-hidden="true" />
-    <div className="app-splash-stage relative text-center">
-      <div className="app-splash-word flex justify-center gap-1" aria-hidden="true">
-        {"VRUMEX".split("").map((ch, i) => <span key={i} className="app-splash-letter font-display text-5xl font-black sm:text-6xl"><span>{ch}</span>{Array.from({ length: 6 }, (_, layer) => <span key={layer} className="app-letter-depth">{ch}</span>)}</span>)}
+    <Button variant="ghost" size="icon" onClick={finish} aria-label="Open marketplace" className="app-splash-skip"><ArrowRight /></Button>
+    <div key={scene} className="app-splash-stage relative text-center">
+      {scene > 0 && <div className="app-scene-emblem" aria-hidden="true"><SceneIcon strokeWidth={1.3} /></div>}
+      <div role="status" aria-label={word} className="app-splash-word flex justify-center gap-1">
+        {word.split("").map((ch, i) => <span key={i} aria-hidden="true" className="app-splash-letter font-display font-black"><span>{ch}</span>{Array.from({ length: 6 }, (_, layer) => <span key={layer} className="app-letter-depth">{ch}</span>)}</span>)}
       </div>
-      <p className="app-splash-tag mt-6 font-display text-[11px] font-extrabold uppercase">Discover • Connect • Trade</p>
       <div className="app-bounce-loader" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} />)}</div>
     </div>
+    <div className="app-splash-progress" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} data-active={i === scene} />)}<ArrowUp className="ml-3 size-4" /></div>
   </div>;
 }
 

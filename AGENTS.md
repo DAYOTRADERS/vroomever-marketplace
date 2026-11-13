@@ -22,3 +22,4 @@
 - Installed phone app = home-screen web app (manifest, no service worker); app mode (standalone or ?app=1) hides the top header and footer and uses a seven-item bottom menu with Post centered, so web and app share all pages and data.
 - Appearance controls share the persisted document theme through useTheme; pre-hydration setup prevents route mounts from resetting dark mode.
 - The app launch overlay is present in SSR markup and enabled before paint for app mode; CSS-layered letters and reduced-motion-safe animation avoid delaying data loading or needing a 3D engine.
+- App-only iOS safe-area spacing and header hiding are applied through pre-paint document attributes; timed launch scenes are skippable and never block marketplace data loading.
