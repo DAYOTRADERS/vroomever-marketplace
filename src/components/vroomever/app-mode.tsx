@@ -55,10 +55,10 @@ export function AppSplash() {
   const [leaving, setLeaving] = useState(false);
   useEffect(() => {
     if (!detectAppMode()) { setShow(false); return; }
-    document.documentElement.dataset.appLaunch = "pending";
+    document.documentElement.dataset["appLaunch"] = "pending";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const t1 = setTimeout(() => setLeaving(true), reduced ? 600 : 3200);
-    const t2 = setTimeout(() => { delete document.documentElement.dataset.appLaunch; setShow(false); }, reduced ? 800 : 3800);
+    const t2 = setTimeout(() => { delete document.documentElement.dataset["appLaunch"]; setShow(false); }, reduced ? 800 : 3800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
   if (!show) return null;

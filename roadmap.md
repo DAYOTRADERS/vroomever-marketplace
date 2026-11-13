@@ -9,7 +9,7 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
-- [ ] App-only empty top bar, centered Post with Categories, persistent dark theme, and pre-content 3D bouncing launch animation
+- [x] App-only empty top bar, centered Post with Categories, persistent dark theme, and pre-content 3D bouncing launch animation
 - [x] Crescent V logo lockup, customer care and secretary desks, staff monitor and admin-created staff logins
 - [x] Blend unframed login/signup forms into artwork, add reduced-motion-safe transitions, and restore white search heading
 - [x] Use solid #0095FD search section and readable login/signup with dimensional patterned backgrounds only
