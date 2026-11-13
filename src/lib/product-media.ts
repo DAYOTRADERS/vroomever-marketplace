@@ -1,3 +1,4 @@
+import { signListingMedia } from "@/lib/media.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 const BUCKET = "product-media";
@@ -34,11 +35,16 @@ export async function mediaUrls(paths: string[], opts?: { width?: number; qualit
     // opts.width/quality are kept for call-site clarity; this storage version
     // cannot transform server-side, so caching is what makes repeat loads instant.
     void opts;
-    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(missing, 60 * 60 * 6);
-    data?.forEach((d) => {
+    // Live listing media is signed server-side (10 min links); owners, admins and
+    // staff fall back to their own access for media not yet public.
+    const live = await signListingMedia({ data: { paths: missing } }).catch(() => ({} as Record<string, string>));
+    const rest = missing.filter((p) => !live[p]);
+    const own = rest.length ? (await supabase.storage.from(BUCKET).createSignedUrls(rest, 600)).data ?? [] : [];
+    const all = [...Object.entries(live).map(([path, signedUrl]) => ({ path, signedUrl })), ...own];
+    all.forEach((d) => {
       if (d.path && d.signedUrl) {
         map.set(d.path, d.signedUrl);
-        urlCache.set(d.path + sizeKey, { url: d.signedUrl, expiresAt: now + 6 * 60 * 60 * 1000 });
+        urlCache.set(d.path + sizeKey, { url: d.signedUrl, expiresAt: now + 10 * 60 * 1000 });
       }
     });
   }

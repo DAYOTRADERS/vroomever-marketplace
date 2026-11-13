@@ -30,8 +30,7 @@ export const getAdminSetupState = createServerFn({ method: "GET" }).handler(asyn
 
 /**
  * Creates a ready-to-use administrator account.
- * - When no administrator exists yet, anyone may create the first one.
- * - Afterwards the caller must be a signed-in administrator.
+ * The caller must always be a signed-in administrator.
  */
 export const createAdminAccount = createServerFn({ method: "POST" })
   .inputValidator((d) => Input.parse(d))
@@ -39,9 +38,9 @@ export const createAdminAccount = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin = supabaseAdmin as any;
 
-    if ((await adminCount(admin)) > 0) {
+    {
       const token = (getRequestHeader("authorization") ?? "").replace(/^Bearer\s+/i, "");
-      if (!token) throw new Error("An administrator already exists. Sign in at /masteradmin/login first, then return here to create more admins.");
+      if (!token) throw new Error("Sign in at /masteradmin/login first, then return here to create more admins.");
       const { data: caller } = await admin.auth.getUser(token);
       if (!caller?.user || !(await isAdmin(admin, caller.user.id))) {
         throw new Error("Only a signed-in administrator can create more admin accounts. Sign in at /masteradmin/login first.");
