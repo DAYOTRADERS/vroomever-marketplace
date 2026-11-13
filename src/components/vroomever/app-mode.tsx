@@ -72,7 +72,7 @@ export function AppSplash() {
     <div key={scene} className="app-splash-stage relative text-center">
       {scene === 0 ? <>
         <div role="status" aria-label="VRUMEX" className="app-splash-word flex justify-center">
-          {"VRUMEX".split("").map((ch, i) => <span key={i} aria-hidden="true" className="app-splash-letter font-display font-black"><span>{ch}</span></span>)}
+          {"VRUMEX".split("").map((ch, i) => <span key={i} aria-hidden="true" className="app-splash-letter font-display font-black"><span>{ch}</span>{Array.from({ length: 6 }, (_, layer) => <span key={layer} className="app-letter-depth">{ch}</span>)}</span>)}
         </div>
         <div className="app-bounce-loader" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} />)}</div>
       </> : <div role="status" aria-label="Discover, Connect, Trade" className="app-launch-journey">

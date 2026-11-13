@@ -380,18 +380,19 @@
 @utility app-splash-leave { opacity: 0; transform: scale(1.02); }
 @utility app-splash-letter {
   position: relative; display: inline-block; opacity: 0; transform-style: preserve-3d;
-  animation: splash-metal-reveal .45s ease both;
+  animation: splash-metal-reveal .28s ease both;
   text-shadow: 1px 1px 0 var(--launch-depth), 2px 2px 0 var(--launch-depth), 3px 3px 0 var(--launch-depth), 4px 4px 0 var(--launch-depth), 5px 5px 0 var(--launch-depth), 6px 6px 0 var(--launch-depth);
 }
 .app-splash-letter:nth-child(1) { animation-delay: .1s; }
-.app-splash-letter:nth-child(2) { animation-delay: .22s; }
-.app-splash-letter:nth-child(3) { animation-delay: .34s; }
-.app-splash-letter:nth-child(4) { animation-delay: .46s; }
-.app-splash-letter:nth-child(5) { animation-delay: .58s; }
-.app-splash-letter:nth-child(6) { animation-delay: .7s; }
+.app-splash-letter:nth-child(2) { animation-delay: .45s; }
+.app-splash-letter:nth-child(3) { animation-delay: .8s; }
+.app-splash-letter:nth-child(4) { animation-delay: 1.15s; }
+.app-splash-letter:nth-child(5) { animation-delay: 1.5s; }
+.app-splash-letter:nth-child(6) { animation-delay: 1.85s; }
 @keyframes splash-metal-reveal { from { opacity: 0; } to { opacity: 1; } }
 .app-splash-letter > span:first-child { position: relative; display: block; transform: translateZ(1px); backface-visibility: hidden; background: var(--launch-metal-face); background-clip: text; -webkit-text-fill-color: transparent; -webkit-text-stroke: .6px var(--launch-metal-edge); text-shadow: none; }
-.app-letter-depth { position: absolute; inset: 0; color: var(--launch-depth); transform: translateZ(-2px); }
+.app-splash-letter > span:first-child { z-index: 1; }
+.app-letter-depth { position: absolute; inset: 0; z-index: -1; color: var(--launch-depth); transform: translateZ(-2px); }
 .app-letter-depth:nth-child(3) { transform: translateZ(-4px); }
 .app-letter-depth:nth-child(4) { transform: translateZ(-6px); }
 .app-letter-depth:nth-child(5) { transform: translateZ(-8px); }
