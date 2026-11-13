@@ -297,3 +297,28 @@
 @media (prefers-reduced-motion: reduce) {
   .home-orbit-grid, .home-float-card { animation: none; }
 }
+
+/* Installed-app launch screen */
+@utility app-splash {
+  background: radial-gradient(circle at 50% 35%, var(--brand-bright), var(--primary) 70%);
+  color: var(--surface-foreground);
+  transition: opacity .6s ease, transform .6s ease;
+}
+@utility app-splash-leave { opacity: 0; transform: scale(1.08); }
+@utility app-splash-letter {
+  display: inline-block; opacity: 0;
+  text-shadow: 0 1px 0 color-mix(in oklab, var(--primary) 60%, transparent), 0 2px 0 color-mix(in oklab, var(--primary) 70%, transparent), 0 3px 0 color-mix(in oklab, var(--primary) 80%, transparent), 0 10px 24px color-mix(in oklab, var(--foreground) 45%, transparent);
+  animation: splash-letter .6s cubic-bezier(.2,.9,.3,1.3) forwards;
+}
+@utility app-splash-tag { opacity: 0; animation: splash-fade .6s ease 1.6s forwards; }
+@utility app-splash-bar { width: 0; animation: splash-bar 2.3s ease-out .2s forwards; }
+@utility app-splash-ring {
+  position: absolute; width: 22rem; height: 22rem; border-radius: 9999px;
+  border: 2px solid color-mix(in oklab, var(--surface-foreground) 25%, transparent);
+  animation: splash-ring 3s linear infinite;
+}
+@utility app-splash-ring-2 { width: 32rem; height: 32rem; animation-duration: 4.5s; animation-direction: reverse; }
+@keyframes splash-letter { from { opacity: 0; transform: translateY(30px) rotateX(-90deg) scale(.6); } to { opacity: 1; transform: none; } }
+@keyframes splash-fade { to { opacity: .9; } }
+@keyframes splash-bar { to { width: 100%; } }
+@keyframes splash-ring { from { transform: rotateX(65deg) rotateZ(0); } to { transform: rotateX(65deg) rotateZ(360deg); } }

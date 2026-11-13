@@ -8,6 +8,8 @@ import { AccountMenu } from "./account-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { setMarketFilters } from "@/lib/market-filters";
+import { useAppMode } from "@/lib/app-mode";
+import { AppBottomNav, AppTopSearch, InstallAppButtons } from "./app-mode";
 
 type DashboardMode = "buyer" | "seller";
 
@@ -16,6 +18,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const [dark, setDark] = useState(false);
   const [menuSearch, setMenuSearch] = useState("");
   const navigate = useNavigate();
+  const appMode = useAppMode();
   const path = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
@@ -35,8 +38,9 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
   const dashboardLinks = dashboardMode === "seller"
     ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
-  return <div className="min-h-screen bg-background text-foreground">
-    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
+  return <div className={`min-h-screen bg-background text-foreground ${appMode ? "pb-28" : ""}`}>
+    {appMode && <AppTopSearch />}
+    {!appMode && <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />
         <div className="hidden flex-1 md:block" />
@@ -50,7 +54,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
         <div className={`shrink-0 sm:ml-auto ${dashboardMode ? "" : "lg:hidden"}`}><AccountMenu /></div>
         {authReady && role && <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setMenu(true)} aria-label="Open menu"><Menu /></Button>}
       </div>
-    </header>
+    </header>}
     {menu && <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
       <button className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in" onClick={() => setMenu(false)} aria-label="Close menu" />
       <nav className="absolute inset-0 overflow-y-auto bg-surface-strong p-5 pt-6 text-surface-foreground animate-scale-in">
@@ -69,17 +73,18 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
         {!dashboardMode && canSell && <Button asChild className="mt-4 w-full glow-ring"><Link to="/sell"><Plus /> Sell an item</Link></Button>}
       </nav>
     </div>}
-    {dashboardMode ? <div className="mx-auto grid w-full max-w-[1600px] lg:grid-cols-[240px_minmax(0,1fr)]">
+    {dashboardMode && !appMode ? <div className="mx-auto grid w-full max-w-[1600px] lg:grid-cols-[240px_minmax(0,1fr)]">
       <aside className="sticky top-18 hidden h-[calc(100vh-4.5rem)] overflow-y-auto border-r border-border bg-card p-4 lg:block">
         <p className="px-3 pb-3 pt-2 text-xs font-bold uppercase text-muted-foreground">{dashboardMode === "seller" ? "Seller dashboard" : "Buyer dashboard"}</p>
         <nav className="grid gap-1" aria-label="Dashboard navigation">{dashboardLinks.map(([to,label,Icon])=><Button key={to} asChild variant={active(to) ? "secondary" : "ghost"} className="justify-start"><Link to={to}><Icon />{label}</Link></Button>)}</nav>
       </aside>
       <main className="min-w-0">{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>
     </div> : <main>{!hideBackButton && path !== "/" && <div className="mx-auto max-w-7xl px-4 pt-2 sm:px-5"><Button variant="ghost" size="sm" className="-ml-2 text-muted-foreground" onClick={() => (window.history.length > 1 ? window.history.back() : window.location.assign("/"))}><ArrowLeft /> Back</Button></div>}{children}</main>}
-    {!dashboardMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
+    {appMode && <AppBottomNav />}
+    {!dashboardMode && !appMode && <footer className="border-t border-border bg-surface-strong text-surface-foreground">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-8 pt-8 sm:grid-cols-2 sm:px-5 md:grid-cols-3">
         <div className="sm:col-span-2"><Brand inverted /><strong className="mt-5 block text-sm">About VRUMEX</strong><p className="mt-3 max-w-sm text-sm text-surface-muted">Kenya’s trusted marketplace for remarkable finds, serious sellers and better deals. Every listing is reviewed by our team before it goes live.</p><p className="mt-3 text-sm text-surface-muted">Payments: M-Pesa and card.</p></div>
-        <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div></div>
+        <div><strong className="text-sm">Help & legal</strong><div className="mt-3 grid gap-2 text-sm text-surface-muted"><Link to="/support">Contact support</Link><Link to="/terms">Terms</Link><Link to="/privacy">Privacy</Link><Link to="/buyer-terms">Buyer terms</Link><Link to="/seller-terms">Seller terms</Link></div><div className="mt-6"><InstallAppButtons /></div></div>
       </div>
       <p className="mx-auto max-w-7xl border-t border-white/10 px-4 py-4 text-xs text-surface-muted sm:px-5">© {new Date().getFullYear()} VRUMEX · Discover • Connect • Trade · Kenya</p>
     </footer>}

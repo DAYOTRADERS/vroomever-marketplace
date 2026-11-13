@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
 import { Route as CustomeradminRouteImport } from './routes/customeradmin'
@@ -24,6 +25,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as SecretaryadminRouteImport } from './routes/secretaryadmin'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SellerTermsRouteImport } from './routes/seller-terms'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -54,6 +56,11 @@ import { Route as MasteradminPricingCategoryRouteImport } from './routes/mastera
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -124,6 +131,11 @@ const SellRoute = SellRouteImport.update({
 const SellerTermsRoute = SellerTermsRouteImport.update({
   id: '/seller-terms',
   path: '/seller-terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -260,6 +272,7 @@ const MasteradminPricingCategoryRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/customeradmin': typeof CustomeradminRoute
@@ -274,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -303,6 +317,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/customeradmin': typeof CustomeradminRoute
@@ -317,6 +332,7 @@ export interface FileRoutesByTo {
   '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -347,6 +363,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
   '/customeradmin': typeof CustomeradminRoute
@@ -361,6 +378,7 @@ export interface FileRoutesById {
   '/secretaryadmin': typeof SecretaryadminRoute
   '/sell': typeof SellRoute
   '/seller-terms': typeof SellerTermsRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -392,6 +410,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/auth'
     | '/buyer-terms'
     | '/customeradmin'
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
+    | '/settings'
     | '/signup'
     | '/support'
     | '/terms'
@@ -435,6 +455,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/auth'
     | '/buyer-terms'
     | '/customeradmin'
@@ -449,6 +470,7 @@ export interface FileRouteTypes {
     | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
+    | '/settings'
     | '/signup'
     | '/support'
     | '/terms'
@@ -478,6 +500,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/auth'
     | '/buyer-terms'
     | '/customeradmin'
@@ -492,6 +515,7 @@ export interface FileRouteTypes {
     | '/secretaryadmin'
     | '/sell'
     | '/seller-terms'
+    | '/settings'
     | '/signup'
     | '/support'
     | '/terms'
@@ -522,6 +546,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRouteWithChildren
   BuyerTermsRoute: typeof BuyerTermsRoute
   CustomeradminRoute: typeof CustomeradminRoute
@@ -536,6 +561,7 @@ export interface RootRouteChildren {
   SecretaryadminRoute: typeof SecretaryadminRoute
   SellRoute: typeof SellRoute
   SellerTermsRoute: typeof SellerTermsRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
@@ -570,6 +596,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -668,6 +701,13 @@ declare module '@tanstack/react-router' {
       path: '/seller-terms'
       fullPath: '/seller-terms'
       preLoaderRoute: typeof SellerTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -867,6 +907,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AuthRoute: AuthRouteWithChildren,
   BuyerTermsRoute: BuyerTermsRoute,
   CustomeradminRoute: CustomeradminRoute,
@@ -881,6 +922,7 @@ const rootRouteChildren: RootRouteChildren = {
   SecretaryadminRoute: SecretaryadminRoute,
   SellRoute: SellRoute,
   SellerTermsRoute: SellerTermsRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,

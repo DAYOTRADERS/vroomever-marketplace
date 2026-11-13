@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicCategories } from "../lib/categories.functions";
 import { InitialCategoriesContext } from "../lib/use-categories";
+import { AppSplash } from "../components/vroomever/app-mode";
 
 function NotFoundComponent() {
   return (
@@ -80,10 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "VRUMEX — Discover, Connect, Trade" },
       { name: "description", content: "Kenya’s modern marketplace for trusted sellers and remarkable finds." },
       { name: "author", content: "VRUMEX" },
+      { name: "theme-color", content: "#0095FD" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "VRUMEX" },
       { property: "og:title", content: "VRUMEX Marketplace" },
       { property: "og:description", content: "Discover, connect and trade across Kenya." },
       { property: "og:type", content: "website" },
@@ -99,6 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" },
       { rel: "icon", href: "/vrumex-icon.png?v=8", type: "image/png", sizes: "64x64" },
       { rel: "icon", href: "/logo-512.png?v=8", type: "image/png", sizes: "512x512" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=8" },
     ],
   }),
@@ -137,6 +144,7 @@ function RootComponent() {
       <InitialCategoriesContext.Provider value={categories}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <AppSplash />
       </InitialCategoriesContext.Provider>
     </QueryClientProvider>
   );
