@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  ScriptOnce,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -117,8 +118,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <ScriptOnce>{`try { const dark = localStorage.getItem('vrumex-theme') === 'dark'; document.documentElement.classList.toggle('dark', dark); const app = new URLSearchParams(location.search).get('app') === '1' || sessionStorage.getItem('vrumex-app-mode') === '1' || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; if (app) document.documentElement.dataset.appLaunch = 'pending'; } catch { if (matchMedia('(display-mode: standalone)').matches || new URLSearchParams(location.search).get('app') === '1') document.documentElement.dataset.appLaunch = 'pending'; }`}</ScriptOnce>
         <HeadContent />
       </head>
       <body>
