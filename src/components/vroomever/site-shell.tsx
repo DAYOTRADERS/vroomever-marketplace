@@ -9,18 +9,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { setMarketFilters } from "@/lib/market-filters";
 import { useAppMode } from "@/lib/app-mode";
-import { AppBottomNav, AppTopSearch, InstallAppButtons } from "./app-mode";
+import { AppBottomNav, InstallAppButtons } from "./app-mode";
+import { useTheme } from "@/lib/theme";
 
 type DashboardMode = "buyer" | "seller";
 
 export function SiteShell({ children, dashboardMode: requestedMode, hideBackButton = false }: { children: ReactNode; dashboardMode?: DashboardMode; hideBackButton?: boolean }) {
   const [menu, setMenu] = useState(false);
-  const [dark, setDark] = useState(false);
+  const { dark, toggleTheme } = useTheme();
   const [menuSearch, setMenuSearch] = useState("");
   const navigate = useNavigate();
   const appMode = useAppMode();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  useEffect(() => { document.documentElement.classList.toggle("dark", dark); }, [dark]);
   const active = (target: string) => path === target;
   const [role, setRole] = useState<AppRole | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -39,7 +39,6 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
     ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
   return <div className={`min-h-screen bg-background text-foreground ${appMode ? "pb-28" : ""}`}>
-    {appMode && <AppTopSearch />}
     {!appMode && <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />
@@ -47,7 +46,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
         <nav className={`ml-auto items-center gap-1 ${dashboardMode ? "hidden" : "hidden lg:flex"}`}>
           <Button asChild variant="ghost"><Link to="/dashboard" className={active("/dashboard") ? "text-primary" : ""}>Marketplace</Link></Button>
           <Button asChild variant="ghost" size="icon"><Link to="/favorites" aria-label="Favorites"><Heart /></Link></Button>
-          <Button variant="ghost" size="icon" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun /> : <Moon />}</Button>
+          <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">{dark ? <Sun /> : <Moon />}</Button>
           <AccountMenu />
           {canSell && <Button asChild className="glow-ring hover:-translate-y-0.5"><Link to="/sell"><Plus /> Sell</Link></Button>}
         </nav>
@@ -68,7 +67,7 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
           {(dashboardMode ? dashboardLinks : [["/", "Home", Home], ["/dashboard", "Marketplace", LayoutGrid], ["/favorites", "Favorites", Heart], ...(role ? [["/profile", "Profile", UserRound], [dash, "Dashboard", LayoutDashboard]] : []), ...(canSell ? [["/seller/listings", "Listings", Store]] : []), ["/support", "Contact support", LifeBuoy]] as [string, string, typeof Home][]).map(([to, label, Icon]) => (
             <Link key={label} to={to} className={`flex min-h-14 items-center gap-4 px-4 text-base rounded-2xl border font-semibold transition hover:-translate-y-0.5 hover:border-primary/60 ${active(to) ? "border-primary/60 bg-primary/20 text-primary" : "border-white/10 bg-white/5 text-surface-foreground"}`}><Icon className="size-5" />{label}</Link>
           ))}
-          <Button variant="ghost" onClick={() => setDark(!dark)} className={`min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-surface-foreground hover:bg-white/10 hover:text-surface-foreground`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
+          <Button variant="ghost" onClick={toggleTheme} className={`min-h-14 justify-start gap-4 rounded-2xl border border-white/10 bg-white/5 px-4 text-base text-surface-foreground hover:bg-white/10 hover:text-surface-foreground`}>{dark ? <Sun className="size-5" /> : <Moon className="size-5" />}{dark ? "Light" : "Dark"}</Button>
         </div>
         {!dashboardMode && canSell && <Button asChild className="mt-4 w-full glow-ring"><Link to="/sell"><Plus /> Sell an item</Link></Button>}
       </nav>

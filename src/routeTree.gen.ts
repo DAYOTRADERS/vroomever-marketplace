@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BuyerTermsRouteImport } from './routes/buyer-terms'
+import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CustomeradminRouteImport } from './routes/customeradmin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as FavoritesRouteImport } from './routes/favorites'
@@ -71,6 +72,11 @@ const AuthRoute = AuthRouteImport.update({
 const BuyerTermsRoute = BuyerTermsRouteImport.update({
   id: '/buyer-terms',
   path: '/buyer-terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomeradminRoute = CustomeradminRouteImport.update({
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/categories': typeof CategoriesRoute
   '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
@@ -320,6 +327,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/categories': typeof CategoriesRoute
   '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/buyer-terms': typeof BuyerTermsRoute
+  '/categories': typeof CategoriesRoute
   '/customeradmin': typeof CustomeradminRoute
   '/dashboard': typeof DashboardRoute
   '/favorites': typeof FavoritesRoute
@@ -413,6 +422,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/buyer-terms'
+    | '/categories'
     | '/customeradmin'
     | '/dashboard'
     | '/favorites'
@@ -458,6 +468,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/buyer-terms'
+    | '/categories'
     | '/customeradmin'
     | '/dashboard'
     | '/favorites'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/buyer-terms'
+    | '/categories'
     | '/customeradmin'
     | '/dashboard'
     | '/favorites'
@@ -549,6 +561,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRouteWithChildren
   BuyerTermsRoute: typeof BuyerTermsRoute
+  CategoriesRoute: typeof CategoriesRoute
   CustomeradminRoute: typeof CustomeradminRoute
   DashboardRoute: typeof DashboardRoute
   FavoritesRoute: typeof FavoritesRoute
@@ -617,6 +630,13 @@ declare module '@tanstack/react-router' {
       path: '/buyer-terms'
       fullPath: '/buyer-terms'
       preLoaderRoute: typeof BuyerTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customeradmin': {
@@ -910,6 +930,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRouteWithChildren,
   BuyerTermsRoute: BuyerTermsRoute,
+  CategoriesRoute: CategoriesRoute,
   CustomeradminRoute: CustomeradminRoute,
   DashboardRoute: DashboardRoute,
   FavoritesRoute: FavoritesRoute,

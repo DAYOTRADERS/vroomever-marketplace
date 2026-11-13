@@ -117,6 +117,13 @@
   --surface-strong: oklch(0.23 0.075 260);
   --surface-foreground: oklch(0.97 0.006 235);
   --surface-muted: oklch(0.76 0.025 235);
+  --launch-background: oklch(from #0095FD l c h);
+  --launch-ink: oklch(0.99 0.003 240);
+  --launch-depth: oklch(0.36 0.14 260);
+  --loader-mint: oklch(0.88 0.16 160);
+  --loader-gold: oklch(0.89 0.17 90);
+  --loader-coral: oklch(0.76 0.19 25);
+  --loader-ice: oklch(0.91 0.08 220);
 }
 
 .dark {
@@ -300,25 +307,64 @@
 
 /* Installed-app launch screen */
 @utility app-splash {
-  background: radial-gradient(circle at 50% 35%, var(--brand-bright), var(--primary) 70%);
-  color: var(--surface-foreground);
+  display: none;
+  background: var(--launch-background);
+  color: var(--launch-ink);
   transition: opacity .6s ease, transform .6s ease;
+}
+[data-app-launch="pending"] .app-splash { display: grid; }
+[data-app-launch="pending"] body { overflow: hidden; background: var(--launch-background); }
+[data-app-launch="pending"] body > *:not(script) { visibility: hidden; }
+[data-app-launch="pending"] .app-splash { visibility: visible; }
+.app-splash-stage { perspective: 900px; padding: 24px; max-width: 100%; }
+.app-splash-word { height: 90px; align-items: center; }
+.app-splash-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(color-mix(in oklab, var(--launch-ink) 10%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--launch-ink) 10%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(transparent, var(--launch-ink));
+  transform: perspective(600px) rotateX(55deg) scale(1.8) translateY(20%);
 }
 @utility app-splash-leave { opacity: 0; transform: scale(1.08); }
 @utility app-splash-letter {
-  display: inline-block; opacity: 0;
-  text-shadow: 0 1px 0 color-mix(in oklab, var(--primary) 60%, transparent), 0 2px 0 color-mix(in oklab, var(--primary) 70%, transparent), 0 3px 0 color-mix(in oklab, var(--primary) 80%, transparent), 0 10px 24px color-mix(in oklab, var(--foreground) 45%, transparent);
-  animation: splash-letter .6s cubic-bezier(.2,.9,.3,1.3) forwards;
+  position: relative; display: inline-block; opacity: 0; transform-style: preserve-3d;
+  animation: splash-letter 1.65s cubic-bezier(.2,.7,.25,1) both;
+  text-shadow: 0 14px 20px color-mix(in oklab, var(--launch-depth) 30%, transparent);
 }
-@utility app-splash-tag { opacity: 0; animation: splash-fade .6s ease 1.6s forwards; }
-@utility app-splash-bar { width: 0; animation: splash-bar 2.3s ease-out .2s forwards; }
-@utility app-splash-ring {
-  position: absolute; width: 22rem; height: 22rem; border-radius: 9999px;
-  border: 2px solid color-mix(in oklab, var(--surface-foreground) 25%, transparent);
-  animation: splash-ring 3s linear infinite;
+.app-splash-letter:nth-child(1) { animation-delay: .1s; }
+.app-splash-letter:nth-child(2) { animation-delay: .3s; }
+.app-splash-letter:nth-child(3) { animation-delay: .5s; }
+.app-splash-letter:nth-child(4) { animation-delay: .7s; }
+.app-splash-letter:nth-child(5) { animation-delay: .9s; }
+.app-splash-letter:nth-child(6) { animation-delay: 1.1s; }
+.app-splash-letter > span:first-child { position: relative; display: block; transform: translateZ(1px); backface-visibility: hidden; }
+.app-letter-depth { position: absolute; inset: 0; color: var(--launch-depth); transform: translateZ(-2px); }
+.app-letter-depth:nth-child(3) { transform: translateZ(-4px); }
+.app-letter-depth:nth-child(4) { transform: translateZ(-6px); }
+.app-letter-depth:nth-child(5) { transform: translateZ(-8px); }
+.app-letter-depth:nth-child(6) { transform: translateZ(-10px); }
+.app-letter-depth:nth-child(7) { transform: translateZ(-12px); }
+@utility app-splash-tag { opacity: 0; animation: splash-fade .6s ease 1.7s forwards; }
+.app-bounce-loader { display: flex; justify-content: center; gap: 14px; height: 64px; align-items: end; margin-top: 20px; perspective: 500px; }
+.app-bounce-loader span {
+  width: 16px; height: 16px; border-radius: 4px; background: var(--loader-mint);
+  box-shadow: inset -3px -3px 0 color-mix(in oklab, var(--launch-depth) 24%, transparent), 0 12px 12px color-mix(in oklab, var(--launch-depth) 20%, transparent);
+  animation: splash-bounce 1s cubic-bezier(.36,0,.66,1) infinite;
 }
-@utility app-splash-ring-2 { width: 32rem; height: 32rem; animation-duration: 4.5s; animation-direction: reverse; }
-@keyframes splash-letter { from { opacity: 0; transform: translateY(30px) rotateX(-90deg) scale(.6); } to { opacity: 1; transform: none; } }
+.app-bounce-loader span:nth-child(2) { background: var(--loader-gold); animation-delay: .12s; }
+.app-bounce-loader span:nth-child(3) { background: var(--loader-coral); animation-delay: .24s; }
+.app-bounce-loader span:nth-child(4) { background: var(--loader-ice); animation-delay: .36s; }
+@keyframes splash-letter {
+  0% { opacity: 0; transform: translate3d(0,30px,-100px) rotateX(-130deg) rotateY(-180deg) rotateZ(-20deg) scale(.55); }
+  20% { opacity: 1; }
+  55% { transform: translate3d(0,-8px,30px) rotateX(25deg) rotateY(160deg) rotateZ(12deg); }
+  80% { transform: rotateX(-15deg) rotateY(380deg) rotateZ(-4deg); }
+  100% { opacity: 1; transform: rotateX(0) rotateY(360deg) rotateZ(0); }
+}
+@keyframes splash-bounce { 0%,100% { transform: translateY(0) rotateX(0) rotateZ(0) scaleY(.85); } 50% { transform: translateY(-30px) rotateX(180deg) rotateZ(90deg) scaleY(1); } }
 @keyframes splash-fade { to { opacity: .9; } }
-@keyframes splash-bar { to { width: 100%; } }
-@keyframes splash-ring { from { transform: rotateX(65deg) rotateZ(0); } to { transform: rotateX(65deg) rotateZ(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .app-splash-letter, .app-splash-tag { animation: none; opacity: 1; }
+  .app-bounce-loader span { animation: none; }
+  .app-splash { transition: opacity .2s; }
+}
