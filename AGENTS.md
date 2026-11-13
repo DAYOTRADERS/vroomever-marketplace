@@ -19,3 +19,4 @@
 - Public category names are fetched before root rendering and passed through request-local context; static categories provide icons only, preventing old-name flashes and cross-request state leaks.
 - Authentication backgrounds and contrast are scoped through auth-backdrop and auth-form-surface tokens; share bundled artwork so account styling does not change other pages.
 - Staff roles (customer_care, secretary) live in user_roles; their logins are created only by admins via staff-accounts server functions, and their actions are logged to staff_activity by database triggers so the admin monitor cannot be bypassed.
+- Installed phone app = home-screen web app (manifest, no service worker); app mode (standalone or ?app=1) swaps the header for a search bar, hides the footer and shows the floating bottom menu, so web and app share all pages and data.
