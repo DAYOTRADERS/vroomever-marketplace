@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Info, Plus, Search, Settings, ShoppingCart, UserRound, Smartphone, Apple, X } from "lucide-react";
+import { Home, Info, LayoutGrid, Plus, Search, Settings, ShoppingCart, UserRound, Smartphone, Apple, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export function AppTopSearch() {
 
 const items = [
   ["/", "Home", Home],
+  ["/categories", "Categories", LayoutGrid],
   ["/favorites", "Cart", ShoppingCart],
   ["/sell", "Post", Plus],
   ["/about", "About", Info],
@@ -38,7 +39,7 @@ export function AppBottomNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return <nav aria-label="App menu" className={`fixed inset-x-3 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-50 transition-all duration-300 ${shown ? "translate-y-0 opacity-100" : "translate-y-[140%] opacity-0"}`}>
-    <div className="mx-auto grid max-w-md grid-cols-6 items-end rounded-3xl border border-border/60 bg-background/90 px-1 py-2 shadow-2xl backdrop-blur-xl">
+    <div className="mx-auto grid max-w-md grid-cols-7 items-end rounded-3xl border border-border/60 bg-background/90 px-1 py-2 shadow-2xl backdrop-blur-xl">
       {items.map(([to, label, Icon]) => {
         const on = path === to;
         if (to === "/sell") return <Link key={to} to={to} aria-label="Post a listing" className="flex flex-col items-center gap-1 text-[10px] font-bold text-primary"><span className="-mt-7 grid size-12 place-items-center rounded-full bg-brand-bright text-primary-foreground shadow-lg ring-4 ring-background"><Icon className="size-6" /></span>{label}</Link>;
@@ -50,25 +51,25 @@ export function AppBottomNav() {
 
 /** Blue launch screen that types the VRUMEX name letter by letter. Shown once per app open. */
 export function AppSplash() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [leaving, setLeaving] = useState(false);
   useEffect(() => {
-    if (!detectAppMode() || sessionStorage.getItem("vrumex-splash") === "1") return;
-    sessionStorage.setItem("vrumex-splash", "1");
-    setShow(true);
-    const t1 = setTimeout(() => setLeaving(true), 2600);
-    const t2 = setTimeout(() => setShow(false), 3200);
+    if (!detectAppMode()) { setShow(false); return; }
+    document.documentElement.dataset.appLaunch = "pending";
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const t1 = setTimeout(() => setLeaving(true), reduced ? 600 : 3200);
+    const t2 = setTimeout(() => { delete document.documentElement.dataset.appLaunch; setShow(false); }, reduced ? 800 : 3800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
   if (!show) return null;
-  return <div aria-hidden className={`app-splash fixed inset-0 z-[100] grid place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`}>
-    <div className="app-splash-ring" /><div className="app-splash-ring app-splash-ring-2" />
-    <div className="relative text-center" style={{ perspective: "800px" }}>
-      <div className="flex justify-center gap-1">
-        {"VRUMEX".split("").map((ch, i) => <span key={i} className="app-splash-letter font-display text-6xl font-black" style={{ animationDelay: `${0.15 + i * 0.22}s` }}>{ch}</span>)}
+  return <div role="status" aria-label="Opening VRUMEX" className={`app-splash fixed inset-0 z-[100] place-items-center overflow-hidden ${leaving ? "app-splash-leave" : ""}`}>
+    <div className="app-splash-grid" aria-hidden="true" />
+    <div className="app-splash-stage relative text-center">
+      <div className="app-splash-word flex justify-center gap-1" aria-hidden="true">
+        {"VRUMEX".split("").map((ch, i) => <span key={i} className="app-splash-letter font-display text-5xl font-black sm:text-6xl"><span>{ch}</span>{Array.from({ length: 6 }, (_, layer) => <span key={layer} className="app-letter-depth">{ch}</span>)}</span>)}
       </div>
-      <p className="app-splash-tag mt-4 font-display text-[11px] font-extrabold uppercase tracking-[0.35em]">Discover • Connect • Trade</p>
-      <div className="mx-auto mt-6 h-1 w-40 overflow-hidden rounded-full bg-surface-foreground/20"><div className="app-splash-bar h-full rounded-full bg-surface-foreground" /></div>
+      <p className="app-splash-tag mt-6 font-display text-[11px] font-extrabold uppercase">Discover • Connect • Trade</p>
+      <div className="app-bounce-loader" aria-hidden="true">{[0, 1, 2, 3].map(i => <span key={i} />)}</div>
     </div>
   </div>;
 }
