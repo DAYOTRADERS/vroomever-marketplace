@@ -11,7 +11,7 @@ export function AppTopSearch() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
   return <header className="sticky top-0 z-50 bg-brand-bright px-3 pb-3 pt-[max(env(safe-area-inset-top),0.75rem)] shadow-lg">
-    <form className="relative" onSubmit={(e) => { e.preventDefault(); if (!q.trim()) return; setMarketFilters({ q }); void navigate({ to: "/search", search: { q } as any }); }}>
+    <form className="relative" onSubmit={(e) => { e.preventDefault(); if (!q.trim()) return; setMarketFilters({ q }); void navigate({ to: "/search", search: { q } }); }}>
       <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search VRUMEX" aria-label="Search marketplace" className="h-12 rounded-full border-0 bg-background pl-11 text-base shadow-inner" />
     </form>
