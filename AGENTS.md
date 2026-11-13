@@ -19,7 +19,8 @@
 - Public category names are fetched before root rendering and passed through request-local context; static categories provide icons only, preventing old-name flashes and cross-request state leaks.
 - Authentication backgrounds and contrast are scoped through auth-backdrop and auth-form-surface tokens; share bundled artwork so account styling does not change other pages.
 - Staff roles (customer_care, secretary) live in user_roles; their logins are created only by admins via staff-accounts server functions, and their actions are logged to staff_activity by database triggers so the admin monitor cannot be bypassed.
-- Installed phone app = home-screen web app (manifest, no service worker); app mode (standalone or ?app=1) hides the top header and footer and uses a seven-item bottom menu with Post centered, so web and app share all pages and data.
+- Installed phone app = home-screen web app (manifest, no service worker); app mode (standalone or ?app=1) hides the top header and footer and reuses the shared marketplace pages and data.
+- The phone dock uses five object-art links with Post centered; Profile is accessed through Settings, while categories remain in marketplace content.
 - Appearance controls share the persisted document theme through useTheme; pre-hydration setup prevents route mounts from resetting dark mode.
 - The app launch overlay is present in SSR markup and enabled before paint for app mode; CSS-layered letters and reduced-motion-safe animation avoid delaying data loading or needing a 3D engine.
 - App-only iOS safe-area spacing and header hiding are applied through pre-paint document attributes; timed launch scenes are skippable and never block marketplace data loading.
