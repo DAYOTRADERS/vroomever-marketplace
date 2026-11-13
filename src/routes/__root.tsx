@@ -108,6 +108,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/logo-512.png?v=8", type: "image/png", sizes: "512x512" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/app-icon-ios-blue.png" },
+      ...[
+        [375, 667, 2], [414, 896, 2], [375, 812, 3], [390, 844, 3],
+        [393, 852, 3], [414, 896, 3], [428, 926, 3], [430, 932, 3],
+        [402, 874, 3], [440, 956, 3],
+      ].map(([width = 390, height = 844, ratio = 3]) => ({
+        rel: "apple-touch-startup-image",
+        href: `/launch/blue-${width * ratio}x${height * ratio}.png`,
+        media: `(device-width: ${width}px) and (device-height: ${height}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: portrait)`,
+      })),
     ],
   }),
   shellComponent: RootShell,
