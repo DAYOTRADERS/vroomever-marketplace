@@ -124,6 +124,9 @@
   --loader-gold: oklch(0.89 0.17 90);
   --loader-coral: oklch(0.76 0.19 25);
   --loader-ice: oklch(0.91 0.08 220);
+  --dock-surface: color-mix(in oklab, var(--card) 94%, transparent);
+  --dock-shadow: 0 8px 32px color-mix(in oklab, var(--brand-ink) 16%, transparent);
+  --dock-post-shadow: 0 5px 14px color-mix(in oklab, var(--brand-bright) 28%, transparent);
 }
 
 .dark {
@@ -304,6 +307,21 @@
 @media (prefers-reduced-motion: reduce) {
   .home-orbit-grid, .home-float-card { animation: none; }
 }
+
+/* Shared phone navigation dock */
+.app-dock { transition: transform .25s ease, opacity .25s ease; }
+.app-dock-hidden { transform: translateY(150%); opacity: 0; }
+.app-dock-surface { min-height: 72px; padding: 5px 3px; border: 1px solid var(--border); border-radius: 20px; background: var(--dock-surface); box-shadow: var(--dock-shadow); backdrop-filter: blur(20px); }
+.app-dock-item { position: relative; display: flex; min-width: 0; height: 60px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--muted-foreground); font-size: 9px; font-weight: 600; text-decoration: none; transition: color .2s; }
+.app-dock-icon { display: grid; width: 34px; height: 30px; place-items: center; border-radius: 8px; transition: background .2s, transform .2s; }
+.app-dock-item[aria-current="page"] { color: var(--primary); }
+.app-dock-item[aria-current="page"] .app-dock-icon { background: var(--accent); }
+.app-dock-item[aria-current="page"]::after { content: ""; position: absolute; bottom: 0; width: 12px; height: 2px; border-radius: 2px; background: var(--brand-bright); }
+.app-dock-item:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 8px; }
+.app-dock-item:hover .app-dock-icon { transform: translateY(-2px); }
+.app-dock-post { color: var(--foreground); font-weight: 700; }
+.app-dock-post-icon { display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 44px; margin-top: -16px; margin-bottom: 3px; border: 3px solid var(--card); border-radius: 14px; background: var(--brand-bright); color: var(--launch-ink); box-shadow: var(--dock-post-shadow); }
+@media (prefers-reduced-motion: reduce) { .app-dock, .app-dock-icon { transition: none; } }
 
 /* Installed-app launch screen */
 [data-app-mode="true"] .site-shell > header,
