@@ -60,7 +60,7 @@ export function AppSplash() {
     if (!detectAppMode()) { setShow(false); return; }
     document.documentElement.dataset["appLaunch"] = "pending";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const duration = reduced ? 700 : scene === 0 ? 9200 : 4600;
+    const duration = reduced ? 700 : scene === 0 ? 3800 : 4600;
     const t1 = setTimeout(() => { if (scene === 0) setScene(1); else setLeaving(true); }, duration);
     const t2 = scene === 1 ? setTimeout(finish, duration + (reduced ? 150 : 400)) : undefined;
     return () => { clearTimeout(t1); if (t2) clearTimeout(t2); };
