@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Badge } from "@/components/ui/badge";
 import { Brand } from "./brand";
+import { AppBottomNav } from "./app-mode";
 import { PageTitle } from "./marketplace-pages";
 import { categories, formatKsh, vipOptions } from "@/data/marketplace";
 
@@ -106,7 +107,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </button>
         </nav>
       </aside>
-      <main className="min-w-0 p-4 sm:p-5 lg:p-8">{children}</main>
+      <main className="min-w-0 p-4 pb-28 sm:p-5 sm:pb-28 lg:p-8">{children}</main>
+      <AppBottomNav mobileOnly />
     </div>
   );
 }

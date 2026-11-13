@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Info, LayoutGrid, Plus, Search, Settings, ShoppingCart, UserRound, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
+import { Home, Heart, Info, LayoutGrid, Plus, Search, Settings, UserRound, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export function AppTopSearch() {
 const items = [
   ["/", "Home", Home],
   ["/categories", "Categories", LayoutGrid],
-  ["/favorites", "Cart", ShoppingCart],
+  ["/favorites", "Favorite", Heart],
   ["/sell", "Post", Plus],
   ["/about", "About", Info],
   ["/profile", "Profile", UserRound],
@@ -29,7 +29,7 @@ const items = [
 ] as const;
 
 /** Floating bottom menu for the app. Hides while scrolling up, shows while scrolling down. */
-export function AppBottomNav() {
+export function AppBottomNav({ mobileOnly = false }: { mobileOnly?: boolean }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [shown, setShown] = useState(true);
   useEffect(() => {
@@ -38,12 +38,12 @@ export function AppBottomNav() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  return <nav aria-label="App menu" className={`fixed inset-x-3 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-50 transition-all duration-300 ${shown ? "translate-y-0 opacity-100" : "translate-y-[140%] opacity-0"}`}>
-    <div className="mx-auto grid max-w-md grid-cols-7 items-end rounded-3xl border border-border/60 bg-background/90 px-1 py-2 shadow-2xl backdrop-blur-xl">
+  return <nav aria-label="App menu" inert={!shown} className={`app-dock fixed inset-x-2 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-50 ${mobileOnly ? "lg:hidden" : ""} ${shown ? "" : "app-dock-hidden"}`}>
+    <div className="app-dock-surface mx-auto grid max-w-md grid-cols-7 items-center">
       {items.map(([to, label, Icon]) => {
-        const on = path === to;
-        if (to === "/sell") return <Link key={to} to={to} aria-label="Post a listing" className="flex flex-col items-center gap-1 text-[10px] font-bold text-primary"><span className="-mt-7 grid size-12 place-items-center rounded-full bg-brand-bright text-primary-foreground shadow-lg ring-4 ring-background"><Icon className="size-6" /></span>{label}</Link>;
-        return <Link key={to} to={to} className={`flex flex-col items-center gap-1 rounded-2xl py-1 text-[10px] font-semibold transition ${on ? "text-brand-bright" : "text-muted-foreground"}`}><Icon className={`size-5 transition ${on ? "scale-110" : ""}`} />{label}</Link>;
+        const on = to === "/" ? path === to : path === to || path.startsWith(`${to}/`);
+        if (to === "/sell") return <Link key={to} to={to} aria-label="Post a listing" aria-current={on ? "page" : undefined} className="app-dock-item app-dock-post"><span className="app-dock-post-icon"><Icon className="size-6" strokeWidth={2} /></span><span>{label}</span></Link>;
+        return <Link key={to} to={to} aria-current={on ? "page" : undefined} className="app-dock-item"><span className="app-dock-icon"><Icon className="size-5" strokeWidth={on ? 2.2 : 1.7} /></span><span>{label}</span></Link>;
       })}
     </div>
   </nav>;
