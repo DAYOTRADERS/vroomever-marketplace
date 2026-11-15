@@ -39,21 +39,21 @@ export function SiteShell({ children, dashboardMode: requestedMode, hideBackButt
     ? [["/seller/dashboard", "Overview", LayoutDashboard], ["/seller/listings", "My listings", Store], ["/sell", "Post a listing", Plus], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const
     : [["/dashboard", "Marketplace", LayoutDashboard], ["/favorites", "Favorites", Heart], ["/profile", "Profile", UserRound], ["/support", "Contact support", LifeBuoy]] as const;
   return <div className={`site-shell min-h-screen bg-background text-foreground ${appMode ? "pb-28" : ""}`}>
-    {!appMode && <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto grid h-18 max-w-7xl grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-4 sm:flex sm:gap-5 lg:px-6">
         <Brand />
         <div className="hidden flex-1 md:block" />
-        <nav className={`ml-auto items-center gap-1 ${dashboardMode ? "hidden" : "hidden lg:flex"}`}>
+        <nav className={`ml-auto items-center gap-1 ${dashboardMode || appMode ? "hidden" : "hidden lg:flex"}`}>
           <Button asChild variant="ghost"><Link to="/dashboard" className={active("/dashboard") ? "text-primary" : ""}>Marketplace</Link></Button>
           <Button asChild variant="ghost" size="icon"><Link to="/favorites" aria-label="Favorites"><Heart /></Link></Button>
           <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">{dark ? <Sun /> : <Moon />}</Button>
           <AccountMenu />
           {canSell && <Button asChild className="glow-ring hover:-translate-y-0.5"><Link to="/sell"><Plus /> Sell</Link></Button>}
         </nav>
-        <div className={`shrink-0 sm:ml-auto ${dashboardMode ? "" : "lg:hidden"}`}><AccountMenu /></div>
-        {authReady && role && <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setMenu(true)} aria-label="Open menu"><Menu /></Button>}
+        <div className={`shrink-0 sm:ml-auto ${dashboardMode || appMode ? "" : "lg:hidden"}`}><AccountMenu /></div>
+        {!appMode && authReady && role && <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" onClick={() => setMenu(true)} aria-label="Open menu"><Menu /></Button>}
       </div>
-    </header>}
+    </header>
     {menu && <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
       <button className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-fade-in" onClick={() => setMenu(false)} aria-label="Close menu" />
       <nav className="absolute inset-0 overflow-y-auto bg-surface-strong p-5 pt-6 text-surface-foreground animate-scale-in">

@@ -26,7 +26,7 @@ const items = [
   ["/settings", "Settings", Settings],
 ] as const;
 
-/** Floating bottom menu for the app. Hides while scrolling up, shows while scrolling down. */
+/** Edge-attached bottom menu. Hides while scrolling up, shows while scrolling down. */
 export function AppBottomNav({ mobileOnly = false }: { mobileOnly?: boolean }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [shown, setShown] = useState(true);
@@ -36,7 +36,7 @@ export function AppBottomNav({ mobileOnly = false }: { mobileOnly?: boolean }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-  return <nav aria-label="App menu" inert={!shown} className={`app-dock fixed inset-x-2 bottom-[max(env(safe-area-inset-bottom),0.75rem)] z-50 ${mobileOnly ? "lg:hidden" : ""} ${shown ? "" : "app-dock-hidden"}`}>
+  return <nav aria-label="App menu" inert={!shown} className={`app-dock fixed inset-x-0 bottom-0 z-50 ${mobileOnly ? "lg:hidden" : ""} ${shown ? "" : "app-dock-hidden"}`}>
     <div className="app-dock-surface mx-auto grid max-w-md grid-cols-5 items-center">
       {items.map(([to, label, Icon]) => {
         const on = to === "/" ? path === to : path === to || path.startsWith(`${to}/`) || (to === "/settings" && path === "/profile");

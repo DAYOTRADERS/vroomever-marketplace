@@ -311,9 +311,9 @@
 }
 
 /* Shared phone navigation dock */
-.app-dock { transition: transform .25s ease, opacity .25s ease; }
+.app-dock { padding-bottom: env(safe-area-inset-bottom); border-top: 1px solid var(--border); background: var(--card); transition: transform .25s ease, opacity .25s ease; }
 .app-dock-hidden { transform: translateY(150%); opacity: 0; }
-.app-dock-surface { min-height: 80px; padding: 5px 6px; border: 1px solid var(--border); border-radius: 20px; background: var(--dock-surface); box-shadow: var(--dock-shadow); backdrop-filter: blur(20px); }
+.app-dock-surface { min-height: 80px; padding: 5px 6px; }
 .app-dock-item { position: relative; display: flex; min-width: 0; height: 68px; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--muted-foreground); font-size: 10px; font-weight: 600; text-decoration: none; transition: color .2s; }
 .app-dock-icon { display: grid; width: 44px; height: 42px; place-items: center; border-radius: 8px; transition: background .2s, transform .2s; }
 .app-dock-item[aria-current="page"] { color: var(--primary); }
@@ -322,12 +322,12 @@
 .app-dock-item:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 8px; }
 .app-dock-item:hover .app-dock-icon { transform: translateY(-2px); }
 .app-dock-post { color: var(--foreground); font-weight: 700; }
-.app-dock-post-icon { display: grid; flex-shrink: 0; place-items: center; width: 56px; height: 56px; margin-top: -16px; margin-bottom: 1px; border: 3px solid var(--card); border-radius: 14px; background: var(--brand-bright); color: var(--launch-ink); box-shadow: var(--dock-post-shadow); }
+.app-dock-post-icon { display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 42px; border-radius: 8px; background: var(--brand-bright); color: var(--launch-ink); }
 @media (prefers-reduced-motion: reduce) { .app-dock, .app-dock-icon { transition: none; } }
 
 /* Installed-app launch screen */
-[data-app-mode="true"] .site-shell > header,
 [data-app-mode="true"] .site-shell > footer { display: none; }
+[data-app-mode="true"] .site-shell { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
 [data-app-mode="true"][data-app-platform="ios"] .site-shell {
   padding-top: calc(max(env(safe-area-inset-top), 44px) + 24px);
 }
