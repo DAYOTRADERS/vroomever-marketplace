@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Heart, Plus, Info, Settings, Search, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
+import { Home, Heart, Plus, Info, UserRound, Search, Smartphone, Apple, X, Compass, Link2, ShoppingBag, ArrowUp, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ const items = [
   ["/favorites", "Favorite", Heart],
   ["/sell", "Post", Plus],
   ["/about", "About", Info],
-  ["/settings", "Settings", Settings],
+  ["/profile", "Profile", UserRound],
 ] as const;
 
 /** Edge-attached bottom menu. Hides while scrolling up, shows while scrolling down. */
@@ -39,7 +39,7 @@ export function AppBottomNav({ mobileOnly = false }: { mobileOnly?: boolean }) {
   return <nav aria-label="App menu" inert={!shown} className={`app-dock fixed inset-x-0 bottom-0 z-50 ${mobileOnly ? "lg:hidden" : ""} ${shown ? "" : "app-dock-hidden"}`}>
     <div className="app-dock-surface mx-auto grid max-w-md grid-cols-5 items-center">
       {items.map(([to, label, Icon]) => {
-        const on = to === "/" ? path === to : path === to || path.startsWith(`${to}/`) || (to === "/settings" && path === "/profile");
+        const on = to === "/" ? path === to : path === to || path.startsWith(`${to}/`);
         return <Link key={to} to={to} aria-label={to === "/sell" ? "Post a listing" : label} aria-current={on ? "page" : undefined} className={`app-dock-item ${to === "/sell" ? "app-dock-post" : ""}`}><span className={to === "/sell" ? "app-dock-post-icon" : "app-dock-icon"}><Icon aria-hidden="true" className={to === "/sell" ? "size-7" : "size-6"} strokeWidth={on ? 2.1 : 1.7} /></span><span>{label}</span></Link>;
       })}
     </div>
