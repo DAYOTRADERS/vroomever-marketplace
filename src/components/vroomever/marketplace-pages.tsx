@@ -685,7 +685,7 @@ export function SellPage() {
   const [description,setDescription]=useState("");
   const [condition,setCondition]=useState("Brand New");
   const [subcategory,setSubcategory]=useState("");
-  useEffect(()=>{const opts=conditionOptionsFor(categorySlug);if(!opts.includes(condition))setCondition(opts[0]);},[categorySlug]);// eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(()=>{const opts=conditionOptionsFor(categorySlug);if(!opts.includes(condition))setCondition(opts[0] ?? "Brand New");},[categorySlug]);// eslint-disable-line react-hooks/exhaustive-deps
   const selectedPrice=listingPrices?.find(p=>p.category_slug===categorySlug && p.subcategory===subcategory);
   const [phoneCode,setPhoneCode]=useState("254");
   const [phoneNum,setPhoneNum]=useState("");
