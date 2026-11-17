@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { compactBrands, countSubcategories, canContactSeller } from "./marketplace-options";
+import { compactBrands, countSubcategories, canContactSeller, conditionOptionsFor } from "./marketplace-options";
 
 describe("marketplace choices", () => {
   it("reserves the eighth slot for Others and retains every remaining brand", () => {
@@ -16,12 +16,10 @@ describe("marketplace choices", () => {
     assert.equal(canContactSeller(true), true);
   });
 });
-import { conditionOptionsFor } from "./marketplace-options";
-import { describe as d2, it as i2, expect as e2 } from "vitest";
-d2("conditionOptionsFor", () => {
-  i2("phones and electronics are refurbished, never used", () => {
-    e2(conditionOptionsFor("phones-tablets")).toEqual(["Brand New", "Refurbished"]);
-    e2(conditionOptionsFor("electronics")).not.toContain("Used");
+describe("conditionOptionsFor", () => {
+  it("phones and electronics are refurbished, never used", () => {
+    assert.deepEqual(conditionOptionsFor("phones-tablets"), ["Brand New", "Refurbished"]);
+    assert.ok(!conditionOptionsFor("electronics").includes("Used"));
   });
-  i2("fashion offers used", () => e2(conditionOptionsFor("fashion")).toEqual(["Brand New", "Used"]));
+  it("fashion offers used", () => assert.deepEqual(conditionOptionsFor("fashion"), ["Brand New", "Used"]));
 });
