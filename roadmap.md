@@ -9,6 +9,9 @@
 - [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
 
 ## Current
+- [ ] Solar artwork image for the Green Energy subcategory
+- [ ] Post a real Green Energy item and verify it appears under Construction & Repair with correct price options
+- [ ] Admin pricing page lets the owner set weekly, monthly and yearly prices for Green Energy and every other category
 - [x] Attach the app menu to the bottom edge, restore app logo/account access, and update the shared marketplace heading
 - [x] Five-item object-photo phone menu; Profile inside Settings; no dock Categories or Profile
 - [x] Slightly smaller VRUMEX, flip-and-rotate letters, and sequential animated Discover/Connect/Trade reveals
