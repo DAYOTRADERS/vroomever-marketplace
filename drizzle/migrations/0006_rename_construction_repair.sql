@@ -1,0 +1,1 @@
+UPDATE public.categories SET name = 'Construction & Repair' WHERE slug = 'repair-construction';

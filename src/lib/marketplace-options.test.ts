@@ -16,3 +16,12 @@ describe("marketplace choices", () => {
     assert.equal(canContactSeller(true), true);
   });
 });
+import { conditionOptionsFor } from "./marketplace-options";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("conditionOptionsFor", () => {
+  i2("phones and electronics are refurbished, never used", () => {
+    e2(conditionOptionsFor("phones-tablets")).toEqual(["Brand New", "Refurbished"]);
+    e2(conditionOptionsFor("electronics")).not.toContain("Used");
+  });
+  i2("fashion offers used", () => e2(conditionOptionsFor("fashion")).toEqual(["Brand New", "Used"]));
+});

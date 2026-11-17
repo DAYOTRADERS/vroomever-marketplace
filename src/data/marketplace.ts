@@ -22,7 +22,7 @@ export const categories: Category[] = [
   { slug: "agriculture", name: "Agriculture & Farming", icon: Tractor, subcategories: ["Farm Machinery", "Livestock", "Seeds", "Fertilizer", "Animal Feed", "Farm Tools", "Produce"] },
   { slug: "gem-stones", name: "Gemstones & Jewellery", icon: Gem, subcategories: ["Cut Gemstones", "Rough Stones", "Gold", "Silver", "Minerals", "Jewellery"] },
   { slug: "beauty", name: "Beauty & Personal Care", icon: Sparkles, subcategories: ["Skincare", "Hair Care", "Fragrance", "Makeup", "Personal Care", "Salon Equipment"] },
-  { slug: "repair-construction", name: "Repair & Construction", icon: Drill, subcategories: ["Building Materials", "Power Tools", "Plumbing", "Electrical", "Hand Tools", "Contractors"] },
+  { slug: "repair-construction", name: "Construction & Repair", icon: Drill, subcategories: ["Building Materials", "Power Tools", "Plumbing", "Electrical", "Hand Tools", "Contractors"] },
   { slug: "commercial-equipment", name: "Commercial Equipment", icon: Building2, subcategories: ["Restaurant Equipment", "Medical Equipment", "Printing", "Retail Equipment", "Industrial Tools"] },
   { slug: "business-industry", name: "Business & Industry", icon: Factory, subcategories: ["Manufacturing", "Agriculture", "Office Equipment", "Wholesale", "Business Sales"] },
   { slug: "babies-kids", name: "Babies & Kids", icon: Baby, subcategories: ["Baby Clothing", "Toys", "Prams", "Kids Furniture", "School Supplies", "Maternity"] },

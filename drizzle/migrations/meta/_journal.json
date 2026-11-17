@@ -43,6 +43,13 @@
       "when": 1794529603412,
       "tag": "0005_lock_listing_status_and_media",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794914772218,
+      "tag": "0006_rename_construction_repair",
+      "breakpoints": true
     }
   ]
 }
