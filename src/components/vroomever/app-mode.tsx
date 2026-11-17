@@ -23,7 +23,7 @@ const items = [
   ["/favorites", "Favorite", Heart],
   ["/sell", "Post", Plus],
   ["/about", "About", Info],
-  ["/profile", "Profile", UserRound],
+  ["/settings", "Profile", UserRound],
 ] as const;
 
 /** Edge-attached bottom menu. Hides while scrolling up, shows while scrolling down. */
