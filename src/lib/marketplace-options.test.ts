@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { compactBrands, countSubcategories, canContactSeller } from "./marketplace-options";
+import { compactBrands, countSubcategories, canContactSeller, conditionOptionsFor } from "./marketplace-options";
 
 describe("marketplace choices", () => {
   it("reserves the eighth slot for Others and retains every remaining brand", () => {
@@ -15,4 +15,11 @@ describe("marketplace choices", () => {
     assert.equal(canContactSeller(false), false);
     assert.equal(canContactSeller(true), true);
   });
+});
+describe("conditionOptionsFor", () => {
+  it("phones and electronics are refurbished, never used", () => {
+    assert.deepEqual(conditionOptionsFor("phones-tablets"), ["Brand New", "Refurbished"]);
+    assert.ok(!conditionOptionsFor("electronics").includes("Used"));
+  });
+  it("fashion offers used", () => assert.deepEqual(conditionOptionsFor("fashion"), ["Brand New", "Used"]));
 });

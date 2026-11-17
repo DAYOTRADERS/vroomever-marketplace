@@ -104,8 +104,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" },
-      { rel: "icon", href: "/vrumex-icon.png?v=8", type: "image/png", sizes: "64x64" },
-      { rel: "icon", href: "/logo-512.png?v=8", type: "image/png", sizes: "512x512" },
+      { rel: "icon", href: "/vrumex-icon.png?v=9", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/logo-512.png?v=9", type: "image/png", sizes: "512x512" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/app-icon-ios-blue.png" },
       ...[
