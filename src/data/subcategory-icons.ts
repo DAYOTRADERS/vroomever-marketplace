@@ -1,5 +1,5 @@
 import {
-  Car, Cog, Bike, Bus, Truck, Construction, Ship, Zap, Wrench, House, Building, Trees, Store, BedDouble, Briefcase,
+  Car, SunMedium, Cog, Bike, Bus, Truck, Construction, Ship, Zap, Wrench, House, Building, Trees, Store, BedDouble, Briefcase,
   Smartphone, Tablet, Headphones, Watch, Phone, Tv, Speaker, Camera, Laptop, Gamepad2, Cable, Cpu, Shirt, Footprints,
   ShoppingBag, Gem, Sofa, Utensils, Armchair, Flower2, Archive, Refrigerator, CookingPot, WashingMachine, Microwave,
   Blend, AirVent, Wheat, Apple, CupSoda, Milk, Drumstick, Cookie, Package, Tractor, Beef, Sprout, FlaskConical,
@@ -21,7 +21,7 @@ const rules: [RegExp, LucideIcon][] = [
   [/cereal/i, Wheat], [/fresh produce|^produce$/i, Apple], [/beverage/i, CupSoda], [/dairy/i, Milk], [/meat|poultry/i, Drumstick], [/snack/i, Cookie], [/wholesale/i, Package],
   [/farm machinery/i, Tractor], [/livestock|farm animal/i, Beef], [/seed/i, Sprout], [/fertilizer/i, FlaskConical], [/animal feed|pet food/i, PawPrint], [/farm tools/i, Shovel],
   [/skincare/i, Sparkles], [/hair care/i, Droplets], [/fragrance/i, SprayCan], [/makeup/i, Palette], [/personal care/i, HandHeart], [/salon/i, Scissors],
-  [/building material/i, BrickWall], [/power tool/i, Drill], [/plumbing/i, Wrench], [/electrical/i, Plug], [/hand tool|industrial tool/i, Hammer], [/contractor|construction/i, HardHat],
+  [/green energy|solar/i, SunMedium], [/building material/i, BrickWall], [/power tool/i, Drill], [/plumbing/i, Wrench], [/electrical/i, Plug], [/hand tool|industrial tool/i, Hammer], [/contractor|construction/i, HardHat],
   [/restaurant/i, ChefHat], [/medical|dental|health/i, Stethoscope], [/print/i, Printer], [/retail/i, Store], [/manufactur/i, Factory], [/agriculture/i, Tractor],
   [/office equipment|business supplies|business sales/i, Briefcase], [/baby|maternity/i, Baby], [/pram/i, Baby], [/toys/i, ToyBrick], [/kids furniture/i, Armchair], [/school/i, Backpack],
   [/dogs/i, Dog], [/cats/i, Cat], [/birds/i, Bird], [/pet services/i, PawPrint], [/sports/i, Dumbbell], [/musical/i, Music], [/books|stationery/i, BookOpen],
