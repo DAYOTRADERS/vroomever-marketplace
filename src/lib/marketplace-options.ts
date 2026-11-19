@@ -49,6 +49,7 @@ export const conditionOptionsFor = (slug: string, subcategory = "") => {
   if (slug === "food-stuff") return [];
   if (slug === "property") {
     const key = subcategory.trim().toLowerCase().replace(/\s+/g, " ");
+    if (/^plots?\b/.test(key)) return [];
     if (PROPERTY_SUBCATEGORY_FILTERS[key]) return PROPERTY_SUBCATEGORY_FILTERS[key];
     if (/^(houses? to let|land for sale|plots? for sale|land and plots? for sale|plots? and land for sale)$/.test(key)) return [];
   }
