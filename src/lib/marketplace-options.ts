@@ -50,5 +50,5 @@ export const conditionOptionsFor = (slug: string, subcategory = "") => {
     if (/^(houses? to let|land for sale|plots? for sale|land and plots? for sale|plots? and land for sale)$/.test(key)) return [];
   }
   const options = CONDITIONS[slug] ?? ["Brand New"];
-  return options.length > 1 ? options : [];
+  return options.length === 1 && options[0] === "Brand New" ? [] : options;
 };
