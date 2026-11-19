@@ -35,7 +35,10 @@ const CONDITIONS: Record<string, string[]> = {
 const PROPERTY_SUBCATEGORY_FILTERS: Record<string, string[]> = {
   "short lets": ["Airbnb", "Lease"],
   "land and farms": ["Lands", "Farms", "Ranches"],
+  "land & farms": ["Lands", "Farms", "Ranches"],
+  land: ["Lands", "Farms", "Ranches"],
   "property services": ["Management", "Maintenance", "Cleaning", "Security"],
+  "property service": ["Management", "Maintenance", "Cleaning", "Security"],
   commercial: ["Office Spaces", "Shops & Malls", "Warehouses", "Hospitals", "Schools"],
 };
 
