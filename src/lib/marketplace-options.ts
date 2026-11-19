@@ -31,5 +31,24 @@ const CONDITIONS: Record<string, string[]> = {
   jobs: ["Available"],
   services: ["Available"],
 };
-/** Condition choices relevant to a category (posting and filters). */
-export const conditionOptionsFor = (slug: string) => CONDITIONS[slug] ?? ["Brand New"];
+
+const PROPERTY_SUBCATEGORY_FILTERS: Record<string, string[]> = {
+  "short lets": ["Airbnb", "Lease"],
+  "land and farms": ["Lands", "Farms", "Ranches"],
+  "property services": ["Management", "Maintenance", "Cleaning", "Security"],
+  commercial: ["Office Spaces", "Shops & Malls", "Warehouses", "Hospitals", "Schools"],
+};
+
+/** Condition choices relevant to a category and, where applicable, its subcategory.
+ * A single "Brand New" choice adds no useful filter beyond "Any", so it is hidden.
+ */
+export const conditionOptionsFor = (slug: string, subcategory = "") => {
+  if (slug === "food-stuff") return [];
+  if (slug === "property") {
+    const key = subcategory.trim().toLowerCase().replace(/\s+/g, " ");
+    if (PROPERTY_SUBCATEGORY_FILTERS[key]) return PROPERTY_SUBCATEGORY_FILTERS[key];
+    if (/^(houses? to let|land for sale|plots? for sale)$/.test(key)) return [];
+  }
+  const options = CONDITIONS[slug] ?? ["Brand New"];
+  return options.length > 1 ? options : [];
+};
