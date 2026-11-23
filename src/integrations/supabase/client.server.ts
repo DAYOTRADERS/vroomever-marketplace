@@ -32,11 +32,11 @@ function createSupabaseAdminClient() {
     process.env['VITE_SUPABASE_URL'] ||
     'https://hooxnftxqfwhxnapobfx.supabase.co';
   const SUPABASE_SECRET_KEY =
-    process.env['SUPABASE_SECRET_KEY'] || process.env['SUPABASE_SERVICE_ROLE_KEY'];
+    process.env['VRUMEX_SUPABASE_SECRET_KEY'] || process.env['VRUMEX_SUPABASE_SERVICE_ROLE_KEY'];
 
   if (!SUPABASE_SECRET_KEY) {
     const message =
-      'Missing server-only Supabase secret. Configure SUPABASE_SECRET_KEY in the hosting environment; never place it in VITE_ variables or commit it.';
+      'Missing server-only Supabase secret. Configure VRUMEX_SUPABASE_SECRET_KEY in the hosting environment; never place it in VITE_ variables or commit it.';
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }
