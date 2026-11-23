@@ -273,6 +273,7 @@ export function AuthPage({
   const nav = useNavigate();
   const [role, setRole] = useState<"buyer" | "seller">(lockedRole ?? "buyer");
   const [loading, setLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
@@ -342,21 +343,56 @@ export function AuthPage({
     });
   };
 
-  // Finish Google/Apple sign-in: apply the Buyer/Seller choice made before leaving.
+  // Complete social sign-in after Supabase restores the browser session.
+  // Defer work out of onAuthStateChange to avoid re-entering Supabase's auth lock.
   useEffect(() => {
+    let finishing = false;
+    let alive = true;
     const finish = async () => {
       const chosen = sessionStorage.getItem("vrumex:oauthRole");
-      if (!chosen) return;
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) return;
-      sessionStorage.removeItem("vrumex:oauthRole");
-      const { data: me } = await getMyRoleRow();
-      if (chosen === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
-      await routeByRole(data.session);
+      if ((chosen !== "buyer" && chosen !== "seller") || finishing) return;
+      finishing = true;
+      try {
+        const { data, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        if (!data.session) {
+          finishing = false;
+          return;
+        }
+
+        const { data: me, error: roleError } = await getMyRoleRow();
+        if (roleError) throw roleError;
+
+        if (chosen === "seller" && me?.role !== "seller" && me?.role !== "admin") {
+          const { error: promoteError } = await supabase.rpc("become_seller");
+          if (promoteError) throw promoteError;
+          const { data: updatedRole, error: updatedRoleError } = await getMyRoleRow();
+          if (updatedRoleError) throw updatedRoleError;
+          if (updatedRole?.role !== "seller" && updatedRole?.role !== "admin") {
+            throw new Error("Your account was authenticated, but the seller role could not be applied. Please contact support.");
+          }
+        }
+
+        if (!alive) return;
+        sessionStorage.removeItem("vrumex:oauthRole");
+        await routeByRole(data.session);
+      } catch (err) {
+        if (alive) {
+          setError(err instanceof Error ? friendly(err.message) : "We could not finish social sign-in. Please try again.");
+          setFacebookLoading(false);
+        }
+        finishing = false;
+      }
     };
+
     void finish();
-    const { data: sub } = supabase.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN") void finish(); });
-    return () => sub.subscription.unsubscribe();
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") queueMicrotask(() => { if (alive) void finish(); });
+    });
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -378,25 +414,33 @@ export function AuthPage({
   };
 
   const facebook = async () => {
+    if (facebookLoading) return;
     setError("");
     setInfo("");
-    sessionStorage.setItem("vrumex:oauthRole", signupRole);
+    setFacebookLoading(true);
 
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      sessionStorage.setItem("vrumex:oauthRole", signupRole);
+      const redirectUrl = new URL("/auth", window.location.origin);
+      redirectUrl.searchParams.set("role", signupRole);
+      redirectUrl.searchParams.set("mode", "login");
+
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "facebook",
         options: {
-          redirectTo: `${window.location.origin}/auth?role=${signupRole}&mode=login`,
+          redirectTo: redirectUrl.toString(),
+          scopes: "email,public_profile",
+          skipBrowserRedirect: true,
         },
       });
 
-      if (oauthError) {
-        sessionStorage.removeItem("vrumex:oauthRole");
-        setError(`Facebook sign-in failed: ${friendly(oauthError.message)}`);
-      }
+      if (oauthError) throw oauthError;
+      if (!data.url) throw new Error("Supabase did not return a Facebook authorization URL. Check that Facebook is enabled in Supabase Auth.");
+      window.location.assign(data.url);
     } catch (err) {
       sessionStorage.removeItem("vrumex:oauthRole");
-      setError(err instanceof Error ? friendly(err.message) : "Facebook sign-in failed. Please try again.");
+      setFacebookLoading(false);
+      setError(err instanceof Error ? `Facebook sign-in failed: ${friendly(err.message)}` : "Facebook sign-in failed. Please try again.");
     }
   };
 
@@ -636,9 +680,9 @@ export function AuthPage({
           {!forgot && <div className="mt-4 grid gap-2">
             <div className="flex items-center gap-3 text-xs text-surface-muted"><span className="h-px flex-1 bg-surface-muted/30" />or continue as {signupRole === "seller" ? "SELLER" : "BUYER"} with<span className="h-px flex-1 bg-surface-muted/30" /></div>
             <div className="grid gap-2 sm:grid-cols-2">
-              <button type="button" onClick={() => void facebook()} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-[#1877F2] bg-[#1877F2] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#166FE5] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:col-span-2">
+              <button type="button" onClick={() => void facebook()} disabled={facebookLoading} aria-busy={facebookLoading} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-[#1877F2] bg-[#1877F2] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#166FE5] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait disabled:opacity-70 sm:col-span-2">
                 <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5 fill-current"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073c0 6.019 4.388 11.016 10.125 11.927v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.98h-1.513c-1.491 0-1.956.931-1.956 1.886v2.258h3.328l-.532 3.49h-2.796V24C19.612 23.09 24 18.092 24 12.073Z"/></svg>
-                Continue with Facebook
+                {facebookLoading ? "Connecting to Facebook…" : "Continue with Facebook"}
               </button>
               <button type="button" onClick={() => void social("google")} className="flex h-11 items-center justify-center gap-2.5 rounded-full border border-border bg-background px-4 text-sm font-semibold text-foreground shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                 <svg aria-hidden="true" viewBox="0 0 48 48" className="size-5"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
