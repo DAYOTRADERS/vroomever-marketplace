@@ -400,8 +400,7 @@ export function AuthPage({
     const { data } = await supabase.auth.getSession();
     if (data.session) {
       sessionStorage.removeItem("vrumex:oauthRole");
-      const { data: me } = await getMyRoleRow();
-      if (signupRole === "seller" && me?.role === "buyer") await supabase.rpc("become_seller");
+      // Always route using the role already stored for this account.
       await routeByRole(data.session);
     }
   };
