@@ -43,7 +43,7 @@ const PROPERTY_SUBCATEGORY_FILTERS: Record<string, string[]> = {
  * A single "Brand New" choice adds no useful filter beyond "Any", so it is hidden.
  */
 export const conditionOptionsFor = (slug: string, subcategory = "") => {
-  const sub = subcategory.trim().toLowerCase().replace(/\\s+/g, " ");
+  const sub = subcategory.trim().toLowerCase().replace(/\s+/g, " ");
   if (slug === "food-stuff" || slug === "leisure-sports" || slug === "services" || slug === "jobs") return [];
   if (slug === "agriculture" && !["farm machinery", "farm tools"].includes(sub)) return [];
   if (slug === "business-industry" && sub !== "office equipment") return [];
