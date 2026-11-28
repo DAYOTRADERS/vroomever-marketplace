@@ -24,6 +24,7 @@ const CONDITIONS: Record<string, string[]> = {
   furniture: NEW_USED_REFURB,
   fashion: NEW_USED,
   "babies-kids": NEW_USED,
+  agriculture: NEW_USED,
   "repair-construction": NEW_USED,
   "office-school": NEW_USED,
 };
