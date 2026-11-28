@@ -47,6 +47,7 @@ export const conditionOptionsFor = (slug: string, subcategory = "") => {
   if (slug === "food-stuff" || slug === "leisure-sports" || slug === "services" || slug === "jobs") return [];
   if (slug === "agriculture" && !["farm machinery", "farm tools"].includes(sub)) return [];
   if (slug === "business-industry" && sub !== "office equipment") return [];
+  if (slug === "repair-construction" && !["power tools", "hand tools"].includes(sub)) return [];
   if (slug === "property") {
     const key = subcategory.trim().toLowerCase().replace(/\s+/g, " ");
     if (/^plots?\b/.test(key)) return [];
