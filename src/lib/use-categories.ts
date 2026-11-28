@@ -14,7 +14,10 @@ function toCategories(data: CategoryRow[]): Category[] {
   const mapped = data.map((r) => ({
     slug: r.slug,
     name: r.name,
-    subcategories: r.subcategories ?? [],
+    // Construction is intentionally not offered as a Jobs subcategory.
+    subcategories: r.slug === "jobs"
+      ? (r.subcategories ?? []).filter((subcategory) => subcategory.trim().toLowerCase() !== "construction")
+      : (r.subcategories ?? []),
     icon: fallback.find((c) => c.slug === r.slug)?.icon ?? Tag,
   }));
   const leisure = mapped.filter((c) => /leisure/i.test(c.name));
