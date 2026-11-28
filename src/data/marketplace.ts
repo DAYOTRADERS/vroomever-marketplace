@@ -28,7 +28,7 @@ export const categories: Category[] = [
   { slug: "babies-kids", name: "Babies & Kids", icon: Baby, subcategories: ["Baby Clothing", "Toys", "Prams", "Kids Furniture", "School Supplies", "Maternity"] },
   { slug: "animals-pets", name: "Animals & Pets", icon: Cat, subcategories: ["Dogs", "Cats", "Farm Animals", "Birds", "Pet Food", "Pet Services"] },
   { slug: "leisure-sports", name: "Leisure & Sports", icon: Dumbbell, subcategories: ["Sports Equipment", "Musical Instruments", "Books", "Gaming", "Camping", "Collectibles"] },
-  { slug: "jobs", name: "Jobs", icon: BriefcaseBusiness, subcategories: ["Technology", "Sales", "Hospitality", "Construction", "Healthcare", "Remote Work"] },
+  { slug: "jobs", name: "Jobs", icon: BriefcaseBusiness, subcategories: ["Technology", "Sales", "Hospitality", "Healthcare", "Remote Work"] },
   { slug: "services", name: "Services", icon: HeartPulse, subcategories: ["Cleaning", "Transport", "Photography", "Events", "Tutoring", "Health & Wellness", "Professional"] },
   { slug: "health-medical", name: "Health & Medical", icon: Stethoscope, subcategories: ["Medical Supplies", "Fitness & Wellness", "Mobility Aids", "Dental", "Pharmacy Products", "Care Services"] },
   { slug: "office-school", name: "Office & School", icon: School, subcategories: ["Stationery", "Office Furniture", "Printers", "School Supplies", "Books", "Business Supplies"] },
