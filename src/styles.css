@@ -421,3 +421,8 @@
   .app-bounce-loader span { animation: none; }
   .app-splash { transition: opacity .2s; }
 }
+
+/* Hide the Lovable edit badge on the published site. */
+#lovable-badge {
+  display: none !important;
+}
