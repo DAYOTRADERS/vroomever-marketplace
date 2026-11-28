@@ -4,7 +4,11 @@ INSERT INTO public.categories (slug, name, subcategories, position) VALUES
 ('phones-tablets','Phones & Tablets',ARRAY['Smartphones','Tablets','Accessories','Smart Watches','Feature Phones','Repairs']::text[],2),
 ('electronics','Electronics',ARRAY['TVs','Audio','Cameras','Computers','Gaming','Accessories','Other Electronics']::text[],3),
 ('fashion','Fashion',ARRAY['Women''s Clothing','Men''s Clothing','Shoes','Bags','Watches','Jewellery','Accessories']::text[],4),
+<<<<<<< HEAD
 ('furniture','Furniture',ARRAY['Sofas','Bed','Dining','Office Furniture','Outdoor','Décor','Storage']::text[],5),
+=======
+('furniture','Furniture',ARRAY['Sofas','Beds','Dining','Office Furniture','Outdoor','Décor','Storage']::text[],5),
+>>>>>>> 076edd0e2998deb932cd9372e8ac05826af64da0
 ('home-appliances','Home Appliances',ARRAY['Fridges','Cookers','Washing Machines','Microwaves','Small Appliances','Air Conditioners']::text[],6),
 ('food-stuff','Food Stuff',ARRAY['Cereals','Fresh Produce','Beverages','Dairy','Meat & Poultry','Snacks','Wholesale Food']::text[],7),
 ('agriculture','Agriculture & Farming',ARRAY['Farm Machinery','Livestock','Seeds','Fertilizer','Animal Feed','Farm Tools','Produce']::text[],8),
