@@ -1,0 +1,15 @@
+{
+  "name": "VRUMEX Marketplace",
+  "short_name": "VRUMEX",
+  "description": "Discover, connect and trade across Kenya.",
+  "start_url": "/?app=1",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0095FD",
+  "theme_color": "#0095FD",
+  "icons": [
+    { "src": "/app-icon-blue.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/app-icon-ios-blue.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

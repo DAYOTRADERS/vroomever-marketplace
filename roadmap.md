@@ -1,0 +1,56 @@
+# Vroomever Roadmap
+
+- [x] Stage 1: Brand, design system, shared components, and centralized configuration
+- [x] Stage 1: Marketplace, authentication, buyer, and seller pages
+- [x] Stage 1: Product posting, VIP, and simulated payments
+- [x] Stage 1: Master admin control center and moderation pages
+- [x] Stage 1: Legal pages, metadata, responsive verification, and preview QA
+- [x] Stage 2: Backend-ready models, services, authentication, storage, permissions, and RLS architecture
+- [x] Responsive polish: buyer, seller, admin, authentication, and all public pages
+
+## Current
+- [x] Solar artwork image for the Green Energy subcategory
+- [x] Post a real Green Energy item and verify it appears under Construction & Repair with correct price options
+- [x] Admin pricing page lets the owner set weekly, monthly and yearly prices for Green Energy and every other category
+- [x] Attach the app menu to the bottom edge, restore app logo/account access, and update the shared marketplace heading
+- [x] Five-item object-photo phone menu; Profile inside Settings; no dock Categories or Profile
+- [x] Slightly smaller VRUMEX, flip-and-rotate letters, and sequential animated Discover/Connect/Trade reveals
+- [x] Larger upright glow-free 3D app opening, combined Discover/Connect/Trade layout, and plain blue iPhone startup artwork
+- [x] Rename app Cart to Favorite, refresh the phone dock, and show it on administrator phone pages
+- [x] iPhone-only top clearance, blue home-screen icons, and app-only VRUMEX → Discover → Connect → Trade launch sequence
+- [x] App-only empty top bar, centered Post with Categories, persistent dark theme, and pre-content 3D bouncing launch animation
+- [x] Crescent V logo lockup, customer care and secretary desks, staff monitor and admin-created staff logins
+- [x] Blend unframed login/signup forms into artwork, add reduced-motion-safe transitions, and restore white search heading
+- [x] Use solid #0095FD search section and readable login/signup with dimensional patterned backgrounds only
+- [x] Apply navy and #0095FD theme and matching login background without other changes
+- [x] Change green theme to sky/light blue and recolour fashion shirt and shoes only
+- [x] Rename newest-first sort to New post and load current admin category names on first visit
+- [x] Compact popup filters, subcategory counts/sort, and seven brands plus Others list
+- [x] Public listing viewing with signed-in seller contact and Cleaning service rename
+- [x] Verify requested marketplace changes on mobile and desktop
+- [x] Compact subcategory/brand views, missing artwork, clearing and transportation service
+- [x] Shared buyer/home layout, responsive account popup, mobile footer reveal
+- [x] Working product/category search, compact inline filters, readable listing details
+- [x] Admin-managed subcategory monthly/annual prices connected to seller posting and listing records
+- [x] Verify pricing rules, connected admin/seller/buyer flows and device layouts
+- [x] Restore all approved listings below the unchanged 3D landing; rename buyer button to Buyers Market
+- [x] Vercel (vrumever.vercel.app) database connection explained/fixed
+- [x] Email links (confirm, reset) go to correct buyer/seller paths on the live domain
+- [x] Google + Apple sign-in on buyer/seller login
+- [x] AI support triage: summary, topic, urgency, suggested reply for admins
+- [x] Support conversations: users see admin replies and status timeline
+- [x] Hide dashboard menu links when no user is signed in
+- [x] Back button on every page that lacks one
+- [x] Rename Vroomever -> VRUMEVER everywhere (incl. terms)
+- [x] Terms checkbox links open the terms
+- [x] Branded Google/Apple buttons with logos
+- [x] Real data only on seller dashboard, seller storefront, listings (enquiries + views recorded)
+- [x] WhatsApp/Call use seller's chosen country code
+- [x] Admin approve/reject listings with reason (seller sees reason)
+- [x] VRUMEVER logo, favicon.png, favicon.ico
+- [x] Buyer flow test: signup -> confirm -> login -> support -> admin inbox
+- [ ] Emails from vrumever.vercel.app — blocked: needs a domain the owner controls
+- [ ] Google/Apple on Vercel — blocked: only works on Lovable-hosted domains
+- [x] Plain navy sign-in pages with white text, always-visible compact footer, refreshed tab icon
+- [x] Weekly/monthly/yearly listing plans; Bronze/Silver/Gold packages page removed
+- [ ] Facebook sign-in — not supported by Lovable Cloud sign-in

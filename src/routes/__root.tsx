@@ -1,0 +1,162 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+  ScriptOnce,
+} from "@tanstack/react-router";
+import { useEffect, type ReactNode } from "react";
+
+import appCss from "../styles.css?url";
+import { reportLovableError } from "../lib/lovable-error-reporting";
+import { getPublicCategories } from "../lib/categories.functions";
+import { InitialCategoriesContext } from "../lib/use-categories";
+import { AppSplash } from "../components/vroomever/app-mode";
+
+function NotFoundComponent() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <h1 className="text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Go home
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ErrorComponent({ error, reset }: import("@tanstack/react-router").ErrorComponentProps) {
+  console.error(error);
+  const router = useRouter();
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Something went wrong on our end. You can try refreshing or head back home.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <button
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Try again
+          </button>
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Go home
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  loader: async () => ({ categories: await getPublicCategories() }),
+  staleTime: Infinity,
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "VRUMEX — Discover, Connect, Trade" },
+      { name: "description", content: "Kenya’s modern marketplace for trusted sellers and remarkable finds." },
+      { name: "author", content: "VRUMEX" },
+      { name: "theme-color", content: "#0095FD" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "VRUMEX" },
+      { property: "og:title", content: "VRUMEX Marketplace" },
+      { property: "og:description", content: "Discover, connect and trade across Kenya." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" },
+      { rel: "icon", href: "/vrumex-icon.png?v=10", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/logo-512.png?v=10", type: "image/png", sizes: "512x512" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/app-icon-ios-blue.png" },
+      ...[
+        [375, 667, 2], [414, 896, 2], [375, 812, 3], [390, 844, 3],
+        [393, 852, 3], [414, 896, 3], [428, 926, 3], [430, 932, 3],
+        [402, 874, 3], [440, 956, 3],
+      ].map(([width = 390, height = 844, ratio = 3]) => ({
+        rel: "apple-touch-startup-image",
+        href: `/launch/blue-${width * ratio}x${height * ratio}.png`,
+        media: `(device-width: ${width}px) and (device-height: ${height}px) and (-webkit-device-pixel-ratio: ${ratio}) and (orientation: portrait)`,
+      })),
+    ],
+  }),
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: NotFoundComponent,
+  errorComponent: ErrorComponent,
+});
+
+function RootShell({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ScriptOnce>{`try { const dark = localStorage.getItem('vrumex-theme') === 'dark'; document.documentElement.classList.toggle('dark', dark); } catch {} try { const app = new URLSearchParams(location.search).get('app') === '1' || sessionStorage.getItem('vrumex-app-mode') === '1' || matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; if (app) { document.documentElement.dataset.appLaunch = 'pending'; document.documentElement.dataset.appMode = 'true'; if (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) document.documentElement.dataset.appPlatform = 'ios'; } } catch { if (matchMedia('(display-mode: standalone)').matches || new URLSearchParams(location.search).get('app') === '1') { document.documentElement.dataset.appLaunch = 'pending'; document.documentElement.dataset.appMode = 'true'; } }`}</ScriptOnce>
+        <HeadContent />
+      </head>
+      <body>
+        {children}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
+  const { categories } = Route.useLoaderData();
+  // If a password-reset email lands on another page, send it to the reset page.
+  useEffect(() => {
+    const { pathname, search, hash } = window.location;
+    if (pathname === "/reset-password") return;
+    if (/type=recovery/.test(hash) || /type=recovery/.test(search)) window.location.replace(`/reset-password${search}${hash}`);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <InitialCategoriesContext.Provider value={categories}>
+      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <Outlet />
+      <AppSplash />
+      </InitialCategoriesContext.Provider>
+    </QueryClientProvider>
+  );
+}

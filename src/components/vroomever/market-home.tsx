@@ -1,0 +1,10 @@
+import { CategoryGrid, LiveGrid, MarketSearch, PageTitle } from "./marketplace-pages";
+export function MarketHome() {
+  return <div className="mx-auto max-w-7xl px-4 py-3 sm:px-5 sm:py-5">
+    <section className="relative overflow-hidden rounded-card bg-brand-bright p-4 text-brand-ink sm:p-5" aria-labelledby="buyers-market-title">
+      <div className="relative max-w-2xl"><h1 id="buyers-market-title" className="font-display text-xl font-bold text-surface-foreground md:text-3xl">Where global meets local</h1><MarketSearch className="mt-3" /></div>
+    </section>
+    <section className="py-4" aria-label="Categories"><PageTitle title="Browse categories" /><CategoryGrid /></section>
+    <section className="pb-6" aria-label="Marketplace products"><PageTitle title="Fresh picks for you" /><LiveGrid all /></section>
+  </div>;
+}

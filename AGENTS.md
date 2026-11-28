@@ -1,0 +1,28 @@
+<!-- LOVABLE:BEGIN -->
+> [!IMPORTANT]
+> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
+> published git history — force pushing, or rebasing/amending/squashing commits
+> that are already pushed — as it rewrites history on Lovable's side and the
+> user will likely lose their project history.
+>
+> Commits you push to the connected branch sync back to Lovable and show up in
+> the editor, so keep the branch in a working state.
+<!-- LOVABLE:END -->
+
+- Buyer and seller dashboards use a desktop side navigation and a full-screen mobile menu, while the account menu remains in the top bar so profile and sign-out stay consistently accessible.
+- The home route renders approved marketplace listings through the existing SiteShell and LiveGrid; keep marketplace and dashboard routes server-renderable for speed and reliability.
+- Home and buyer dashboard share MarketHome so search, category layout, and filters stay identical.
+- Subcategory listing packages use public.subcategory_prices with admin-only writes and database-validated prices; listing fee, cadence, and expiry are snapshotted on products separately from item asking prices, and payment remains simulation-only.
+- Store selected vehicle brands in products.brand; title matching is only a compatibility fallback for older listings without a brand.
+- Marketplace option helpers centralize compact brand partitioning, subcategory counts, and contact visibility so these rules stay testable across listing views.
+- Package submissions record payments with status simulated via a database trigger; never represent them as real successful charges.
+- Public category names are fetched before root rendering and passed through request-local context; static categories provide icons only, preventing old-name flashes and cross-request state leaks.
+- Authentication backgrounds and contrast are scoped through auth-backdrop and auth-form-surface tokens; share bundled artwork so account styling does not change other pages.
+- Staff roles (customer_care, secretary) live in user_roles; their logins are created only by admins via staff-accounts server functions, and their actions are logged to staff_activity by database triggers so the admin monitor cannot be bypassed.
+- Installed phone app = home-screen web app (manifest, no service worker); app mode (standalone or ?app=1) reuses the shared logo/account header and marketplace data but hides the footer for consistent account access.
+- The phone dock uses five shared icon links with Post centered, attached edge-to-edge at the bottom with safe-area clearance; the last link opens Profile directly, while categories remain in marketplace content.
+- Appearance controls share the persisted document theme through useTheme; pre-hydration setup prevents route mounts from resetting dark mode.
+- The app launch overlay is present in SSR markup and enabled before paint for app mode; CSS-layered letters and reduced-motion-safe animation avoid delaying data loading or needing a 3D engine.
+- App-only iOS safe-area spacing is applied through pre-paint document attributes; timed launch scenes are skippable and never block marketplace data loading.
+- App opening uses two stages: upright extruded brand letters, then a combined three-action composition; iPhone portrait startup images are plain blue to avoid a pre-content logo.
+- Admin phone pages reuse the app navigation dock with a mobile-only flag and bottom content clearance, keeping desktop navigation unchanged.
