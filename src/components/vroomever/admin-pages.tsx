@@ -232,7 +232,7 @@ export function AdminEntryPage() {
 
   useEffect(() => {
     let active = true;
-    (async () => {
+    const syncAdminSession = async () => {
       const { data: sessionData } = await supabase.auth.getSession();
       if (!active) return;
       if (!sessionData.session) {
@@ -242,15 +242,30 @@ export function AdminEntryPage() {
       }
       const { data: profile } = await getMyRoleRow();
       if (!active) return;
-      if (profile?.role === "admin") setAuthenticatedAdmin(true);
-      else {
+      if (profile?.role === "admin") {
+        setAuthenticatedAdmin(true);
+      } else {
         await supabase.auth.signOut();
         if (!active) return;
         setAuthenticatedAdmin(false);
       }
       setChecking(false);
-    })();
-    return () => { active = false; };
+    };
+
+    void syncAdminSession();
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      // Run after the Supabase auth callback releases its internal lock.
+      queueMicrotask(() => {
+        if (!active) return;
+        setChecking(true);
+        void syncAdminSession();
+      });
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   if (checking) return <div className="grid min-h-screen place-items-center bg-surface-strong text-surface-foreground"><p>Checking admin access…</p></div>;
