@@ -363,15 +363,8 @@ export function AuthPage({
         const { data: me, error: roleError } = await getMyRoleRow();
         if (roleError) throw roleError;
 
-        if (chosen === "seller" && me?.role !== "seller" && me?.role !== "admin") {
-          const { error: promoteError } = await supabase.rpc("become_seller");
-          if (promoteError) throw promoteError;
-          const { data: updatedRole, error: updatedRoleError } = await getMyRoleRow();
-          if (updatedRoleError) throw updatedRoleError;
-          if (updatedRole?.role !== "seller" && updatedRole?.role !== "admin") {
-            throw new Error("Your account was authenticated, but the seller role could not be applied. Please contact support.");
-          }
-        }
+        // The role already stored for this email is authoritative.
+        // The role selected on the login screen must never promote or downgrade an existing account.
 
         if (!alive) return;
         sessionStorage.removeItem("vrumex:oauthRole");
@@ -492,9 +485,9 @@ export function AuthPage({
         if (/email not confirmed/i.test(signInError.message)) setPendingEmail(email);
         throw signInError;
       }
-      const { data: roleRow } = await getMyRoleRow();
+      const { data: roleRow, error: roleError } = await getMyRoleRow();
+      if (roleError) throw roleError;
       const actual = roleRow?.role ?? "buyer";
-      const expected = role;
       if (actual === "admin") {
         await supabase.auth.signOut();
         throw new Error("This is an administrator account. Please sign in through the Master Admin login at /masteradmin/login.");
@@ -503,13 +496,7 @@ export function AuthPage({
         await supabase.auth.signOut();
         throw new Error(actual === "secretary" ? "This is a secretary login. Please sign in at /secretaryadmin." : "This is a customer care login. Please sign in at /customeradmin.");
       }
-      if (actual !== expected) {
-        await supabase.auth.signOut();
-        setRole(actual);
-        throw new Error(actual === "seller"
-          ? "This email is registered as a SELLER account. Please use the Seller login form below."
-          : "This email is registered as a BUYER account. Please use the Buyer login form below.");
-      }
+      setRole(actual);
       await routeByRole(data.session);
     } catch (err) {
       if (err instanceof Error && err.message === "__timeout__") {
