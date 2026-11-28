@@ -363,8 +363,20 @@ export function AuthPage({
         const { data: me, error: roleError } = await getMyRoleRow();
         if (roleError) throw roleError;
 
-        // The role already stored for this email is authoritative.
-        // The role selected on the login screen must never promote or downgrade an existing account.
+        // The database trigger creates a buyer role for OAuth users when the provider
+        // does not supply a role. Apply the selected seller role only to a genuinely
+        // new Google/Apple account; never change the role of an existing account.
+        const provider = String(data.session.user.app_metadata?.provider ?? "");
+        const createdAt = Date.parse(data.session.user.created_at ?? "");
+        const isNewSocialAccount =
+          (provider === "google" || provider === "apple") &&
+          Number.isFinite(createdAt) &&
+          Date.now() - createdAt >= 0 &&
+          Date.now() - createdAt < 5 * 60 * 1000;
+        if (chosen === "seller" && me?.role === "buyer" && isNewSocialAccount) {
+          const { error: sellerRoleError } = await supabase.rpc("become_seller");
+          if (sellerRoleError) throw sellerRoleError;
+        }
 
         if (!alive) return;
         sessionStorage.removeItem("vrumex:oauthRole");
